@@ -7,29 +7,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; }
-        
-        /* Encabezado con Logo */
         header { background-color: #2c3e50; color: white; padding: 30px; }
         .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin-bottom: 15px; }
-        header h1 { margin: 10px 0; font-size: 24px; }
-
-        /* Contenedor y Buscador */
         .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
-        .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 30px; outline: none; font-size: 16px; }
-
-        /* Grilla de Imágenes */
+        .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); }
-        .card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 8px; }
-        .card h3 { font-size: 14px; color: #333; margin: 15px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
-
-        /* Botón WhatsApp */
-        .btn-ws { background: #25d366; color: white; text-decoration: none; padding: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; transition: 0.3s; }
-        .btn-ws:hover { background: #1ebd5b; }
-        .btn-ws img { width: 18px; height: 18px; margin-right: 8px; background: none; padding: 0; }
-
-        #status { padding: 20px; color: #666; font-weight: bold; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; }
+        .card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 5px; }
+        .card h3 { font-size: 14px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
+        .btn-ws { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; display: inline-block; font-size: 13px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -37,17 +23,19 @@
 <header>
     <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo">
     <h1>Likelyon Estampados</h1>
+    <p>Catálogo Oficial de Diseños</p>
 </header>
 
 <div class="container">
-    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño...">
+    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Moto, etc)...">
     <div id="status">Cargando catálogo...</div>
     <div id="galeria" class="grid"></div>
 </div>
 
 <script>
-    // URL de tu Google Sheet publicado como CSV
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
+
+    let datosCatalogo = [];
 
     function cargarDatos() {
         Papa.parse(CSV_URL, {
@@ -55,48 +43,46 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                const galeria = document.getElementById('galeria');
-                const status = document.getElementById('status');
-                galeria.innerHTML = '';
-                
-                if (results.data.length > 0) {
-                    status.style.display = 'none';
-                    results.data.forEach(item => {
-                        // Leemos las columnas que genera tu script actual
-                        const nombre = item["Nombre del Diseño"];
-                        const imagen = item["URL Imagen"];
-                        
-                        if(imagen && imagen.includes('http')) {
-                            const card = document.createElement('div');
-                            card.className = 'card';
-                            const textoWs = encodeURIComponent(`¡Hola! Me interesa este diseño: ${nombre}`);
-                            
-                            card.innerHTML = `
-                                <img src="${imagen}" alt="${nombre}">
-                                <h3>${nombre}</h3>
-                                <a href="https://wa.me/56954180844?text=${textoWs}" target="_blank" class="btn-ws">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="ws">
-                                    CONSULTAR WHATSAPP
-                                </a>
-                            `;
-                            galeria.appendChild(card);
-                        }
-                    });
-                } else {
-                    status.innerText = "No se encontraron datos en el catálogo.";
-                }
+                datosCatalogo = results.data.filter(item => Object.values(item)[0]);
+                document.getElementById('status').style.display = 'none';
+                renderizar(datosCatalogo);
             }
         });
     }
 
-    // Buscador en tiempo real
+    function renderizar(lista) {
+        const galeria = document.getElementById('galeria');
+        galeria.innerHTML = '';
+        
+        lista.forEach(item => {
+            const fila = Object.values(item);
+            const nombre = fila[0] || "Diseño";
+            const imagen = fila[1] || "";
+            
+            if(imagen && imagen.includes('http')) {
+                // Formateamos el mensaje para que sea ultra claro para ti
+                const textoMensaje = `Hola Likelyon! Me interesa este diseño:\n\n📌 *${nombre.toUpperCase()}*\n\nVer imagen: ${imagen}`;
+                const mensajeWs = encodeURIComponent(textoMensaje);
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${imagen}" alt="${nombre}">
+                    <h3>${nombre}</h3>
+                    <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
+                `;
+                galeria.appendChild(card);
+            }
+        });
+    }
+
     document.getElementById('buscador').oninput = function(e) {
         const term = e.target.value.toLowerCase();
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            const h3 = card.querySelector('h3').innerText.toLowerCase();
-            card.style.display = h3.includes(term) ? 'block' : 'none';
+        const filtrados = datosCatalogo.filter(item => {
+            const n = (Object.values(item)[0] || "").toLowerCase();
+            return n.includes(term);
         });
+        renderizar(filtrados);
     };
 
     window.onload = cargarDatos;
