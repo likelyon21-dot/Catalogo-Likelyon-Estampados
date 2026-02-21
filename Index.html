@@ -76,4 +76,31 @@
                                 <h3>${nombre}</h3>
                                 <a href="https://wa.me/56954180844?text=${textoWs}" target="_blank" class="btn-ws">
                                     <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="ws">
-                                    CONSULTAR WH
+                                    CONSULTAR WHATSAPP
+                                </a>
+                            `;
+                            galeria.appendChild(card);
+                        }
+                    });
+                } else {
+                    status.innerText = "No se encontraron datos en el catálogo.";
+                }
+            }
+        });
+    }
+
+    // Buscador en tiempo real
+    document.getElementById('buscador').oninput = function(e) {
+        const term = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            const h3 = card.querySelector('h3').innerText.toLowerCase();
+            card.style.display = h3.includes(term) ? 'block' : 'none';
+        });
+    };
+
+    window.onload = cargarDatos;
+</script>
+
+</body>
+</html>
