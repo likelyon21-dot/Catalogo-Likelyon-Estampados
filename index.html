@@ -1,37 +1,45 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo - Likelyon Estampados</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; }
-        header { background-color: #2c3e50; color: white; padding: 30px; }
-        .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin-bottom: 15px; }
-        .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
-        .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); }
-        .card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 5px; }
-        .card h3 { font-size: 13px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
-        .btn-ws { background: #25d366; color: white; text-decoration: none; padding: 10px; border-radius: 5px; display: inline-block; font-size: 13px; font-weight: bold; width: 90%; }
-        #status { padding: 50px; color: #666; font-size: 18px; }
-    </style>
-</head>
-<body>
-    <header>
-        <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo">
-        <h1>Likelyon Estampados</h1>
-        <p>Catálogo de Diseños</p>
-    </header>
+function actualizarLikelyon() {
+  var idCarpetaRaiz = "17iJ7Wupzh8qm3Ofob8H439rdajHLC4Cw"; 
+  var hoja = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  
+  hoja.clear();
+  // Preparamos la lista en memoria con los encabezados
+  var listaFinal = [["Nombre del Diseño", "URL Imagen"]];
 
-    <div class="container">
-        <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Moto, etc)...">
-        <div id="status">Cargando catálogo...</div>
-        <div id="galeria" class="grid"></div>
-    </div>
+  try {
+    var carpetaRaiz = DriveApp.getFolderById(idCarpetaRaiz);
+    
+    // Función recursiva para entrar en cada subcarpeta
+    function buscarEnSubcarpetas(carpeta) {
+      var archivos = carpeta.getFiles();
+      while (archivos.hasNext()) {
+        var archivo = archivos.next();
+        // Guardamos en la lista temporal
+        listaFinal.push([
+          archivo.getName(),
+          "https://drive.google.com/thumbnail?id=" + archivo.getId() + "&sz=w500"
+        ]);
+      }
+      
+      // Buscamos más carpetas adentro
+      var subCarpetas = carpeta.getFolders();
+      while (subCarpetas.hasNext()) {
+        buscarEnSubcarpetas(subCarpetas.next());
+      }
+    }
 
-<script>
-    const CSV_URL = '
+    // Iniciar búsqueda
+    buscarEnSubcarpetas(carpetaRaiz);
+
+    // Escribir TODO el bloque al Excel al final (Máxima velocidad de pegado)
+    if (listaFinal.length > 1) {
+      hoja.getRange(1, 1, listaFinal.length, 2).setValues(listaFinal);
+      Logger.log("¡Éxito! Se encontraron " + (listaFinal.length - 1) + " diseños en total.");
+    } else {
+      Logger.log("No se encontraron archivos.");
+    }
+
+  } catch (e) {
+    Logger.log("Error: " + e.message);
+  }
+}
