@@ -6,208 +6,81 @@
     <title>Catálogo de Diseños - Likelyon Estampados</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .logo-pyme {
-            max-width: 180px; 
-            height: auto;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            background-color: white; /* Asegura visibilidad si el logo es oscuro */
-            padding: 5px;
-        }
-        header h1 { margin: 0; font-size: 2.5em; letter-spacing: 1px; }
-        header p { font-size: 1.2em; color: #d1d8e0; margin-top: 5px; margin-bottom: 15px; }
-        .datos-contacto {
-            font-size: 1em;
-            color: #bdc3c7;
-            background-color: rgba(255, 255, 255, 0.1);
-            display: inline-block;
-            padding: 10px 20px;
-            border-radius: 30px;
-            text-decoration: none;
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 30px auto;
-            padding: 0 20px;
-            text-align: center;
-        }
-        
-        .search-bar {
-            width: 100%;
-            max-width: 600px;
-            padding: 15px;
-            font-size: 16px;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
-            box-sizing: border-box;
-            outline: none;
-            margin-bottom: 15px;
-            transition: border-color 0.3s;
-        }
-        .search-bar:focus { border-color: #3498db; }
-        .search-bar:disabled { background-color: #ecf0f1; cursor: not-allowed; }
-
-        #estado-carga { font-size: 1.1em; font-weight: bold; color: #27ae60; margin-bottom: 30px; }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 25px;
-        }
-        .card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            overflow: hidden;
-            text-align: center;
-            padding: 15px;
-            transition: transform 0.2s;
-        }
-        .card:hover { transform: translateY(-5px); }
-        .card img {
-            width: 100%;
-            height: 200px;
-            object-fit: contain; /* Para que el diseño no se deforme ni se corte */
-            border-radius: 6px;
-            background-color: #ecf0f1;
-        }
-        .card h3 { font-size: 14px; margin: 15px 0 10px; color: #2c3e50; word-wrap: break-word; height: 32px; overflow: hidden; }
-        .card a {
-            display: inline-block;
-            padding: 8px 20px;
-            background-color: #25d366; /* Color verde WhatsApp */
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 13px;
-            transition: background-color 0.3s;
-        }
-        .card a:hover { background-color: #128c7e; }
-        
-        .mensaje-limite {
-            grid-column: 1 / -1;
-            margin-top: 30px;
-            font-size: 1.1em;
-            color: #7f8c8d;
-            background-color: #e8ecef;
-            padding: 15px;
-            border-radius: 8px;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 0; }
+        header { background-color: #2c3e50; color: white; padding: 40px 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .logo-pyme { max-width: 180px; height: auto; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); background-color: white; padding: 5px; }
+        header h1 { margin: 0; font-size: 2.5em; }
+        header p { font-size: 1.2em; color: #d1d8e0; margin-bottom: 15px; }
+        .datos-contacto { font-size: 1em; color: white; background-color: #25d366; display: inline-block; padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: bold; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; text-align: center; }
+        .search-bar { width: 100%; max-width: 600px; padding: 15px; font-size: 16px; border: 2px solid #bdc3c7; border-radius: 30px; outline: none; margin-bottom: 25px; transition: 0.3s; }
+        .search-bar:focus { border-color: #3498db; box-shadow: 0 0 8px rgba(52,152,219,0.3); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; padding: 15px; transition: 0.3s; border: 1px solid #eee; }
+        .card:hover { transform: translateY(-5px); border-color: #3498db; }
+        .card img { width: 100%; height: 220px; object-fit: contain; border-radius: 8px; background-color: #f8f9fa; }
+        .card h3 { font-size: 14px; margin: 15px 0; color: #2c3e50; height: 35px; overflow: hidden; }
+        .card a { display: block; padding: 10px; background-color: #25d366; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <header>
         <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" alt="Logo Likelyon Estampados" class="logo-pyme">
-        
         <h1>Likelyon Estampados</h1>
         <p>Catálogo Oficial de Diseños</p>
-        
-        <div class="datos-contacto">
-            📱 WhatsApp: +56 9 5418 0844 &nbsp; | &nbsp; 📷 Instagram: @likelyon_estampados
-        </div>
+        <a href="https://wa.me/56954180844" class="datos-contacto" target="_blank">📱 Pedir por WhatsApp</a>
     </header>
 
     <div class="container">
-        <input type="text" id="buscador" class="search-bar" placeholder="⏳ Conectando con la base de datos..." disabled>
-        <div id="estado-carga">Preparando catálogo de imágenes JPG...</div>
+        <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño por nombre..." disabled>
+        <div id="estado-carga">Conectando con el inventario...</div>
         <div id="galeria" class="grid"></div>
     </div>
 
     <script>
+        // Enlace de publicación de tu nueva Spreadsheet
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
+        
         let todosLosDisenos = [];
-        const LIMITE_MOSTRAR = 60; 
 
-        function inicializarCatalogo() {
+        function inicializar() {
             Papa.parse(CSV_URL, {
                 download: true,
                 header: true,
-                complete: function(resultados) {
-                    todosLosDisenos = resultados.data.filter(fila => {
-                        const nombre = fila['Nombre del Diseño'] ? fila['Nombre del Diseño'].toLowerCase() : '';
-                        return nombre !== '' && (nombre.includes('.jpg') || nombre.includes('.jpeg'));
-                    });
-                    
+                complete: function(res) {
+                    todosLosDisenos = res.data.filter(f => f['Nombre del Diseño'] && /\.(jpg|jpeg|png)$/i.test(f['Nombre del Diseño']));
                     document.getElementById('estado-carga').style.display = 'none';
-                    
-                    const buscador = document.getElementById('buscador');
-                    buscador.disabled = false;
-                    buscador.placeholder = `🔍 Buscar entre ${todosLosDisenos.length} diseños listos para estampar...`;
-                    
-                    mostrarDisenos(todosLosDisenos);
-                },
-                error: function(error) {
-                    document.getElementById('estado-carga').innerHTML = '<span style="color:red;">⚠️ Error al cargar la base de datos.</span>';
+                    const b = document.getElementById('buscador');
+                    b.disabled = false;
+                    b.placeholder = `🔍 Buscar entre ${todosLosDisenos.length} diseños...`;
+                    mostrar(todosLosDisenos);
                 }
             });
         }
 
-        function mostrarDisenos(disenos) {
-            const galeria = document.getElementById('galeria');
-            galeria.innerHTML = ''; 
-            
-            if (disenos.length === 0) {
-                galeria.innerHTML = '<p style="grid-column: 1 / -1; font-size: 1.2em; color: #7f8c8d;">No se encontró ningún diseño JPG con ese nombre.</p>';
-                return;
-            }
-
-            const disenosAMostrar = disenos.slice(0, LIMITE_MOSTRAR);
-
-            disenosAMostrar.forEach(archivo => {
-                const nombreOriginal = archivo['Nombre del Diseño'];
-                const nombreLimpio = nombreOriginal.replace('.jpg', '').replace('.jpeg', '').replace('.JPG', '');
-                const imagenUrl = archivo['URL Miniatura'] || 'https://cdn-icons-png.flaticon.com/512/2911/2911230.png';
-                
-                // Mensaje de WhatsApp personalizado por producto
-                const linkWhatsApp = `https://wa.me/56954180844?text=Hola! Me interesa el diseño: ${encodeURIComponent(nombreLimpio)}`;
-
+        function mostrar(lista) {
+            const g = document.getElementById('galeria');
+            g.innerHTML = '';
+            lista.forEach(d => {
+                const n = d['Nombre del Diseño'].replace(/\.[^/.]+$/, "");
                 const tarjeta = document.createElement('div');
                 tarjeta.className = 'card';
                 tarjeta.innerHTML = `
-                    <img src="${imagenUrl}" alt="${nombreLimpio}" loading="lazy">
-                    <h3>${nombreLimpio}</h3>
-                    <a href="${linkWhatsApp}" target="_blank">Consultar WhatsApp</a>
+                    <img src="${d['URL Miniatura']}" alt="${n}" loading="lazy">
+                    <h3>${n}</h3>
+                    <a href="https://wa.me/56954180844?text=Hola! Me interesa el diseño: ${encodeURIComponent(n)}" target="_blank">Consultar</a>
                 `;
-                galeria.appendChild(tarjeta);
+                g.appendChild(tarjeta);
             });
-
-            if (disenos.length > LIMITE_MOSTRAR) {
-                const aviso = document.createElement('div');
-                aviso.className = 'mensaje-limite';
-                aviso.innerHTML = `Mostrando <b>${LIMITE_MOSTRAR}</b> de <b>${disenos.length}</b> resultados encontrados. <br>Escribe un nombre más específico en el buscador para ver los demás.`;
-                galeria.appendChild(aviso);
-            }
         }
 
         document.getElementById('buscador').addEventListener('input', (e) => {
-            const textoBusqueda = e.target.value.toLowerCase();
-            const disenosFiltrados = todosLosDisenos.filter(archivo => {
-                const nombre = archivo['Nombre del Diseño'] || '';
-                return nombre.toLowerCase().includes(textoBusqueda);
-            });
-            mostrarDisenos(disenosFiltrados);
+            const t = e.target.value.toLowerCase();
+            mostrar(todosLosDisenos.filter(d => d['Nombre del Diseño'].toLowerCase().includes(t)));
         });
 
-        inicializarCatalogo();
+        inicializar();
     </script>
 </body>
 </html>
