@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Catálogo Likelyon</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f9; text-align: center; margin: 0; }
+        header { background: #2c3e50; color: white; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 20px; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: 180px; object-fit: contain; }
+        .btn { background: #25d366; color: white; text-decoration: none; padding: 10px; display: block; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <header><h1>LIKELYON ESTAMPADOS</h1></header>
+    <div id="galeria" class="grid"></div>
+    <script>
+        const CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
+        Papa.parse(CSV, {
+            download: true, header: true, complete: function(res) {
+                const gal = document.getElementById('galeria');
+                res.data.forEach(item => {
+                    const n = item["Nombre del Diseño"];
+                    const img = item["URL Imagen"];
+                    if(img && img.includes('http')) {
+                        const div = document.createElement('div');
+                        div.className = 'card';
+                        div.innerHTML = `<img src="${img}"><h3>${n}</h3><a href="https://wa.me/56954180844?text=Me interesa: ${n}" class="btn">WhatsApp</a>`;
+                        gal.appendChild(div);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
