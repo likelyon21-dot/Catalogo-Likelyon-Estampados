@@ -6,47 +6,85 @@
     <title>Catálogo - Likelyon Estampados</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        :root { --primary: #2c3e50; --accent: #25d366; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg); margin: 0; padding: 0; }
-        
-        /* Encabezado e Imagen Corporativa */
-        header { background: var(--primary); color: white; padding: 30px 10px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .logo-container img { max-width: 180px; background: white; padding: 10px; border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        header h1 { margin: 15px 0 5px; font-size: 24px; letter-spacing: 1px; }
-        
-        /* Buscador */
-        .search-container { position: sticky; top: 0; background: var(--bg); padding: 20px; z-index: 100; display: flex; justify-content: center; }
-        #buscador { width: 100%; max-width: 500px; padding: 15px 25px; border-radius: 30px; border: 2px solid #ddd; font-size: 16px; outline: none; transition: 0.3s; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        #buscador:focus { border-color: var(--accent); box-shadow: 0 2px 15px rgba(37, 211, 102, 0.2); }
-
-        /* Galería de Tarjetas */
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px 50px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
-        .card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.08); transition: 0.3s; display: flex; flex-direction: column; }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
-        .card img { width: 100%; height: 220px; object-fit: contain; background: #fff; padding: 10px; box-sizing: border-box; border-bottom: 1px solid #eee; }
-        .card-info { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .card h3 { font-size: 14px; color: #333; margin: 0 0 15px; height: 40px; overflow: hidden; text-transform: uppercase; font-weight: 700; }
-        
-        /* Botón WhatsApp */
-        .btn-ws { background: var(--accent); color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 14px; transition: 0.3s; text-align: center; }
-        .btn-ws:hover { background: #1ebd5b; }
-        
-        #loading { padding: 100px; font-size: 20px; color: #666; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; }
+        header { background-color: #2c3e50; color: white; padding: 30px; }
+        .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin-bottom: 15px; }
+        .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
+        .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 5px; }
+        .card h3 { font-size: 14px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
+        .btn-ws { background: #25d366; color: white; text-decoration: none; padding: 10px 15px; border-radius: 5px; display: inline-block; font-size: 13px; font-weight: bold; width: 80%; }
+        #status { padding: 20px; color: #666; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo-container">
-        <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" alt="Likelyon Logo">
-    </div>
-    <h1>LIKELYON ESTAMPADOS</h1>
-    <p>Diseños Exclusivos DTF 2026</p>
+    <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo">
+    <h1>Likelyon Estampados</h1>
+    <p>Catálogo Oficial de Diseños</p>
 </header>
 
-<div class="search-container">
-    <input type="text" id="buscador" placeholder="🔍 Busca tu diseño (ej: Calavera, Flores, Moto)...">
+<div class="container">
+    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Moto, etc)...">
+    <div id="status">Cargando catálogo...</div>
+    <div id="galeria" class="grid"></div>
 </div>
 
-<div class="container">}
+<script>
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
+
+    function cargarDatos() {
+        Papa.parse(CSV_URL, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                const galeria = document.getElementById('galeria');
+                const status = document.getElementById('status');
+                galeria.innerHTML = '';
+                
+                if (results.data.length > 0) {
+                    status.style.display = 'none';
+                    results.data.forEach(item => {
+                        const nombre = item["Nombre del Diseño"] || item["Nombre"];
+                        const imagen = item["URL Imagen"] || item["URL"];
+                        
+                        if(imagen && imagen.includes('http')) {
+                            const card = document.createElement('div');
+                            card.className = 'card';
+                            const textoWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre}`);
+                            
+                            card.innerHTML = `
+                                <img src="${imagen}" alt="${nombre}">
+                                <h3>${nombre}</h3>
+                                <a href="https://wa.me/56954180844?text=${textoWs}" target="_blank" class="btn-ws">PEDIR POR WHATSAPP</a>
+                            `;
+                            galeria.appendChild(card);
+                        }
+                    });
+                } else {
+                    status.innerText = "No se encontraron diseños en el Excel.";
+                }
+            }
+        });
+    }
+
+    // Buscador
+    document.getElementById('buscador').oninput = function(e) {
+        const term = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            const h3 = card.querySelector('h3').innerText.toLowerCase();
+            card.style.display = h3.includes(term) ? 'block' : 'none';
+        });
+    };
+
+    window.onload = cargarDatos;
+</script>
+
+</body>
+</html>
