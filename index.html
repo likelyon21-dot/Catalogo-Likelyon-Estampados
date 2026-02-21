@@ -1,45 +1,76 @@
-function actualizarLikelyon() {
-  var idCarpetaRaiz = "17iJ7Wupzh8qm3Ofob8H439rdajHLC4Cw"; 
-  var hoja = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  
-  hoja.clear();
-  // Preparamos la lista en memoria con los encabezados
-  var listaFinal = [["Nombre del Diseño", "URL Imagen"]];
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - Likelyon Estampados</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; }
+        header { background-color: #2c3e50; color: white; padding: 25px; }
+        .logo-pyme { max-width: 150px; background: white; padding: 10px; border-radius: 12px; margin-bottom: 10px; }
+        .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
+        .search-bar { width: 90%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 25px; outline: none; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .card { background: white; padding: 12px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: 160px; object-fit: contain; background: #fdfdfd; border-radius: 5px; }
+        .card h3 { font-size: 12px; color: #333; margin: 10px 0; height: 32px; overflow: hidden; text-transform: uppercase; }
+        .btn-ws { background: #25d366; color: white; text-decoration: none; padding: 8px; border-radius: 5px; display: inline-block; font-size: 12px; font-weight: bold; width: 100%; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo">
+        <h1>LIKELYON ESTAMPADOS</h1>
+    </header>
+    <div class="container">
+        <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño...">
+        <div id="galeria" class="grid"></div>
+    </div>
+<script>
+    // URL de tu Excel publicado como CSV
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
 
-  try {
-    var carpetaRaiz = DriveApp.getFolderById(idCarpetaRaiz);
-    
-    // Función recursiva para entrar en cada subcarpeta
-    function buscarEnSubcarpetas(carpeta) {
-      var archivos = carpeta.getFiles();
-      while (archivos.hasNext()) {
-        var archivo = archivos.next();
-        // Guardamos en la lista temporal
-        listaFinal.push([
-          archivo.getName(),
-          "https://drive.google.com/thumbnail?id=" + archivo.getId() + "&sz=w500"
-        ]);
-      }
-      
-      // Buscamos más carpetas adentro
-      var subCarpetas = carpeta.getFolders();
-      while (subCarpetas.hasNext()) {
-        buscarEnSubcarpetas(subCarpetas.next());
-      }
+    function cargarDatos() {
+        Papa.parse(CSV_URL, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                const galeria = document.getElementById('galeria');
+                galeria.innerHTML = '';
+                
+                results.data.forEach(item => {
+                    // Usamos los nombres de columna que crea tu script
+                    const nombre = item["Nombre del Diseño"];
+                    const imagen = item["URL Imagen"];
+                    
+                    if(imagen && imagen.includes('http')) {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <img src="${imagen}">
+                            <h3>${nombre}</h3>
+                            <a href="https://wa.me/56954180844?text=Hola Likelyon! Me interesa: ${nombre}" target="_blank" class="btn-ws">PEDIR POR WHATSAPP</a>
+                        `;
+                        galeria.appendChild(card);
+                    }
+                });
+            }
+        });
     }
 
-    // Iniciar búsqueda
-    buscarEnSubcarpetas(carpetaRaiz);
+    // Buscador en tiempo real
+    document.getElementById('buscador').oninput = function(e) {
+        const term = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            const txt = card.querySelector('h3').innerText.toLowerCase();
+            card.style.display = txt.includes(term) ? 'block' : 'none';
+        });
+    };
 
-    // Escribir TODO el bloque al Excel al final (Máxima velocidad de pegado)
-    if (listaFinal.length > 1) {
-      hoja.getRange(1, 1, listaFinal.length, 2).setValues(listaFinal);
-      Logger.log("¡Éxito! Se encontraron " + (listaFinal.length - 1) + " diseños en total.");
-    } else {
-      Logger.log("No se encontraron archivos.");
-    }
-
-  } catch (e) {
-    Logger.log("Error: " + e.message);
-  }
-}
+    window.onload = cargarDatos;
+</script>
+</body>
+</html>
