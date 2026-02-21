@@ -3,84 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo de Diseños - Likelyon Estampados</title>
+    <title>Catálogo - Likelyon Estampados</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 0; }
-        header { background-color: #2c3e50; color: white; padding: 40px 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .logo-pyme { max-width: 180px; height: auto; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); background-color: white; padding: 5px; }
-        header h1 { margin: 0; font-size: 2.5em; }
-        header p { font-size: 1.2em; color: #d1d8e0; margin-bottom: 15px; }
-        .datos-contacto { font-size: 1em; color: white; background-color: #25d366; display: inline-block; padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: bold; }
-        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; text-align: center; }
-        .search-bar { width: 100%; max-width: 600px; padding: 15px; font-size: 16px; border: 2px solid #bdc3c7; border-radius: 30px; outline: none; margin-bottom: 25px; transition: 0.3s; }
-        .search-bar:focus { border-color: #3498db; box-shadow: 0 0 8px rgba(52,152,219,0.3); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; padding: 15px; transition: 0.3s; border: 1px solid #eee; }
-        .card:hover { transform: translateY(-5px); border-color: #3498db; }
-        .card img { width: 100%; height: 220px; object-fit: contain; border-radius: 8px; background-color: #f8f9fa; }
-        .card h3 { font-size: 14px; margin: 15px 0; color: #2c3e50; height: 35px; overflow: hidden; }
-        .card a { display: block; padding: 10px; background-color: #25d366; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; }
+        header { background-color: #2c3e50; color: white; padding: 30px; }
+        .logo-pyme { max-width: 150px; background: white; padding: 5px; border-radius: 10px; }
+        .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
+        .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 5px; }
+        .card h3 { font-size: 14px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
+        .btn-ws { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; display: inline-block; font-size: 13px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <header>
-        <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" alt="Logo Likelyon Estampados" class="logo-pyme">
-        <h1>Likelyon Estampados</h1>
-        <p>Catálogo Oficial de Diseños</p>
-        <a href="https://wa.me/56954180844" class="datos-contacto" target="_blank">📱 Pedir por WhatsApp</a>
-    </header>
+<header>
+    <h1>Likelyon Estampados</h1>
+    <p>Catálogo de Diseños Disponibles</p>
+</header>
 
-    <div class="container">
-        <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño por nombre..." disabled>
-        <div id="estado-carga">Conectando con el inventario...</div>
-        <div id="galeria" class="grid"></div>
-    </div>
+<div class="container">
+    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Harley, etc)...">
+    <div id="status">Cargando diseños...</div>
+    <div id="galeria" class="grid"></div>
+</div>
 
-    <script>
-        // Enlace de publicación de tu nueva Spreadsheet
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
-        
-        let todosLosDisenos = [];
+<script>
+    // TU ENLACE QUE SÍ FUNCIONA
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
 
-        function inicializar() {
-            Papa.parse(CSV_URL, {
-                download: true,
-                header: true,
-                complete: function(res) {
-                    todosLosDisenos = res.data.filter(f => f['Nombre del Diseño'] && /\.(jpg|jpeg|png)$/i.test(f['Nombre del Diseño']));
-                    document.getElementById('estado-carga').style.display = 'none';
-                    const b = document.getElementById('buscador');
-                    b.disabled = false;
-                    b.placeholder = `🔍 Buscar entre ${todosLosDisenos.length} diseños...`;
-                    mostrar(todosLosDisenos);
+    let datosCatalogo = [];
+
+    function cargarDatos() {
+        Papa.parse(CSV_URL, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                console.log("Datos cargados:", results.data);
+                // Filtramos filas que tengan al menos un nombre
+                datosCatalogo = results.data.filter(item => Object.values(item)[0]);
+                
+                if(datosCatalogo.length === 0) {
+                    document.getElementById('status').innerText = "No se encontraron datos en la hoja.";
+                } else {
+                    document.getElementById('status').style.display = 'none';
+                    renderizar(datosCatalogo);
                 }
-            });
-        }
-
-        function mostrar(lista) {
-            const g = document.getElementById('galeria');
-            g.innerHTML = '';
-            lista.forEach(d => {
-                const n = d['Nombre del Diseño'].replace(/\.[^/.]+$/, "");
-                const tarjeta = document.createElement('div');
-                tarjeta.className = 'card';
-                tarjeta.innerHTML = `
-                    <img src="${d['URL Miniatura']}" alt="${n}" loading="lazy">
-                    <h3>${n}</h3>
-                    <a href="https://wa.me/56954180844?text=Hola! Me interesa el diseño: ${encodeURIComponent(n)}" target="_blank">Consultar</a>
-                `;
-                g.appendChild(tarjeta);
-            });
-        }
-
-        document.getElementById('buscador').addEventListener('input', (e) => {
-            const t = e.target.value.toLowerCase();
-            mostrar(todosLosDisenos.filter(d => d['Nombre del Diseño'].toLowerCase().includes(t)));
+            }
         });
+    }
 
-        inicializar();
-    </script>
+    function renderizar(lista) {
+        const galeria = document.getElementById('galeria');
+        galeria.innerHTML = '';
+        
+        lista.forEach(item => {
+            // Buscamos el nombre y la imagen por posición para que no falle
+            const fila = Object.values(item);
+            const nombre = fila[0] || "Diseño";
+            const imagen = fila[1] || "";
+            
+            if(imagen.includes('http')) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${imagen}" alt="${nombre}">
+                    <h3>${nombre}</h3>
+                    <a href="https://wa.me/56954180844?text=Hola! Me interesa el diseño: ${encodeURIComponent(nombre)}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
+                `;
+                galeria.appendChild(card);
+            }
+        });
+    }
+
+    document.getElementById('buscador').oninput = function(e) {
+        const term = e.target.value.toLowerCase();
+        const filtrados = datosCatalogo.filter(item => {
+            const n = (Object.values(item)[0] || "").toLowerCase();
+            return n.includes(term);
+        });
+        renderizar(filtrados);
+    };
+
+    cargarDatos();
+</script>
+
 </body>
 </html>
