@@ -17,7 +17,7 @@
         .card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 5px; transition: 0.3s; }
         .card h3 { font-size: 14px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
         .btn-ws { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; display: inline-block; font-size: 13px; font-weight: bold; }
-        
+
         /* MODAL */
         #modalImagen {
             display: none;
@@ -27,12 +27,15 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
+            cursor: zoom-out;
         }
         #modalImagen img {
             max-width: 90%;
             max-height: 90%;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform 0.3s;
+            cursor: grab;
         }
     </style>
 </head>
@@ -83,7 +86,6 @@
             const imagen = fila[1] || "";
             
             if(imagen && imagen.includes('http')) {
-                // Mensaje WhatsApp simplificado
                 const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre.toUpperCase()}\n\nVer imagen: `) + imagen;
                 
                 const card = document.createElement('div');
@@ -94,7 +96,6 @@
                     <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
                 `;
                 
-                // Abrir modal al click en la imagen
                 const imgElemento = card.querySelector('img');
                 imgElemento.addEventListener('click', () => abrirModal(imagen));
 
@@ -103,18 +104,30 @@
         });
     }
 
-    // Modal
+    // Modal con zoom
     const modal = document.getElementById('modalImagen');
     const modalImg = document.getElementById('imagenModal');
+    let escala = 1;
 
     function abrirModal(url) {
         modal.style.display = 'flex';
         modalImg.src = url;
+        escala = 1;
+        modalImg.style.transform = `scale(${escala})`;
     }
 
+    // Cierre al hacer clic fuera
     modal.addEventListener('click', () => {
         modal.style.display = 'none';
         modalImg.src = '';
+    });
+
+    // Zoom con rueda del mouse
+    modalImg.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        if(e.deltaY < 0) escala += 0.1;
+        else escala = Math.max(1, escala - 0.1);
+        modalImg.style.transform = `scale(${escala})`;
     });
 
     // Buscador
