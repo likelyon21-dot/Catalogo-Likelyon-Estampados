@@ -29,13 +29,16 @@ header {
   top: 15px;
   cursor: pointer;
   font-weight: bold;
+  background: #25D366;
+  padding: 6px 12px;
+  border-radius: 20px;
 }
 
-/* UBICACION */
-.ubicacion {
+/* UBICACION GENERAL */
+.ubicacionGeneral {
   text-align: center;
   font-weight: bold;
-  margin: 20px 0;
+  margin: 15px 0;
 }
 
 /* GALERIA */
@@ -50,4 +53,87 @@ header {
   background: white;
   border-radius: 12px;
   padding: 10px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.card img:hover {
+  transform: scale(1.05);
+}
+
+.card button {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border: none;
+  background: #111;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 12px;
+}
+
+.cerrar {
+  position: absolute;
+  top: 25px;
+  right: 35px;
+  font-size: 30px;
+  color: white;
+  cursor: pointer;
+}
+
+/* PANEL CARRITO */
+.panelCarrito {
+  position: fixed;
+  right: -350px;
+  top: 0;
+  width: 330px;
+  height: 100%;
+  background: white;
+  box-shadow: -3px 0 10px rgba(0,0,0,0.2);
+  transition: right 0.4s;
+  padding: 15px;
+  overflow-y: auto;
+  z-index: 3000;
+}
+
+.panelCarrito.activo {
+  right: 0;
+}
+
+.itemCarrito {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.itemCarrito img {
+  width: 50px;
+  margin-right: 10px;
+  border-radius: 6px;
+}
+
+.itemCarrito button {
+  margi
