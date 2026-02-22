@@ -8,6 +8,7 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; }
         header { background-color: #2c3e50; color: white; padding: 30px; }
+        /* Estilo para que tu logo resalte */
         .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin-bottom: 15px; }
         .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
         .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; }
@@ -46,18 +47,13 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                // Filtramos para evitar filas vacías
                 datosCatalogo = results.data.filter(item => Object.values(item)[0]);
-                
                 if(datosCatalogo.length === 0) {
-                    document.getElementById('status').innerText = "No se encontraron datos en la hoja.";
+                    document.getElementById('status').innerText = "No se encontraron datos.";
                 } else {
                     document.getElementById('status').style.display = 'none';
                     renderizar(datosCatalogo);
                 }
-            },
-            error: function() {
-                document.getElementById('status').innerText = "Error de conexión con la base de datos.";
             }
         });
     }
@@ -71,13 +67,13 @@
             const nombre = fila[0] || "Diseño";
             const imagen = fila[1] || "";
             
-            if(imagen && imagen.includes('http')) {
+            if(imagen.includes('http')) {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
                     <img src="${imagen}" alt="${nombre}">
                     <h3>${nombre}</h3>
-                    <a href="https://wa.me/56954180844?text=Hola! Me interesa el diseño: ${encodeURIComponent(nombre)}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
+                    <a href="https://wa.me/56954180844?text=Hola Likelyon! Me interesa el diseño: ${encodeURIComponent(nombre)}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
                 `;
                 galeria.appendChild(card);
             }
@@ -93,8 +89,7 @@
         renderizar(filtrados);
     };
 
-    // ESTA LÍNEA ES LA QUE HACE QUE CARGUE AL ABRIR LA PÁGINA
-    window.onload = cargarDatos;
+    cargarDatos();
 </script>
 
 </body>
