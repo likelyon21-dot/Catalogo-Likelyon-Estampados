@@ -1,96 +1,60 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo - Likelyon Estampados</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; }
-        header { background-color: #2c3e50; color: white; padding: 30px; }
-        /* Estilo para que tu logo resalte */
-        .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin-bottom: 15px; }
-        .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
-        .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; }
-        .search-bar:focus { border-color: #25d366; box-shadow: 0 0 5px rgba(37,211,102,0.5); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); }
-        .card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 5px; }
-        .card h3 { font-size: 14px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
-        .btn-ws { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; display: inline-block; font-size: 13px; font-weight: bold; }
-        #status { padding: 20px; color: #666; }
-    </style>
-</head>
-<body>
+const FOLDER_ID = '17iJ7Wupzh8qm3Ofob8H439rdajHLC4Cw';
+const SPREADSHEET_ID = '1tJRmftiJnrdtYLHzoYmD7nnp-4G3GeCtcbNDn5KKUSw';
 
-<header>
-    <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Estampados">
-    <h1>Likelyon Estampados</h1>
-    <p>Catálogo Oficial de Diseños</p>
-</header>
-
-<div class="container">
-    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Harley, etc)...">
-    <div id="status">Cargando catálogo...</div>
-    <div id="galeria" class="grid"></div>
-</div>
-
-<script>
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
-
-    let datosCatalogo = [];
-
-    function cargarDatos() {
-        Papa.parse(CSV_URL, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                datosCatalogo = results.data.filter(item => Object.values(item)[0]);
-                if(datosCatalogo.length === 0) {
-                    document.getElementById('status').innerText = "No se encontraron datos.";
-                } else {
-                    document.getElementById('status').style.display = 'none';
-                    renderizar(datosCatalogo);
-                }
-            }
-        });
+function escanearDisenos() {
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const hoja = ss.getSheets()[0]; 
+    const carpetaPrincipal = DriveApp.getFolderById(FOLDER_ID);
+    
+    console.log("Iniciando escaneo EXCLUSIVO de JPG en: " + carpetaPrincipal.getName());
+    
+    // Encabezados
+    let datos = [['Nombre del Diseño', 'URL Miniatura', 'URL Archivo']];
+    
+    // Iniciar búsqueda recursiva
+    buscarSoloJPG(carpetaPrincipal, datos);
+    
+    hoja.clear(); 
+    if (datos.length > 1) {
+      hoja.getRange(1, 1, datos.length, datos[0].length).setValues(datos);
+      SpreadsheetApp.flush(); 
+      console.log("¡Hecho! Se encontraron " + (datos.length - 1) + " archivos JPG.");
+    } else {
+      console.warn("⚠️ No se encontró ningún archivo con extensión .jpg o .jpeg.");
     }
+  } catch (e) {
+    console.error("❌ Error: " + e.toString());
+  }
+}
 
-    function renderizar(lista) {
-        const galeria = document.getElementById('galeria');
-        galeria.innerHTML = '';
-        
-        lista.forEach(item => {
-            const fila = Object.values(item);
-            const nombre = fila[0] || "Diseño";
-            const imagen = fila[1] || "";
-            
-            if(imagen.includes('http')) {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <img src="${imagen}" alt="${nombre}">
-                    <h3>${nombre}</h3>
-                    <a href="https://wa.me/56954180844?text=Hola Likelyon! Me interesa el diseño: ${encodeURIComponent(nombre)}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
-                `;
-                galeria.appendChild(card);
-            }
-        });
+function buscarSoloJPG(carpeta, datos) {
+  const archivos = carpeta.getFiles();
+  
+  while (archivos.hasNext()) {
+    const archivo = archivos.next();
+    const nombreOriginal = archivo.getName();
+    
+    // FILTRO ULTRA ESTRICTO: Solo .jpg o .jpeg (ignora mayúsculas/minúsculas)
+    if (/\.(jpg|jpeg)$/i.test(nombreOriginal)) {
+      const id = archivo.getId();
+      
+      // Quitamos la extensión del nombre para que se vea limpio en la web
+      const nombreLimpio = nombreOriginal.replace(/\.(jpg|jpeg)$/i, "");
+      
+      const urlMiniatura = `https://drive.google.com/thumbnail?id=${id}&sz=w500`;
+      const urlArchivo = archivo.getUrl();
+      
+      datos.push([nombreLimpio, urlMiniatura, urlArchivo]);
+      console.log("JPG Agregado: " + nombreLimpio);
+    } else {
+      console.log("Ignorado (no es JPG): " + nombreOriginal);
     }
-
-    document.getElementById('buscador').oninput = function(e) {
-        const term = e.target.value.toLowerCase();
-        const filtrados = datosCatalogo.filter(item => {
-            const n = (Object.values(item)[0] || "").toLowerCase();
-            return n.includes(term);
-        });
-        renderizar(filtrados);
-    };
-
-    cargarDatos();
-</script>
-
-</body>
-</html>
+  }
+  
+  // Entrar en subcarpetas
+  const subcarpetas = carpeta.getFolders();
+  while (subcarpetas.hasNext()) {
+    buscarSoloJPG(subcarpetas.next(), datos);
+  }
+}
