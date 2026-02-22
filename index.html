@@ -46,13 +46,18 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
+                // Filtramos para evitar filas vacías
                 datosCatalogo = results.data.filter(item => Object.values(item)[0]);
+                
                 if(datosCatalogo.length === 0) {
-                    document.getElementById('status').innerText = "No se encontraron datos.";
+                    document.getElementById('status').innerText = "No se encontraron datos en la hoja.";
                 } else {
                     document.getElementById('status').style.display = 'none';
                     renderizar(datosCatalogo);
                 }
+            },
+            error: function() {
+                document.getElementById('status').innerText = "Error de conexión con la base de datos.";
             }
         });
     }
@@ -67,15 +72,12 @@
             const imagen = fila[1] || "";
             
             if(imagen && imagen.includes('http')) {
-                // Mensaje personalizado que incluye el Link de la imagen para que te llegue al WhatsApp
-                const mensajeWs = `Hola Likelyon! Me interesa este diseño: ${nombre.toUpperCase()} %0A%0A Foto: ${imagen}`;
-                
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
                     <img src="${imagen}" alt="${nombre}">
                     <h3>${nombre}</h3>
-                    <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
+                    <a href="https://wa.me/56954180844?text=Hola! Me interesa el diseño: ${encodeURIComponent(nombre)}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
                 `;
                 galeria.appendChild(card);
             }
@@ -91,6 +93,7 @@
         renderizar(filtrados);
     };
 
+    // ESTA LÍNEA ES LA QUE HACE QUE CARGUE AL ABRIR LA PÁGINA
     window.onload = cargarDatos;
 </script>
 
