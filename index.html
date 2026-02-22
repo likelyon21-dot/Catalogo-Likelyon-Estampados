@@ -187,108 +187,23 @@ header {
 </div>
 
 <script>
-
-// 🔥 EJEMPLO DE DATOS (AQUÍ CONECTAS TU GOOGLE SHEET)
+// DATOS DE IMÁGENES
 const imagenes = [
-  {id:"A2458", nombre:"Anime 245", url:"https://via.placeholder.com/400", ubicacion:"Carpeta Anime/Naruto"},
-  {id:"M8871", nombre:"Moto 887", url:"https://via.placeholder.com/400", ubicacion:"Carpeta Motos/Adventure"}
+  {id:"A2458", nombre:"Anime 245", url:"imagenes/estampado1.jpg", ubicacion:"Carpeta Anime/Naruto"},
+  {id:"M8871", nombre:"Moto 887", url:"imagenes/estampado2.jpg", ubicacion:"Carpeta Motos/Adventure"}
 ];
 
+// GALERÍA
 const galeria = document.getElementById("galeria");
 
 imagenes.forEach(img => {
-  galeria.innerHTML += `
-    <div class="card">
-      <img src="${img.url}" loading="lazy" onclick="abrirModal('${img.url}')">
-      <p><strong>${img.nombre}</strong></p>
-      <small>📁 ${img.ubicacion}</small><br>
-      <button onclick="agregarCarrito('${img.id}','${img.nombre}','${img.url}','${img.ubicacion}')">
-        Seleccionar
-      </button>
-    </div>
-  `;
-});
+  const card = document.createElement("div");
+  card.className = "card";
 
-// MODAL
-function abrirModal(url) {
-  document.getElementById("modal").style.display = "flex";
-  document.getElementById("imagenGrande").src = url;
-}
+  const imagen = document.createElement("img");
+  imagen.src = img.url;
+  imagen.loading = "lazy";
+  imagen.alt = img.nombre;
+  imagen.onclick = () => abrirModal(img.url);
 
-function cerrarModal() {
-  document.getElementById("modal").style.display = "none";
-}
-
-// CARRITO
-let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-
-function agregarCarrito(id, nombre, url, ubicacion) {
-  if (!carrito.find(item => item.id === id)) {
-    carrito.push({id, nombre, url, ubicacion});
-    localStorage.setItem("carrito", JSON.stringify(carrito));
-    actualizarCarrito();
-  } else {
-    alert("Este diseño ya está seleccionado");
-  }
-}
-
-function actualizarCarrito() {
-  document.getElementById("contadorCarrito").innerText =
-    "🛒 " + carrito.length;
-
-  const lista = document.getElementById("listaCarrito");
-  lista.innerHTML = "";
-
-  carrito.forEach(item => {
-    lista.innerHTML += `
-      <div class="itemCarrito">
-        <img src="${item.url}">
-        <div>
-          <div>${item.nombre}</div>
-          <small>📁 ${item.ubicacion}</small>
-        </div>
-        <button onclick="eliminarItem('${item.id}')">X</button>
-      </div>
-    `;
-  });
-}
-
-function eliminarItem(id) {
-  carrito = carrito.filter(item => item.id !== id);
-  localStorage.setItem("carrito", JSON.stringify(carrito));
-  actualizarCarrito();
-}
-
-function toggleCarrito() {
-  document.getElementById("panelCarrito").classList.toggle("activo");
-}
-
-// WHATSAPP
-function enviarWhatsApp() {
-
-  if (carrito.length === 0) {
-    alert("No hay diseños seleccionados");
-    return;
-  }
-
-  let mensaje = "Hola, quiero estos diseños:%0A%0A";
-
-  carrito.forEach((item, index) => {
-    mensaje += 
-      (index + 1) + ") " + item.nombre + "%0A" +
-      "📁 " + item.ubicacion + "%0A" +
-      "🔗 " + item.url + "%0A%0A";
-  });
-
-  const numero = "569XXXXXXXX"; // PON TU NUMERO AQUI
-  const url = "https://wa.me/" + numero + "?text=" + mensaje;
-
-  window.open(url, "_blank");
-}
-
-actualizarCarrito();
-
-</script>
-
-</body>
-</html>
+  const nombre = document.createElem
