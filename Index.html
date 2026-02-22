@@ -16,7 +16,6 @@
         .card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 5px; }
         .card h3 { font-size: 14px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
         .btn-ws { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; display: inline-block; font-size: 13px; font-weight: bold; }
-        #status { padding: 20px; color: #666; }
     </style>
 </head>
 <body>
@@ -44,7 +43,6 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                // Filtramos filas que tengan datos reales
                 datosCatalogo = results.data.filter(item => Object.values(item)[0]);
                 document.getElementById('status').style.display = 'none';
                 renderizar(datosCatalogo);
@@ -59,18 +57,16 @@
         lista.forEach(item => {
             const fila = Object.values(item);
             const nombre = fila[0] || "Diseño";
-            const miniatura = fila[1] || "";
-            const urlReal = fila[2] || ""; // Nueva columna con el link directo al archivo
+            const imagen = fila[1] || "";
             
-            if(miniatura && miniatura.includes('http')) {
-                // Mensaje ultra completo para tu flujo de trabajo
-                const textoMensaje = `Hola Likelyon! Me interesa este diseño:\n\n📌 *${nombre.toUpperCase()}*\n\n🖼️ Foto: ${miniatura}\n\n📂 Archivo en mi Drive: ${urlReal}`;
-                const mensajeWs = encodeURIComponent(textoMensaje);
+            if(imagen && imagen.includes('http')) {
+                // He simplificado el mensaje para que WhatsApp genere la vista previa más fácil
+                const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre.toUpperCase()}\n\nVer imagen: `) + imagen;
                 
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <img src="${miniatura}" alt="${nombre}">
+                    <img src="${imagen}" alt="${nombre}">
                     <h3>${nombre}</h3>
                     <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
                 `;
@@ -81,7 +77,10 @@
 
     document.getElementById('buscador').oninput = function(e) {
         const term = e.target.value.toLowerCase();
-        const filtrados = datosCatalogo.filter(item => (Object.values(item)[0] || "").toLowerCase().includes(term));
+        const filtrados = datosCatalogo.filter(item => {
+            const n = (Object.values(item)[0] || "").toLowerCase();
+            return n.includes(term);
+        });
         renderizar(filtrados);
     };
 
