@@ -1,139 +1,60 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogo de Diseños</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo Likelyon Estampados</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #222;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 20px;
+      gap: 15px;
+    }
+    .gallery img {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      transition: transform 0.3s;
+      cursor: pointer;
+    }
+    .gallery img:hover {
+      transform: scale(1.05);
+    }
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background: #222;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: #f4f4f4;
-}
+<header>
+  <h1>Catálogo Likelyon Estampados</h1>
+</header>
 
-/* HEADER */
-header {
-  background: #111;
-  color: white;
-  padding: 15px;
-  text-align: center;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
+<div class="gallery">
+  <img src="imagenes/estampado1.jpg" alt="Estampado 1">
+  <img src="imagenes/estampado2.jpg" alt="Estampado 2">
+  <img src="imagenes/estampado3.jpg" alt="Estampado 3">
+  <img src="imagenes/estampado4.jpg" alt="Estampado 4">
+  <!-- Añade más imágenes aquí -->
+</div>
 
-#contadorCarrito {
-  position: absolute;
-  right: 20px;
-  top: 15px;
-  cursor: pointer;
-  font-weight: bold;
-  background: #25D366;
-  padding: 6px 12px;
-  border-radius: 20px;
-}
-
-/* UBICACION GENERAL */
-.ubicacionGeneral {
-  text-align: center;
-  font-weight: bold;
-  margin: 15px 0;
-}
-
-/* GALERIA */
-.galeria {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
-  padding: 20px;
-}
-
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-  text-align: center;
-}
-
-.card img {
-  width: 100%;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-
-.card img:hover {
-  transform: scale(1.05);
-}
-
-.card button {
-  margin-top: 8px;
-  padding: 6px 10px;
-  border: none;
-  background: #111;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-/* MODAL */
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-}
-
-.modal img {
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: 12px;
-}
-
-.cerrar {
-  position: absolute;
-  top: 25px;
-  right: 35px;
-  font-size: 30px;
-  color: white;
-  cursor: pointer;
-}
-
-/* PANEL CARRITO */
-.panelCarrito {
-  position: fixed;
-  right: -350px;
-  top: 0;
-  width: 330px;
-  height: 100%;
-  background: white;
-  box-shadow: -3px 0 10px rgba(0,0,0,0.2);
-  transition: right 0.4s;
-  padding: 15px;
-  overflow-y: auto;
-  z-index: 3000;
-}
-
-.panelCarrito.activo {
-  right: 0;
-}
-
-.itemCarrito {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.itemCarrito img {
-  width: 50px;
-  margin-right: 10px;
-  border-radius: 6px;
-}
-
-.itemCarrito button {
-  margi
+<div class="footer"
