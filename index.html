@@ -4,44 +4,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogo - Likelyon Estampados</title>
+<title>Catálogo Likelyon</title>
 <script src=""></script>
 <style>
 body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; }
-header { background-color: #2c3e50; color: white; padding: 30px; border-bottom: 5px solid #25d366; }
-.logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin-bottom: 15px; }
-.container { max-width: 1100px; margin: 20px auto; padding: 20px; }
-.search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; font-size: 16px; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-.card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; }
-.card:hover { transform: translateY(-5px); }
-.card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 5px; cursor: zoom-in; }
-.card h3 { font-size: 14px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
-.btn-ws { background: #25d366; color: white; text-decoration: none; padding: 10px; border-radius: 5px; display: block; font-size: 13px; font-weight: bold; }
+header { background-color: #2c3e50; color: white; padding: 20px; border-bottom: 5px solid #25d366; }
+.logo-pyme { max-width: 150px; background: white; padding: 10px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+.container { max-width: 1100px; margin: auto; padding: 20px; }
+.search-bar { width: 90%; max-width: 400px; padding: 12px; border-radius: 20px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; font-size: 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+.card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.3s; }
+.card img { width: 100%; height: 160px; object-fit: contain; cursor: zoom-in; background: #fafafa; border-radius: 5px; }
+.card h3 { font-size: 13px; text-transform: uppercase; color: #333; margin: 10px 0; height: 32px; overflow: hidden; }
+.btn-ws { background: #25d366; color: white; text-decoration: none; padding: 10px; border-radius: 5px; display: block; font-weight: bold; font-size: 12px; }
 
 </head>
 <body>
 
 <header>
-<img src="" class="logo-pyme" alt="Likelyon Logo">
+<img src="" class="logo-pyme" alt="Likelyon">
 <h1>Likelyon Estampados</h1>
-<p>Haz clic en las fotos para agrandarlas</p>
+<p style="font-size: 14px;">Toca la imagen para verla en grande</p>
 </header>
 
 <div class="container">
-<input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño JPG...">
-<div id="status">Cargando catálogo...</div>
+<input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño...">
 <div id="galeria" class="grid"></div>
 </div>
 
-<div id="miModal" class="modal">
-<span class="modal-close" onclick="cerrarModal()">&times;</span>
-<img class="modal-content" id="imgGrande">
-<div id="caption"></div>
+<div id="miModal">
+<span class="cerrar" onclick="cerrar()">&times;</span>
+<img id="imgGrande">
+<div id="txtGrande"></div>
 </div>
 
 <script>
 const CSV_URL = '';
+let listaDisenos = [];
 
 </script>
 
