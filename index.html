@@ -84,6 +84,16 @@ padding:5px 10px;
 border-radius:20px;
 font-size:14px;
 }
+.btn-delete{
+background:#e74c3c;
+color:white;
+border:none;
+padding:3px 6px;
+border-radius:5px;
+cursor:pointer;
+margin-top:5px;
+font-size:12px;
+}
 </style>
 </head>
 
@@ -136,6 +146,11 @@ const match=url?url.match(regex):null;
 return match?`https://drive.google.com/uc?export=view&id=${match[1]}`:url;
 }
 
+// eliminar duplicados por URL archivo
+function eliminarDuplicados(array){
+return array.filter((item,index,self)=>self.findIndex(t=>t.urlArchivo===item.urlArchivo)===index);
+}
+
 function renderGaleria(lista){
 galeria.innerHTML='';
 lista.forEach(item=>{
@@ -157,17 +172,31 @@ contadorFav.textContent=favoritos.length+" diseños seleccionados";
 favoritos.forEach(item=>{
 const card=document.createElement('div');
 card.className='card';
-card.innerHTML=`<img src="${item.urlMini}"><h3>${item.nombre}</h3>`;
+card.innerHTML=`
+<img src="${item.urlMini}">
+<h3>${item.nombre}</h3>
+<button class="btn-delete">Eliminar</button>
+`;
+card.querySelector('.btn-delete').onclick=()=>{eliminarFav(item);};
 galeriaFav.appendChild(card);
 });
 }
 
+// guardar/eliminar favorito al dar clic en ❤️
 function guardarFav(item){
 if(!favoritos.find(f=>f.urlArchivo===item.urlArchivo)){
 favoritos.push(item);
 }else{
 favoritos=favoritos.filter(f=>f.urlArchivo!==item.urlArchivo);
 }
+localStorage.setItem('favoritos',JSON.stringify(favoritos));
+renderFav();
+renderGaleria(datosOriginal);
+}
+
+// eliminar favorito desde sección de favoritos
+function eliminarFav(item){
+favoritos=favoritos.filter(f=>f.urlArchivo!==item.urlArchivo);
 localStorage.setItem('favoritos',JSON.stringify(favoritos));
 renderFav();
 renderGaleria(datosOriginal);
@@ -207,8 +236,9 @@ datosOriginal=res.data
 nombre: d["Nombre del Diseño"],
 urlMini: transformarUrlDrive(d["URL Miniatura"]),
 urlArchivo: d["URL Archivo"]
-}))
-.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+}));
+
+datosOriginal = eliminarDuplicados(datosOriginal);
 
 document.getElementById('status').style.display='none';
 renderGaleria(datosOriginal);
@@ -216,6 +246,7 @@ renderFav();
 }
 });
 
+// contador de visitas
 fetch('https://api.countapi.xyz/hit/likelyon-estampados/visitas')
 .then(r=>r.json())
 .then(d=>{document.getElementById('contadorVisitas').textContent="Visitas: "+d.value;});
