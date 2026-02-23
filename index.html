@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Likelyon Estampados</title>
+<title>Likelyon Estampados - Catálogo</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
@@ -26,7 +26,6 @@ header { background:#2c3e50; color:white; padding:20px; position:relative; }
 #toggleFav { background:#2c3e50; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-left:10px; }
 #contadorVisitas { position:absolute; top:10px; right:15px; background:#34495e; padding:5px 10px; border-radius:20px; font-size:14px; }
 .btn-delete { background:#e74c3c; color:white; border:none; padding:3px 6px; border-radius:5px; cursor:pointer; margin-top:5px; font-size:12px; }
-#btnCargarMas { padding:10px 20px; margin:15px auto; background:#2c3e50; color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; display:block; }
 
 /* MODAL ZOOM */
 #modalImagen { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:9999; cursor:zoom-out; overflow:hidden; }
@@ -56,7 +55,6 @@ header { background:#2c3e50; color:white; padding:20px; position:relative; }
 
 <div id="status">Cargando catálogo...</div>
 <div id="galeria" class="grid"></div>
-<button id="btnCargarMas" style="display:none;">Cargar más diseños</button>
 
 <div id="modalImagen"><img id="imagenModal"></div>
 
@@ -66,37 +64,25 @@ header { background:#2c3e50; color:white; padding:20px; position:relative; }
 document.addEventListener("DOMContentLoaded",function(){
 
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
-let datosOriginal=[], favoritos=JSON.parse(localStorage.getItem('favoritos'))||[], indexCargar=0;
-const CARGAR_POR=20;
+let datosOriginal=[], favoritos=JSON.parse(localStorage.getItem('favoritos'))||[];
 
 const galeria=document.getElementById('galeria');
 const galeriaFav=document.getElementById('galeriaFav');
 const contadorFav=document.getElementById('contadorFav');
 const toggleFav=document.getElementById('toggleFav');
-const btnCargarMas=document.getElementById('btnCargarMas');
 
 const modal=document.getElementById('modalImagen');
 const modalImg=document.getElementById('imagenModal');
-let escala=1, lastX=0, lastY=0, posX=0, posY=0, dragging=false;
+let escala=1, posX=0, posY=0, dragging=false, lastX=0, lastY=0;
 
-// --- FUNCIÓN DRIVE DEFINITIVA ---
+// --- FUNCIÓN DRIVE ---
 function transformarUrlDrive(url, tipo){
     if(!url) return url;
     let fileId=null;
-
-    // Si es miniatura (thumbnail) se deja igual
-    if(tipo==='mini') return url;
-
-    // Si es archivo final /file/d/ID/
+    if(tipo==='mini') return url; // thumbnails ya funcionan
     let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
     if(match) fileId=match[1];
-
-    // Si no, intenta thumbnail?id=ID
-    if(!fileId){
-        match = url.match(/id=([a-zA-Z0-9_-]+)/);
-        if(match) fileId=match[1];
-    }
-
+    if(!fileId){ match = url.match(/id=([a-zA-Z0-9_-]+)/); if(match) fileId=match[1]; }
     if(fileId) return `https://drive.google.com/uc?export=view&id=${fileId}`;
     return url;
 }
@@ -107,20 +93,18 @@ function eliminarDuplicados(array){
 
 function renderGaleria(){
     galeria.innerHTML='';
-    let listaMostrar=datosOriginal.slice(0,indexCargar);
-    listaMostrar.forEach(item=>{
+    datosOriginal.forEach(item=>{
         const card=document.createElement('div'); card.className='card';
         const img=document.createElement('img'); img.src=item.urlMini; img.loading="lazy"; img.alt=item.nombre;
-        img.onerror=function(){ this.src='https://via.placeholder.com/200x200?text=Imagen+no+disponible'; this.style.objectFit='contain'; }
+        img.onerror=function(){ this.src='https://via.placeholder.com/200x200?text=Imagen+no+disponible'; }
         img.onclick=()=>abrirModal(item.urlMini);
-        const btnFav=document.createElement('button');
+        const btnFav=document.createElement('button'); 
         btnFav.className='btn-fav '+(favoritos.find(f=>f.urlArchivo===item.urlArchivo)?'saved':'');
         btnFav.textContent='❤️'; btnFav.onclick=(e)=>{ e.stopPropagation(); guardarFav(item); }
         const titulo=document.createElement('h3'); titulo.textContent=item.nombre;
         card.appendChild(img); card.appendChild(titulo); card.appendChild(btnFav);
         galeria.appendChild(card);
     });
-    btnCargarMas.style.display=(indexCargar<datosOriginal.length)?'block':'none';
 }
 
 function renderFav(){
@@ -128,7 +112,6 @@ function renderFav(){
     favoritos.forEach(item=>{
         const card=document.createElement('div'); card.className='card';
         const img=document.createElement('img'); img.src=item.urlMini; img.alt=item.nombre;
-        img.onerror=function(){ this.src='https://via.placeholder.com/200x200?text=Imagen+no+disponible'; this.style.objectFit='contain'; }
         img.onclick=()=>abrirModal(item.urlMini);
         const titulo=document.createElement('h3'); titulo.textContent=item.nombre;
         const btnDel=document.createElement('button'); btnDel.className='btn-delete'; btnDel.textContent='Eliminar'; btnDel.onclick=()=>{ eliminarFav(item); }
@@ -152,8 +135,8 @@ toggleFav.onclick=function(){
 
 document.getElementById('buscador').addEventListener('input',function(e){
     const term=e.target.value.toLowerCase();
-    const filtrados=datosOriginal.filter(d=>d.nombre.toLowerCase().includes(term));
-    datosOriginal=eliminarDuplicados(filtrados); indexCargar=Math.min(CARGAR_POR, datosOriginal.length); renderGaleria();
+    datosOriginal=datosOriginal.filter(d=>d.nombre.toLowerCase().includes(term));
+    renderGaleria();
 });
 
 document.getElementById('enviarFav').onclick=function(){
@@ -163,14 +146,11 @@ document.getElementById('enviarFav').onclick=function(){
     window.open("https://wa.me/56954180844?text="+mensaje);
 };
 
-btnCargarMas.onclick=function(){ indexCargar+=CARGAR_POR; renderGaleria(); }
-
 // --- MODAL ---
 function abrirModal(url){
     modal.style.display='flex'; modalImg.src=url; escala=1; posX=0; posY=0; modalImg.style.transform=`translate(0px,0px) scale(1)`;
 }
-
-modal.addEventListener('click',()=>{ modal.style.display='none'; modalImg.src=''; escala=1; posX=0; posY=0; });
+modal.addEventListener('click',()=>{ modal.style.display='none'; modalImg.src=''; });
 modalImg.addEventListener('wheel',e=>{ e.preventDefault(); escala= e.deltaY<0 ? escala+0.1 : Math.max(1,escala-0.1); modalImg.style.transform=`translate(${posX}px,${posY}px) scale(${escala})`; });
 modalImg.addEventListener('pointerdown',e=>{ dragging=true; lastX=e.clientX; lastY=e.clientY; modalImg.setPointerCapture(e.pointerId); });
 modalImg.addEventListener('pointermove',e=>{ if(dragging){ let dx=e.clientX-lastX, dy=e.clientY-lastY; posX+=dx; posY+=dy; modalImg.style.transform=`translate(${posX}px,${posY}px) scale(${escala})`; lastX=e.clientX; lastY=e.clientY; }});
@@ -186,7 +166,6 @@ Papa.parse(CSV_URL,{download:true,header:true,skipEmptyLines:true,complete:funct
         urlArchivo:transformarUrlDrive(d["URL Archivo"], 'archivo')
     }));
     datosOriginal=eliminarDuplicados(datosOriginal);
-    indexCargar=Math.min(CARGAR_POR, datosOriginal.length);
     document.getElementById('status').style.display='none';
     renderGaleria(); renderFav();
 }});
