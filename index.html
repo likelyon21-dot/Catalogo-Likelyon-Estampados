@@ -118,7 +118,6 @@ font-size:14px;
 </div>
 
 <script>
-
 document.addEventListener("DOMContentLoaded",function(){
 
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
@@ -143,9 +142,9 @@ lista.forEach(item=>{
 const card=document.createElement('div');
 card.className='card';
 card.innerHTML=`
-<img src="${item.imagen}" loading="lazy">
+<img src="${item.urlMini}" loading="lazy">
 <h3>${item.nombre}</h3>
-<button class="btn-fav ${favoritos.find(f=>f.imagen===item.imagen)?'saved':''}">❤️</button>
+<button class="btn-fav ${favoritos.find(f=>f.urlArchivo===item.urlArchivo)?'saved':''}">❤️</button>
 `;
 card.querySelector('.btn-fav').onclick=(e)=>{e.stopPropagation();guardarFav(item);};
 galeria.appendChild(card);
@@ -158,16 +157,16 @@ contadorFav.textContent=favoritos.length+" diseños seleccionados";
 favoritos.forEach(item=>{
 const card=document.createElement('div');
 card.className='card';
-card.innerHTML=`<img src="${item.imagen}"><h3>${item.nombre}</h3>`;
+card.innerHTML=`<img src="${item.urlMini}"><h3>${item.nombre}</h3>`;
 galeriaFav.appendChild(card);
 });
 }
 
 function guardarFav(item){
-if(!favoritos.find(f=>f.imagen===item.imagen)){
+if(!favoritos.find(f=>f.urlArchivo===item.urlArchivo)){
 favoritos.push(item);
 }else{
-favoritos=favoritos.filter(f=>f.imagen!==item.imagen);
+favoritos=favoritos.filter(f=>f.urlArchivo!==item.urlArchivo);
 }
 localStorage.setItem('favoritos',JSON.stringify(favoritos));
 renderFav();
@@ -193,7 +192,7 @@ renderGaleria(filtrados);
 document.getElementById('enviarFav').onclick=function(){
 if(favoritos.length===0)return alert("No hay favoritos");
 let mensaje="Hola! Me interesan estos diseños:%0A%0A";
-favoritos.forEach(f=>{mensaje+=f.nombre+"%0A";});
+favoritos.forEach(f=>{mensaje+=f.nombre+": "+f.urlArchivo+"%0A";});
 window.open("https://wa.me/56954180844?text="+mensaje);
 };
 
@@ -203,10 +202,11 @@ header:true,
 skipEmptyLines:true,
 complete:function(res){
 datosOriginal=res.data
-.filter(d=>d.Nombre && d.Imagen)
+.filter(d=>d["Nombre del Diseño"] && d["URL Miniatura"] && d["URL Archivo"])
 .map(d=>({
-nombre:d.Nombre,
-imagen:transformarUrlDrive(d.Imagen)
+nombre: d["Nombre del Diseño"],
+urlMini: transformarUrlDrive(d["URL Miniatura"]),
+urlArchivo: d["URL Archivo"]
 }))
 .sort((a,b)=>a.nombre.localeCompare(b.nombre));
 
@@ -221,7 +221,6 @@ fetch('https://api.countapi.xyz/hit/likelyon-estampados/visitas')
 .then(d=>{document.getElementById('contadorVisitas').textContent="Visitas: "+d.value;});
 
 });
-
 </script>
 
 </body>
