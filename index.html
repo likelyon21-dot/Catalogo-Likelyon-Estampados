@@ -21,9 +21,10 @@ header{background:#2c3e50;color:white;padding:30px;position:relative;}
 .btn-fav.saved{background:#2ecc71;}
 #modalImagen{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;z-index:9999;cursor:grab;overflow:hidden;}
 #modalImagen img{max-width:90%;max-height:90%;border-radius:10px;box-shadow:0 4px 15px rgba(0,0,0,0.5);transition:transform .3s;}
-#favoritos{margin-top:40px;}
-#favoritos h2{margin-bottom:15px;}
+#favoritos{margin-top:40px;text-align:left;}
+#favoritos h2{margin-bottom:15px;display:flex;align-items:center;justify-content:space-between;}
 #contadorVisitas{position:absolute;top:15px;right:20px;background:#2c3e50;color:white;padding:5px 10px;border-radius:20px;font-weight:bold;}
+#toggleFav{font-size:14px;padding:3px 8px;margin-left:10px;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -40,8 +41,11 @@ header{background:#2c3e50;color:white;padding:30px;position:relative;}
 <div id="galeria" class="grid"></div>
 
 <div id="favoritos">
-<h2>Mis Favoritos</h2>
-<div id="galeriaFav" class="grid"></div>
+<h2>
+  Mis Favoritos
+  <button id="toggleFav">Mostrar ▼</button>
+</h2>
+<div id="galeriaFav" class="grid" style="display:none;"></div>
 </div>
 </div>
 
@@ -52,14 +56,14 @@ const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhyg
 let datosCatalogo = [];
 let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
 
-// Transformar Google Drive URL
+// Transformar URL de Google Drive
 function transformarUrlDrive(url){
     const regex=/\/file\/d\/([a-zA-Z0-9_-]+)\//;
     const match=url.match(regex);
-    return match&&match[1]?`https://drive.google.com/uc?export=view&id=${match[1]}`:url;
+    return match && match[1] ? `https://drive.google.com/uc?export=view&id=${match[1]}` : url;
 }
 
-// Guardar favorito en localStorage
+// Guardar/quitar favorito en localStorage
 function guardarFavorito(imagen){
     if(!favoritos.includes(imagen)){
         favoritos.push(imagen);
@@ -70,12 +74,12 @@ function guardarFavorito(imagen){
     renderizarFavoritos();
 }
 
-// Renderizar favoritos
+// Renderizar sección de favoritos
 function renderizarFavoritos(){
     const galFav = document.getElementById('galeriaFav');
     galFav.innerHTML = '';
-    if(favoritos.length===0){
-        galFav.innerHTML='<p>No hay favoritos aún.</p>';
+    if(favoritos.length === 0){
+        galFav.innerHTML = '<p>No hay favoritos aún.</p>';
         return;
     }
     favoritos.forEach(img=>{
@@ -87,7 +91,7 @@ function renderizarFavoritos(){
     });
 }
 
-// Cargar datos desde CSV
+// Cargar catálogo desde CSV
 function cargarDatos(){
     Papa.parse(CSV_URL,{
         download:true,
@@ -108,11 +112,11 @@ function renderizar(lista){
     galeria.innerHTML='';
     lista.forEach(item=>{
         const fila = Object.values(item);
-        const nombre = fila[0]||"Diseño";
-        const imagenOriginal = fila[1]||"";
+        const nombre = fila[0] || "Diseño";
+        const imagenOriginal = fila[1] || "";
         const imagen = transformarUrlDrive(imagenOriginal);
         if(imagen.includes('http')){
-            const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre}`)+imagen;
+            const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre}`) + imagen;
             const card=document.createElement('div');
             card.className='card';
             card.innerHTML=`
@@ -134,19 +138,38 @@ function renderizar(lista){
     });
 }
 
-// Modal
+// Modal con zoom
 const modal=document.getElementById('modalImagen');
 const modalImg=document.getElementById('imagenModal');
 function abrirModal(url){modal.style.display='flex'; modalImg.src=url;}
 modal.addEventListener('click',()=>{modal.style.display='none'; modalImg.src='';});
+modalImg.addEventListener('wheel', e=>{
+    e.preventDefault();
+    let escala = parseFloat(modalImg.style.transform.replace('scale(','').replace(')','')) || 1;
+    if(e.deltaY<0) escala += 0.1; else escala = Math.max(1, escala-0.1);
+    modalImg.style.transform = `scale(${escala})`;
+});
 
 // Buscador
 document.getElementById('buscador').oninput=function(e){
-    const term=e.target.value.toLowerCase();
+    const term = e.target.value.toLowerCase();
     renderizar(datosCatalogo.filter(item=>(Object.values(item)[0]||"").toLowerCase().includes(term)));
 };
 
-// Contador de visitas global
+// Panel de favoritos colapsable
+const toggleFav = document.getElementById('toggleFav');
+const galeriaFav = document.getElementById('galeriaFav');
+toggleFav.addEventListener('click', () => {
+    if (galeriaFav.style.display === 'none') {
+        galeriaFav.style.display = 'grid';
+        toggleFav.textContent = 'Ocultar ▲';
+    } else {
+        galeriaFav.style.display = 'none';
+        toggleFav.textContent = 'Mostrar ▼';
+    }
+});
+
+// Contador global de visitas
 fetch('https://api.countapi.xyz/hit/likelyon-estampados/visitas')
 .then(res=>res.json())
 .then(data=>{document.getElementById('contadorVisitas').textContent=`Visitas totales: ${data.value}`;});
