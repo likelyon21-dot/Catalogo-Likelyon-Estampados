@@ -11,24 +11,8 @@
 body{font-family:'Segoe UI',sans-serif;margin:0;background:#f4f4f9;text-align:center;}
 header{background:#2c3e50;color:white;padding:30px;position:relative;}
 .logo{max-width:180px;background:white;padding:10px;border-radius:15px;margin-top:15px;}
-.container{max-width:1200px;margin:20px auto;padding:20px;}
-
-.search-bar{
-width:100%;max-width:500px;padding:12px;
-border-radius:25px;border:1px solid #ccc;margin-bottom:20px;
-}
-
-.filtros{margin:15px 0;}
-.filtros button{
-margin:4px;
-padding:6px 12px;
-border:none;
-border-radius:20px;
-background:#ddd;
-cursor:pointer;
-font-size:13px;
-}
-.filtros button:hover{background:#2c3e50;color:white;}
+.container{max-width:1100px;margin:20px auto;padding:20px;}
+.search-bar{width:100%;max-width:500px;padding:12px;border-radius:25px;border:1px solid #ccc;margin-bottom:20px;}
 
 .grid{
 display:grid;
@@ -81,18 +65,14 @@ box-shadow:0 2px 10px rgba(0,0,0,0.1);
 margin-bottom:30px;
 }
 
-#paginacion{
-margin:30px 0;
-}
-
-#paginacion button{
-padding:8px 15px;
-margin:0 5px;
-border:none;
-border-radius:5px;
+#toggleFav{
 background:#2c3e50;
 color:white;
+border:none;
+padding:6px 12px;
+border-radius:6px;
 cursor:pointer;
+margin-left:10px;
 }
 
 #contadorVisitas{
@@ -119,26 +99,21 @@ font-size:14px;
 
 <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño...">
 
-<!-- FAVORITOS -->
+<!-- FAVORITOS COLAPSABLE -->
 <div id="favoritos">
-<h3>❤️ Mis Favoritos</h3>
+<h3>
+❤️ Mis Favoritos
+<button id="toggleFav">Mostrar ▼</button>
+</h3>
 <p id="contadorFav">0 diseños seleccionados</p>
-<div id="galeriaFav" class="grid"></div>
-<button id="enviarFav" style="background:#25d366;color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;">
+<div id="galeriaFav" class="grid" style="display:none;"></div>
+<button id="enviarFav" style="background:#25d366;color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;margin-top:10px;">
 🛒 Enviar todos por WhatsApp
 </button>
 </div>
 
-<!-- FILTRO LETRAS -->
-<div class="filtros" id="filtroLetras"></div>
-
+<div id="status">Cargando catálogo...</div>
 <div id="galeria" class="grid"></div>
-
-<div id="paginacion">
-<button id="prev">⬅</button>
-<span id="infoPagina"></span>
-<button id="next">➡</button>
-</div>
 
 </div>
 
@@ -149,20 +124,32 @@ document.addEventListener("DOMContentLoaded",function(){
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
 
 let datosOriginal=[];
-let datos=[];
 let favoritos=JSON.parse(localStorage.getItem('favoritos'))||[];
-let paginaActual=1;
-const porPagina=20;
 
 const galeria=document.getElementById('galeria');
 const galeriaFav=document.getElementById('galeriaFav');
 const contadorFav=document.getElementById('contadorFav');
-const infoPagina=document.getElementById('infoPagina');
+const toggleFav=document.getElementById('toggleFav');
 
 function transformarUrlDrive(url){
 const regex=/\/file\/d\/([a-zA-Z0-9_-]+)\//;
 const match=url?url.match(regex):null;
 return match?`https://drive.google.com/uc?export=view&id=${match[1]}`:url;
+}
+
+function renderGaleria(lista){
+galeria.innerHTML='';
+lista.forEach(item=>{
+const card=document.createElement('div');
+card.className='card';
+card.innerHTML=`
+<img src="${item.imagen}" loading="lazy">
+<h3>${item.nombre}</h3>
+<button class="btn-fav ${favoritos.find(f=>f.imagen===item.imagen)?'saved':''}">❤️</button>
+`;
+card.querySelector('.btn-fav').onclick=(e)=>{e.stopPropagation();guardarFav(item);};
+galeria.appendChild(card);
+});
 }
 
 function renderFav(){
@@ -184,45 +171,23 @@ favoritos=favoritos.filter(f=>f.imagen!==item.imagen);
 }
 localStorage.setItem('favoritos',JSON.stringify(favoritos));
 renderFav();
-renderPagina();
+renderGaleria(datosOriginal);
 }
 
-function renderPagina(){
-galeria.innerHTML='';
-let inicio=(paginaActual-1)*porPagina;
-let fin=inicio+porPagina;
-let paginaDatos=datos.slice(inicio,fin);
-
-paginaDatos.forEach(item=>{
-const card=document.createElement('div');
-card.className='card';
-card.innerHTML=`
-<img src="${item.imagen}" loading="lazy">
-<h3>${item.nombre}</h3>
-<button class="btn-fav ${favoritos.find(f=>f.imagen===item.imagen)?'saved':''}">❤️</button>
-`;
-card.querySelector('.btn-fav').onclick=(e)=>{e.stopPropagation();guardarFav(item);};
-galeria.appendChild(card);
-});
-
-let totalPaginas=Math.ceil(datos.length/porPagina);
-infoPagina.textContent="Página "+paginaActual+" de "+totalPaginas;
+toggleFav.onclick=function(){
+if(galeriaFav.style.display==="none"){
+galeriaFav.style.display="grid";
+this.textContent="Ocultar ▲";
+}else{
+galeriaFav.style.display="none";
+this.textContent="Mostrar ▼";
 }
-
-document.getElementById('prev').onclick=function(){
-if(paginaActual>1){paginaActual--;renderPagina();}
-};
-
-document.getElementById('next').onclick=function(){
-let totalPaginas=Math.ceil(datos.length/porPagina);
-if(paginaActual<totalPaginas){paginaActual++;renderPagina();}
 };
 
 document.getElementById('buscador').addEventListener('input',function(e){
 const term=e.target.value.toLowerCase();
-datos=datosOriginal.filter(d=>d.nombre.toLowerCase().includes(term));
-paginaActual=1;
-renderPagina();
+const filtrados=datosOriginal.filter(d=>d.nombre.toLowerCase().includes(term));
+renderGaleria(filtrados);
 });
 
 document.getElementById('enviarFav').onclick=function(){
@@ -231,20 +196,6 @@ let mensaje="Hola! Me interesan estos diseños:%0A%0A";
 favoritos.forEach(f=>{mensaje+=f.nombre+"%0A";});
 window.open("https://wa.me/56954180844?text="+mensaje);
 };
-
-function crearFiltroLetras(){
-const cont=document.getElementById('filtroLetras');
-"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(letra=>{
-const btn=document.createElement('button');
-btn.textContent=letra;
-btn.onclick=function(){
-datos=datosOriginal.filter(d=>d.nombre.toUpperCase().startsWith(letra));
-paginaActual=1;
-renderPagina();
-};
-cont.appendChild(btn);
-});
-}
 
 Papa.parse(CSV_URL,{
 download:true,
@@ -259,9 +210,8 @@ imagen:transformarUrlDrive(d.Imagen)
 }))
 .sort((a,b)=>a.nombre.localeCompare(b.nombre));
 
-datos=[...datosOriginal];
-crearFiltroLetras();
-renderPagina();
+document.getElementById('status').style.display='none';
+renderGaleria(datosOriginal);
 renderFav();
 }
 });
