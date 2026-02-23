@@ -27,6 +27,7 @@ border-radius:10px;
 box-shadow:0 2px 10px rgba(0,0,0,0.1);
 position:relative;
 transition:0.2s;
+cursor:pointer;
 }
 
 .card:hover{transform:scale(1.03);}
@@ -107,6 +108,26 @@ cursor:pointer;
 font-size:14px;
 display:block;
 }
+
+/* MODAL ZOOM */
+#modalImagen{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.85);
+justify-content:center;
+align-items:center;
+z-index:9999;
+cursor:zoom-out;
+}
+#modalImagen img{
+max-width:90%;
+max-height:90%;
+border-radius:10px;
+box-shadow:0 4px 15px rgba(0,0,0,0.5);
+transition:transform 0.3s;
+cursor:grab;
+}
 </style>
 </head>
 
@@ -139,6 +160,11 @@ display:block;
 <div id="galeria" class="grid"></div>
 <button id="btnCargarMas" style="display:none;">Cargar más diseños</button>
 
+<!-- MODAL ZOOM -->
+<div id="modalImagen">
+<img id="imagenModal" src="">
+</div>
+
 </div>
 
 <script>
@@ -157,18 +183,20 @@ const contadorFav=document.getElementById('contadorFav');
 const toggleFav=document.getElementById('toggleFav');
 const btnCargarMas=document.getElementById('btnCargarMas');
 
+const modal=document.getElementById('modalImagen');
+const modalImg=document.getElementById('imagenModal');
+
 function transformarUrlDrive(url){
 const regex=/\/file\/d\/([a-zA-Z0-9_-]+)\//;
 const match=url?url.match(regex):null;
 return match?`https://drive.google.com/uc?export=view&id=${match[1]}`:url;
 }
 
-// eliminar duplicados por URL archivo
 function eliminarDuplicados(array){
 return array.filter((item,index,self)=>self.findIndex(t=>t.urlArchivo===item.urlArchivo)===index);
 }
 
-// renderizar galería (solo desde indexCargar a indexCargar+CARGAR_POR)
+// render galería con zoom
 function renderGaleria(){
 galeria.innerHTML='';
 let listaMostrar = datosOriginal.slice(0,indexCargar);
@@ -180,13 +208,14 @@ card.innerHTML=`
 <h3>${item.nombre}</h3>
 <button class="btn-fav ${favoritos.find(f=>f.urlArchivo===item.urlArchivo)?'saved':''}">❤️</button>
 `;
+const imgElem = card.querySelector('img');
+imgElem.onclick=()=>abrirModal(item.urlMini);
 card.querySelector('.btn-fav').onclick=(e)=>{e.stopPropagation();guardarFav(item);};
 galeria.appendChild(card);
 });
 btnCargarMas.style.display = (indexCargar < datosOriginal.length) ? 'block' : 'none';
 }
 
-// renderizar favoritos
 function renderFav(){
 galeriaFav.innerHTML='';
 contadorFav.textContent=favoritos.length+" diseños seleccionados";
@@ -198,12 +227,12 @@ card.innerHTML=`
 <h3>${item.nombre}</h3>
 <button class="btn-delete">Eliminar</button>
 `;
+card.querySelector('img').onclick=()=>abrirModal(item.urlMini);
 card.querySelector('.btn-delete').onclick=()=>{eliminarFav(item);};
 galeriaFav.appendChild(card);
 });
 }
 
-// guardar/eliminar favorito al dar clic en ❤️
 function guardarFav(item){
 if(!favoritos.find(f=>f.urlArchivo===item.urlArchivo)){
 favoritos.push(item);
@@ -215,7 +244,6 @@ renderFav();
 renderGaleria();
 }
 
-// eliminar favorito desde sección de favoritos
 function eliminarFav(item){
 favoritos=favoritos.filter(f=>f.urlArchivo!==item.urlArchivo);
 localStorage.setItem('favoritos',JSON.stringify(favoritos));
@@ -248,11 +276,17 @@ favoritos.forEach(f=>{mensaje+=f.nombre+": "+f.urlArchivo+"%0A";});
 window.open("https://wa.me/56954180844?text="+mensaje);
 };
 
-// botón cargar más
 btnCargarMas.onclick = function(){
 indexCargar += CARGAR_POR;
 renderGaleria();
 };
+
+// MODAL ZOOM
+function abrirModal(url){
+modal.style.display='flex';
+modalImg.src=url;
+}
+modal.addEventListener('click',()=>{modal.style.display='none'; modalImg.src='';});
 
 Papa.parse(CSV_URL,{
 download:true,
