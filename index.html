@@ -16,7 +16,7 @@ header{background:#2c3e50;color:white;padding:30px;position:relative;}
 
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
 gap:20px;
 }
 
@@ -33,7 +33,7 @@ transition:0.2s;
 
 .card img{
 width:100%;
-height:180px;
+height:250px;
 object-fit:contain;
 }
 
@@ -84,6 +84,7 @@ padding:5px 10px;
 border-radius:20px;
 font-size:14px;
 }
+
 .btn-delete{
 background:#e74c3c;
 color:white;
@@ -93,6 +94,18 @@ border-radius:5px;
 cursor:pointer;
 margin-top:5px;
 font-size:12px;
+}
+
+#btnCargarMas{
+padding:10px 20px;
+margin:20px auto;
+background:#2c3e50;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-size:14px;
+display:block;
 }
 </style>
 </head>
@@ -124,6 +137,7 @@ font-size:12px;
 
 <div id="status">Cargando catálogo...</div>
 <div id="galeria" class="grid"></div>
+<button id="btnCargarMas" style="display:none;">Cargar más diseños</button>
 
 </div>
 
@@ -134,11 +148,14 @@ const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvu
 
 let datosOriginal=[];
 let favoritos=JSON.parse(localStorage.getItem('favoritos'))||[];
+let indexCargar=0;
+const CARGAR_POR = 20;
 
 const galeria=document.getElementById('galeria');
 const galeriaFav=document.getElementById('galeriaFav');
 const contadorFav=document.getElementById('contadorFav');
 const toggleFav=document.getElementById('toggleFav');
+const btnCargarMas=document.getElementById('btnCargarMas');
 
 function transformarUrlDrive(url){
 const regex=/\/file\/d\/([a-zA-Z0-9_-]+)\//;
@@ -151,9 +168,11 @@ function eliminarDuplicados(array){
 return array.filter((item,index,self)=>self.findIndex(t=>t.urlArchivo===item.urlArchivo)===index);
 }
 
-function renderGaleria(lista){
+// renderizar galería (solo desde indexCargar a indexCargar+CARGAR_POR)
+function renderGaleria(){
 galeria.innerHTML='';
-lista.forEach(item=>{
+let listaMostrar = datosOriginal.slice(0,indexCargar);
+listaMostrar.forEach(item=>{
 const card=document.createElement('div');
 card.className='card';
 card.innerHTML=`
@@ -164,8 +183,10 @@ card.innerHTML=`
 card.querySelector('.btn-fav').onclick=(e)=>{e.stopPropagation();guardarFav(item);};
 galeria.appendChild(card);
 });
+btnCargarMas.style.display = (indexCargar < datosOriginal.length) ? 'block' : 'none';
 }
 
+// renderizar favoritos
 function renderFav(){
 galeriaFav.innerHTML='';
 contadorFav.textContent=favoritos.length+" diseños seleccionados";
@@ -191,7 +212,7 @@ favoritos=favoritos.filter(f=>f.urlArchivo!==item.urlArchivo);
 }
 localStorage.setItem('favoritos',JSON.stringify(favoritos));
 renderFav();
-renderGaleria(datosOriginal);
+renderGaleria();
 }
 
 // eliminar favorito desde sección de favoritos
@@ -199,7 +220,7 @@ function eliminarFav(item){
 favoritos=favoritos.filter(f=>f.urlArchivo!==item.urlArchivo);
 localStorage.setItem('favoritos',JSON.stringify(favoritos));
 renderFav();
-renderGaleria(datosOriginal);
+renderGaleria();
 }
 
 toggleFav.onclick=function(){
@@ -215,7 +236,9 @@ this.textContent="Mostrar ▼";
 document.getElementById('buscador').addEventListener('input',function(e){
 const term=e.target.value.toLowerCase();
 const filtrados=datosOriginal.filter(d=>d.nombre.toLowerCase().includes(term));
-renderGaleria(filtrados);
+datosOriginal = eliminarDuplicados(filtrados);
+indexCargar = Math.min(CARGAR_POR, datosOriginal.length);
+renderGaleria();
 });
 
 document.getElementById('enviarFav').onclick=function(){
@@ -223,6 +246,12 @@ if(favoritos.length===0)return alert("No hay favoritos");
 let mensaje="Hola! Me interesan estos diseños:%0A%0A";
 favoritos.forEach(f=>{mensaje+=f.nombre+": "+f.urlArchivo+"%0A";});
 window.open("https://wa.me/56954180844?text="+mensaje);
+};
+
+// botón cargar más
+btnCargarMas.onclick = function(){
+indexCargar += CARGAR_POR;
+renderGaleria();
 };
 
 Papa.parse(CSV_URL,{
@@ -239,9 +268,9 @@ urlArchivo: d["URL Archivo"]
 }));
 
 datosOriginal = eliminarDuplicados(datosOriginal);
-
+indexCargar = Math.min(CARGAR_POR, datosOriginal.length);
 document.getElementById('status').style.display='none';
-renderGaleria(datosOriginal);
+renderGaleria();
 renderFav();
 }
 });
