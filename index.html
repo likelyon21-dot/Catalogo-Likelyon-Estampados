@@ -230,43 +230,80 @@ function renderGaleria(){
 galeria.innerHTML='';
 let listaMostrar = datosOriginal.slice(0,indexCargar);
 listaMostrar.forEach(item=>{
-const card=document.createElement('div');
-card.className='card';
-card.innerHTML=`
-<img src="${item.urlMini}" loading="lazy">
-<h3>${item.nombre}</h3>
-<button class="btn-fav ${favoritos.find(f=>f.urlArchivo===item.urlArchivo)?'saved':''}">❤️</button>
-`;
-const imgElem = card.querySelector('img');
-imgElem.onclick=()=>abrirModal(item.urlMini);
-card.querySelector('.btn-fav').onclick=(e)=>{e.stopPropagation();guardarFav(item);};
-galeria.appendChild(card);
+    const card=document.createElement('div');
+    card.className='card';
+
+    const imgElem=document.createElement('img');
+    imgElem.src=item.urlMini;
+    imgElem.loading="lazy";
+    imgElem.alt=item.nombre;
+
+    // Manejo de error en móvil
+    imgElem.onerror=function(){
+        this.src='https://via.placeholder.com/200x200?text=Imagen+no+disponible';
+        this.style.objectFit='contain';
+    }
+
+    imgElem.onclick=()=>abrirModal(item.urlMini);
+
+    const btnFav=document.createElement('button');
+    btnFav.className='btn-fav '+(favoritos.find(f=>f.urlArchivo===item.urlArchivo)?'saved':'');
+    btnFav.textContent='❤️';
+    btnFav.onclick=(e)=>{ e.stopPropagation(); guardarFav(item); };
+
+    const titulo=document.createElement('h3');
+    titulo.textContent=item.nombre;
+
+    card.appendChild(imgElem);
+    card.appendChild(titulo);
+    card.appendChild(btnFav);
+
+    galeria.appendChild(card);
 });
-btnCargarMas.style.display = (indexCargar < datosOriginal.length) ? 'block' : 'none';
+
+btnCargarMas.style.display=(indexCargar<datosOriginal.length)?'block':'none';
 }
 
 function renderFav(){
 galeriaFav.innerHTML='';
 contadorFav.textContent=favoritos.length+" diseños seleccionados";
 favoritos.forEach(item=>{
-const card=document.createElement('div');
-card.className='card';
-card.innerHTML=`
-<img src="${item.urlMini}">
-<h3>${item.nombre}</h3>
-<button class="btn-delete">Eliminar</button>
-`;
-card.querySelector('img').onclick=()=>abrirModal(item.urlMini);
-card.querySelector('.btn-delete').onclick=()=>{eliminarFav(item);};
-galeriaFav.appendChild(card);
+    const card=document.createElement('div');
+    card.className='card';
+
+    const imgElem=document.createElement('img');
+    imgElem.src=item.urlMini;
+    imgElem.alt=item.nombre;
+
+    // Manejo de error
+    imgElem.onerror=function(){
+        this.src='https://via.placeholder.com/200x200?text=Imagen+no+disponible';
+        this.style.objectFit='contain';
+    }
+
+    imgElem.onclick=()=>abrirModal(item.urlMini);
+
+    const titulo=document.createElement('h3');
+    titulo.textContent=item.nombre;
+
+    const btnDelete=document.createElement('button');
+    btnDelete.className='btn-delete';
+    btnDelete.textContent='Eliminar';
+    btnDelete.onclick=()=>{ eliminarFav(item); };
+
+    card.appendChild(imgElem);
+    card.appendChild(titulo);
+    card.appendChild(btnDelete);
+
+    galeriaFav.appendChild(card);
 });
 }
 
 function guardarFav(item){
 if(!favoritos.find(f=>f.urlArchivo===item.urlArchivo)){
-favoritos.push(item);
+    favoritos.push(item);
 }else{
-favoritos=favoritos.filter(f=>f.urlArchivo!==item.urlArchivo);
+    favoritos=favoritos.filter(f=>f.urlArchivo!==item.urlArchivo);
 }
 localStorage.setItem('favoritos',JSON.stringify(favoritos));
 renderFav();
@@ -282,11 +319,11 @@ renderGaleria();
 
 toggleFav.onclick=function(){
 if(galeriaFav.style.display==="none"){
-galeriaFav.style.display="grid";
-this.textContent="Ocultar ▲";
+    galeriaFav.style.display="grid";
+    this.textContent="Ocultar ▲";
 }else{
-galeriaFav.style.display="none";
-this.textContent="Mostrar ▼";
+    galeriaFav.style.display="none";
+    this.textContent="Mostrar ▼";
 }
 };
 
@@ -331,6 +368,7 @@ else escala=Math.max(1,escala-0.1);
 modalImg.style.transform=`scale(${escala})`;
 });
 
+// Cargar datos CSV
 Papa.parse(CSV_URL,{
 download:true,
 header:true,
@@ -339,11 +377,10 @@ complete:function(res){
 datosOriginal=res.data
 .filter(d=>d["Nombre del Diseño"] && d["URL Miniatura"] && d["URL Archivo"])
 .map(d=>({
-nombre: d["Nombre del Diseño"],
-urlMini: transformarUrlDrive(d["URL Miniatura"]),
-urlArchivo: d["URL Archivo"]
+nombre:d["Nombre del Diseño"],
+urlMini:transformarUrlDrive(d["URL Miniatura"]),
+urlArchivo:d["URL Archivo"]
 }));
-
 datosOriginal = eliminarDuplicados(datosOriginal);
 indexCargar = Math.min(CARGAR_POR, datosOriginal.length);
 document.getElementById('status').style.display='none';
