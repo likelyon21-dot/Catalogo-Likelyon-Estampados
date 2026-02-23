@@ -8,156 +8,29 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
 <style>
-body {
-    font-family:'Segoe UI',sans-serif;
-    margin:0;
-    background:#f4f4f9;
-    text-align:center;
-}
-header {
-    background:#2c3e50;
-    color:white;
-    padding:20px;
-    position:relative;
-}
-.logo {
-    max-width:180px;
-    background:white;
-    padding:10px;
-    border-radius:15px;
-    margin-top:10px;
-}
-.container {
-    max-width:1100px;
-    margin:20px auto;
-    padding:10px 20px;
-}
-.search-bar {
-    width:100%;
-    max-width:500px;
-    padding:12px;
-    border-radius:25px;
-    border:1px solid #ccc;
-    margin-bottom:20px;
-    box-sizing:border-box;
-}
+body { font-family:'Segoe UI',sans-serif; margin:0; background:#f4f4f9; text-align:center; }
+header { background:#2c3e50; color:white; padding:20px; position:relative; }
+.logo { max-width:180px; background:white; padding:10px; border-radius:15px; margin-top:10px; }
+.container { max-width:1100px; margin:20px auto; padding:10px 20px; }
+.search-bar { width:100%; max-width:500px; padding:12px; border-radius:25px; border:1px solid #ccc; margin-bottom:20px; box-sizing:border-box; }
 
-.grid {
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:15px;
-}
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:15px; }
 
-.card {
-    background:white;
-    padding:10px;
-    border-radius:10px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-    position:relative;
-    transition:0.2s;
-    cursor:pointer;
-}
-
+.card { background:white; padding:10px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); position:relative; transition:0.2s; cursor:pointer; }
 .card:hover{transform:scale(1.03);}
-
-.card img {
-    width:100%;
-    max-height:200px;
-    height:auto;
-    object-fit:contain;
-}
-
-.card h3 {
-    font-size:14px;
-    margin:8px 0;
-    text-transform:uppercase;
-}
-
-.btn-fav {
-    position:absolute;
-    top:8px;
-    right:8px;
-    background:#ff4757;
-    color:white;
-    border:none;
-    padding:5px 7px;
-    border-radius:50%;
-    cursor:pointer;
-}
-
+.card img { width:100%; max-height:200px; height:auto; object-fit:contain; }
+.card h3 { font-size:14px; margin:8px 0; text-transform:uppercase; }
+.btn-fav { position:absolute; top:8px; right:8px; background:#ff4757; color:white; border:none; padding:5px 7px; border-radius:50%; cursor:pointer; }
 .btn-fav.saved { background:#2ecc71; }
-
-#favoritos {
-    background:white;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-    margin-bottom:20px;
-}
-
-#toggleFav {
-    background:#2c3e50;
-    color:white;
-    border:none;
-    padding:6px 12px;
-    border-radius:6px;
-    cursor:pointer;
-    margin-left:10px;
-}
-
-#contadorVisitas {
-    position:absolute;
-    top:10px;
-    right:15px;
-    background:#34495e;
-    padding:5px 10px;
-    border-radius:20px;
-    font-size:14px;
-}
-
-.btn-delete {
-    background:#e74c3c;
-    color:white;
-    border:none;
-    padding:3px 6px;
-    border-radius:5px;
-    cursor:pointer;
-    margin-top:5px;
-    font-size:12px;
-}
-
-#btnCargarMas {
-    padding:10px 20px;
-    margin:15px auto;
-    background:#2c3e50;
-    color:white;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:14px;
-    display:block;
-}
+#favoritos { background:white; padding:15px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); margin-bottom:20px; }
+#toggleFav { background:#2c3e50; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-left:10px; }
+#contadorVisitas { position:absolute; top:10px; right:15px; background:#34495e; padding:5px 10px; border-radius:20px; font-size:14px; }
+.btn-delete { background:#e74c3c; color:white; border:none; padding:3px 6px; border-radius:5px; cursor:pointer; margin-top:5px; font-size:12px; }
+#btnCargarMas { padding:10px 20px; margin:15px auto; background:#2c3e50; color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; display:block; }
 
 /* MODAL ZOOM */
-#modalImagen {
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.85);
-    justify-content:center;
-    align-items:center;
-    z-index:9999;
-    cursor:zoom-out;
-}
-#modalImagen img {
-    max-width:90%;
-    max-height:90%;
-    border-radius:10px;
-    box-shadow:0 4px 15px rgba(0,0,0,0.5);
-    transition:transform 0.2s;
-    cursor:grab;
-    touch-action: none;
-}
+#modalImagen { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:9999; cursor:zoom-out; overflow:hidden; }
+#modalImagen img { border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.5); transition:transform 0.2s; cursor:grab; touch-action: none; max-width:100%; max-height:100%; }
 </style>
 </head>
 <body>
@@ -172,12 +45,8 @@ header {
 
 <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño...">
 
-<!-- FAVORITOS COLAPSABLE -->
 <div id="favoritos">
-<h3>
-❤️ Mis Favoritos
-<button id="toggleFav">Mostrar ▼</button>
-</h3>
+<h3>❤️ Mis Favoritos <button id="toggleFav">Mostrar ▼</button></h3>
 <p id="contadorFav">0 diseños seleccionados</p>
 <div id="galeriaFav" class="grid" style="display:none;"></div>
 <button id="enviarFav" style="background:#25d366;color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;margin-top:10px;">
@@ -189,10 +58,7 @@ header {
 <div id="galeria" class="grid"></div>
 <button id="btnCargarMas" style="display:none;">Cargar más diseños</button>
 
-<!-- MODAL ZOOM -->
-<div id="modalImagen">
-<img id="imagenModal" src="">
-</div>
+<div id="modalImagen"><img id="imagenModal"></div>
 
 </div>
 
@@ -200,11 +66,8 @@ header {
 document.addEventListener("DOMContentLoaded",function(){
 
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
-
-let datosOriginal=[];
-let favoritos=JSON.parse(localStorage.getItem('favoritos'))||[];
-let indexCargar=0;
-const CARGAR_POR = 20;
+let datosOriginal=[], favoritos=JSON.parse(localStorage.getItem('favoritos'))||[], indexCargar=0;
+const CARGAR_POR=20;
 
 const galeria=document.getElementById('galeria');
 const galeriaFav=document.getElementById('galeriaFav');
@@ -214,185 +77,118 @@ const btnCargarMas=document.getElementById('btnCargarMas');
 
 const modal=document.getElementById('modalImagen');
 const modalImg=document.getElementById('imagenModal');
-let escala=1;
+let escala=1, lastX=0, lastY=0, posX=0, posY=0, dragging=false;
 
+// --- FUNCIÓN CORREGIDA PARA DRIVE ---
 function transformarUrlDrive(url){
-const regex=/\/file\/d\/([a-zA-Z0-9_-]+)\//;
-const match=url?url.match(regex):null;
-return match?`https://drive.google.com/uc?export=view&id=${match[1]}`:url;
+    if(!url) return url;
+    let fileId=null;
+    // /file/d/ID/
+    let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if(match) fileId=match[1];
+    else {
+        // thumbnail?id=ID
+        match = url.match(/id=([a-zA-Z0-9_-]+)/);
+        if(match) fileId=match[1];
+    }
+    if(fileId) return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    return url;
 }
 
 function eliminarDuplicados(array){
-return array.filter((item,index,self)=>self.findIndex(t=>t.urlArchivo===item.urlArchivo)===index);
+    return array.filter((item,index,self)=>self.findIndex(t=>t.urlArchivo===item.urlArchivo)===index);
 }
 
 function renderGaleria(){
-galeria.innerHTML='';
-let listaMostrar = datosOriginal.slice(0,indexCargar);
-listaMostrar.forEach(item=>{
-    const card=document.createElement('div');
-    card.className='card';
-
-    const imgElem=document.createElement('img');
-    imgElem.src=item.urlMini;
-    imgElem.loading="lazy";
-    imgElem.alt=item.nombre;
-
-    // Manejo de error en móvil
-    imgElem.onerror=function(){
-        this.src='https://via.placeholder.com/200x200?text=Imagen+no+disponible';
-        this.style.objectFit='contain';
-    }
-
-    imgElem.onclick=()=>abrirModal(item.urlMini);
-
-    const btnFav=document.createElement('button');
-    btnFav.className='btn-fav '+(favoritos.find(f=>f.urlArchivo===item.urlArchivo)?'saved':'');
-    btnFav.textContent='❤️';
-    btnFav.onclick=(e)=>{ e.stopPropagation(); guardarFav(item); };
-
-    const titulo=document.createElement('h3');
-    titulo.textContent=item.nombre;
-
-    card.appendChild(imgElem);
-    card.appendChild(titulo);
-    card.appendChild(btnFav);
-
-    galeria.appendChild(card);
-});
-
-btnCargarMas.style.display=(indexCargar<datosOriginal.length)?'block':'none';
+    galeria.innerHTML='';
+    let listaMostrar=datosOriginal.slice(0,indexCargar);
+    listaMostrar.forEach(item=>{
+        const card=document.createElement('div'); card.className='card';
+        const img=document.createElement('img'); img.src=item.urlMini; img.loading="lazy"; img.alt=item.nombre;
+        img.onerror=function(){ this.src='https://via.placeholder.com/200x200?text=Imagen+no+disponible'; this.style.objectFit='contain'; }
+        img.onclick=()=>abrirModal(item.urlMini);
+        const btnFav=document.createElement('button');
+        btnFav.className='btn-fav '+(favoritos.find(f=>f.urlArchivo===item.urlArchivo)?'saved':'');
+        btnFav.textContent='❤️'; btnFav.onclick=(e)=>{ e.stopPropagation(); guardarFav(item); }
+        const titulo=document.createElement('h3'); titulo.textContent=item.nombre;
+        card.appendChild(img); card.appendChild(titulo); card.appendChild(btnFav);
+        galeria.appendChild(card);
+    });
+    btnCargarMas.style.display=(indexCargar<datosOriginal.length)?'block':'none';
 }
 
 function renderFav(){
-galeriaFav.innerHTML='';
-contadorFav.textContent=favoritos.length+" diseños seleccionados";
-favoritos.forEach(item=>{
-    const card=document.createElement('div');
-    card.className='card';
-
-    const imgElem=document.createElement('img');
-    imgElem.src=item.urlMini;
-    imgElem.alt=item.nombre;
-
-    // Manejo de error
-    imgElem.onerror=function(){
-        this.src='https://via.placeholder.com/200x200?text=Imagen+no+disponible';
-        this.style.objectFit='contain';
-    }
-
-    imgElem.onclick=()=>abrirModal(item.urlMini);
-
-    const titulo=document.createElement('h3');
-    titulo.textContent=item.nombre;
-
-    const btnDelete=document.createElement('button');
-    btnDelete.className='btn-delete';
-    btnDelete.textContent='Eliminar';
-    btnDelete.onclick=()=>{ eliminarFav(item); };
-
-    card.appendChild(imgElem);
-    card.appendChild(titulo);
-    card.appendChild(btnDelete);
-
-    galeriaFav.appendChild(card);
-});
+    galeriaFav.innerHTML=''; contadorFav.textContent=favoritos.length+" diseños seleccionados";
+    favoritos.forEach(item=>{
+        const card=document.createElement('div'); card.className='card';
+        const img=document.createElement('img'); img.src=item.urlMini; img.alt=item.nombre;
+        img.onerror=function(){ this.src='https://via.placeholder.com/200x200?text=Imagen+no+disponible'; this.style.objectFit='contain'; }
+        img.onclick=()=>abrirModal(item.urlMini);
+        const titulo=document.createElement('h3'); titulo.textContent=item.nombre;
+        const btnDel=document.createElement('button'); btnDel.className='btn-delete'; btnDel.textContent='Eliminar'; btnDel.onclick=()=>{ eliminarFav(item); }
+        card.appendChild(img); card.appendChild(titulo); card.appendChild(btnDel);
+        galeriaFav.appendChild(card);
+    });
 }
 
 function guardarFav(item){
-if(!favoritos.find(f=>f.urlArchivo===item.urlArchivo)){
-    favoritos.push(item);
-}else{
-    favoritos=favoritos.filter(f=>f.urlArchivo!==item.urlArchivo);
+    if(!favoritos.find(f=>f.urlArchivo===item.urlArchivo)) favoritos.push(item);
+    else favoritos=favoritos.filter(f=>f.urlArchivo!==item.urlArchivo);
+    localStorage.setItem('favoritos',JSON.stringify(favoritos));
+    renderFav(); renderGaleria();
 }
-localStorage.setItem('favoritos',JSON.stringify(favoritos));
-renderFav();
-renderGaleria();
-}
-
-function eliminarFav(item){
-favoritos=favoritos.filter(f=>f.urlArchivo!==item.urlArchivo);
-localStorage.setItem('favoritos',JSON.stringify(favoritos));
-renderFav();
-renderGaleria();
-}
+function eliminarFav(item){ favoritos=favoritos.filter(f=>f.urlArchivo!==item.urlArchivo); localStorage.setItem('favoritos',JSON.stringify(favoritos)); renderFav(); renderGaleria(); }
 
 toggleFav.onclick=function(){
-if(galeriaFav.style.display==="none"){
-    galeriaFav.style.display="grid";
-    this.textContent="Ocultar ▲";
-}else{
-    galeriaFav.style.display="none";
-    this.textContent="Mostrar ▼";
-}
+    if(galeriaFav.style.display==="none"){ galeriaFav.style.display="grid"; this.textContent="Ocultar ▲"; }
+    else { galeriaFav.style.display="none"; this.textContent="Mostrar ▼"; }
 };
 
 document.getElementById('buscador').addEventListener('input',function(e){
-const term=e.target.value.toLowerCase();
-const filtrados=datosOriginal.filter(d=>d.nombre.toLowerCase().includes(term));
-datosOriginal = eliminarDuplicados(filtrados);
-indexCargar = Math.min(CARGAR_POR, datosOriginal.length);
-renderGaleria();
+    const term=e.target.value.toLowerCase();
+    const filtrados=datosOriginal.filter(d=>d.nombre.toLowerCase().includes(term));
+    datosOriginal=eliminarDuplicados(filtrados); indexCargar=Math.min(CARGAR_POR, datosOriginal.length); renderGaleria();
 });
 
 document.getElementById('enviarFav').onclick=function(){
-if(favoritos.length===0)return alert("No hay favoritos");
-let mensaje="Hola! Me interesan estos diseños:%0A%0A";
-favoritos.forEach(f=>{mensaje+=f.nombre+": "+f.urlArchivo+"%0A";});
-window.open("https://wa.me/56954180844?text="+mensaje);
+    if(favoritos.length===0)return alert("No hay favoritos");
+    let mensaje="Hola! Me interesan estos diseños:%0A%0A";
+    favoritos.forEach(f=>{mensaje+=f.nombre+": "+f.urlArchivo+"%0A";});
+    window.open("https://wa.me/56954180844?text="+mensaje);
 };
 
-btnCargarMas.onclick = function(){
-indexCargar += CARGAR_POR;
-renderGaleria();
-};
+btnCargarMas.onclick=function(){ indexCargar+=CARGAR_POR; renderGaleria(); }
 
-// MODAL ZOOM con scroll y touch
+// --- MODAL CON ZOOM Y ARRASTRE ---
 function abrirModal(url){
-modal.style.display='flex';
-modalImg.src=url;
-escala=1;
-modalImg.style.transform=`scale(${escala})`;
+    modal.style.display='flex'; modalImg.src=url; escala=1; posX=0; posY=0; modalImg.style.transform=`translate(0px,0px) scale(1)`;
 }
 
-modal.addEventListener('click',()=>{
-modal.style.display='none';
-modalImg.src='';
-escala=1;
-});
+modal.addEventListener('click',()=>{ modal.style.display='none'; modalImg.src=''; escala=1; posX=0; posY=0; });
 
-modalImg.addEventListener('wheel',(e)=>{
-e.preventDefault();
-if(e.deltaY<0) escala +=0.1;
-else escala=Math.max(1,escala-0.1);
-modalImg.style.transform=`scale(${escala})`;
-});
+modalImg.addEventListener('wheel',e=>{ e.preventDefault(); escala= e.deltaY<0 ? escala+0.1 : Math.max(1,escala-0.1); modalImg.style.transform=`translate(${posX}px,${posY}px) scale(${escala})`; });
 
-// Cargar datos CSV
-Papa.parse(CSV_URL,{
-download:true,
-header:true,
-skipEmptyLines:true,
-complete:function(res){
-datosOriginal=res.data
-.filter(d=>d["Nombre del Diseño"] && d["URL Miniatura"] && d["URL Archivo"])
-.map(d=>({
-nombre:d["Nombre del Diseño"],
-urlMini:transformarUrlDrive(d["URL Miniatura"]),
-urlArchivo:d["URL Archivo"]
-}));
-datosOriginal = eliminarDuplicados(datosOriginal);
-indexCargar = Math.min(CARGAR_POR, datosOriginal.length);
-document.getElementById('status').style.display='none';
-renderGaleria();
-renderFav();
-}
-});
+modalImg.addEventListener('pointerdown',e=>{ dragging=true; lastX=e.clientX; lastY=e.clientY; modalImg.setPointerCapture(e.pointerId); });
+modalImg.addEventListener('pointermove',e=>{ if(dragging){ let dx=e.clientX-lastX, dy=e.clientY-lastY; posX+=dx; posY+=dy; modalImg.style.transform=`translate(${posX}px,${posY}px) scale(${escala})`; lastX=e.clientX; lastY=e.clientY; }});
+modalImg.addEventListener('pointerup',e=>{ dragging=false; modalImg.releasePointerCapture(e.pointerId); });
+modalImg.addEventListener('pointercancel',()=>{ dragging=false; });
 
-// contador de visitas
-fetch('https://api.countapi.xyz/hit/likelyon-estampados/visitas')
-.then(r=>r.json())
-.then(d=>{document.getElementById('contadorVisitas').textContent="Visitas: "+d.value;});
+// --- CARGAR CSV ---
+Papa.parse(CSV_URL,{download:true,header:true,skipEmptyLines:true,complete:function(res){
+    datosOriginal=res.data.filter(d=>d["Nombre del Diseño"] && d["URL Miniatura"] && d["URL Archivo"])
+    .map(d=>({
+        nombre:d["Nombre del Diseño"],
+        urlMini:transformarUrlDrive(d["URL Miniatura"]),
+        urlArchivo:transformarUrlDrive(d["URL Archivo"])
+    }));
+    datosOriginal=eliminarDuplicados(datosOriginal);
+    indexCargar=Math.min(CARGAR_POR, datosOriginal.length);
+    document.getElementById('status').style.display='none';
+    renderGaleria(); renderFav();
+}});
+
+// --- CONTADOR DE VISITAS ---
+fetch('https://api.countapi.xyz/hit/likelyon-estampados/visitas').then(r=>r.json()).then(d=>{document.getElementById('contadorVisitas').textContent="Visitas: "+d.value;});
 
 });
 </script>
