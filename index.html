@@ -1,216 +1,309 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Catálogo - Likelyon Estampados</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            text-align: center;
-        }
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 30px;
-        }
-        .logo-pyme {
-            max-width: 180px;
-            background: white;
-            padding: 10px;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            margin-bottom: 15px;
-        }
-        .container {
-            max-width: 1100px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-        .search-bar {
-            width: 100%;
-            max-width: 500px;
-            padding: 12px;
-            border-radius: 25px;
-            border: 1px solid #ccc;
-            margin-bottom: 20px;
-            outline: none;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        .card {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: 0.3s;
-            cursor: pointer;
-        }
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .card img {
-            width: 100%;
-            height: 180px;
-            object-fit: contain;
-            background: #fafafa;
-            border-radius: 5px;
-            transition: 0.3s;
-        }
-        .card h3 {
-            font-size: 14px;
-            color: #333;
-            margin: 10px 0;
-            height: 35px;
-            overflow: hidden;
-            text-transform: uppercase;
-        }
-        .btn-ws {
-            background: #25d366;
-            color: white;
-            text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            display: inline-block;
-            font-size: 13px;
-            font-weight: bold;
-        }
-        /* MODAL */
-        #modalImagen {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            cursor: zoom-out;
-        }
-        #modalImagen img {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: transform 0.3s;
-            cursor: grab;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Catálogo - Likelyon Estampados</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f4f4f9;
+        margin: 0;
+        text-align: center;
+    }
+    header {
+        background-color: #2c3e50;
+        color: white;
+        padding: 30px;
+    }
+    .logo-pyme {
+        max-width: 180px;
+        background: white;
+        padding: 10px;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        margin-bottom: 15px;
+    }
+    .container {
+        max-width: 1100px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+    .search-bar {
+        width: 100%;
+        max-width: 500px;
+        padding: 12px;
+        border-radius: 25px;
+        border: 1px solid #ccc;
+        margin-bottom: 20px;
+        outline: none;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    .card {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: 0.3s;
+        cursor: pointer;
+        position: relative;
+    }
+    .card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .card img {
+        width: 100%;
+        height: 180px;
+        object-fit: contain;
+        background: #fafafa;
+        border-radius: 5px;
+        transition: 0.3s;
+    }
+    .card h3 {
+        font-size: 14px;
+        color: #333;
+        margin: 10px 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-transform: uppercase;
+    }
+    .btn-ws {
+        background: #25d366;
+        color: white;
+        text-decoration: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        display: inline-block;
+        font-size: 13px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .btn-fav {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #ff4757;
+        color: white;
+        border: none;
+        padding: 5px 8px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+    .btn-fav.saved {
+        background: #2ecc71;
+    }
+    #status {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+    /* Spinner */
+    .spinner {
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #2c3e50;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    /* MODAL */
+    #modalImagen {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        cursor: zoom-out;
+    }
+    #modalImagen img {
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        transition: transform 0.3s;
+        cursor: grab;
+    }
+    /* Sección Favoritos */
+    #favoritos {
+        margin-top: 40px;
+    }
+    #favoritos h2 {
+        margin-bottom: 15px;
+    }
+</style>
 </head>
 <body>
-    <header>
-        <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo" />
-        <h1>Likelyon Estampados</h1>
-        <p>Catálogo Oficial de Diseños</p>
-    </header>
-    <div class="container">
-        <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Moto, etc)..." />
-        <div id="status">Cargando catálogo...</div>
-        <div id="galeria" class="grid"></div>
+<header>
+    <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo" />
+    <h1>Likelyon Estampados</h1>
+    <p>Catálogo Oficial de Diseños</p>
+</header>
+
+<div class="container">
+    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Moto, etc)..." />
+    <div id="status"><div class="spinner"></div>Cargando catálogo...</div>
+    <div id="galeria" class="grid"></div>
+
+    <div id="favoritos">
+        <h2>Mis Favoritos</h2>
+        <div id="galeriaFav" class="grid"></div>
     </div>
-    <!-- MODAL -->
-    <div id="modalImagen">
-        <img id="imagenModal" src="" />
-    </div>
-    <script>
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
+</div>
 
-        let datosCatalogo = [];
+<!-- MODAL -->
+<div id="modalImagen">
+    <img id="imagenModal" src="" />
+</div>
 
-        // Función para transformar URL de Google Drive para mostrar imagen correctamente
-        function transformarUrlDrive(url) {
-            const regex = /\/file\/d\/([a-zA-Z0-9_-]+)\//;
-            const match = url.match(regex);
-            if (match && match[1]) {
-                return `https://drive.google.com/uc?export=view&id=${match[1]}`;
-            }
-            return url;
+<script>
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
+
+let datosCatalogo = [];
+let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
+
+// Transformar URLs de Google Drive
+function transformarUrlDrive(url) {
+    const regex = /\/file\/d\/([a-zA-Z0-9_-]+)\//;
+    const match = url.match(regex);
+    if (match && match[1]) {
+        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+    return url;
+}
+
+// Guardar favoritos en localStorage
+function guardarFavoritos() {
+    localStorage.setItem('favoritos', JSON.stringify(favoritos));
+    renderizarFavoritos();
+}
+
+// Cargar CSV
+function cargarDatos() {
+    Papa.parse(CSV_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+            datosCatalogo = results.data.filter(item => Object.values(item)[0]);
+            document.getElementById('status').style.display = 'none';
+            renderizar(datosCatalogo);
+            renderizarFavoritos();
         }
+    });
+}
 
-        function cargarDatos() {
-            Papa.parse(CSV_URL, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    datosCatalogo = results.data.filter(item => Object.values(item)[0]);
-                    document.getElementById('status').style.display = 'none';
-                    renderizar(datosCatalogo);
+// Renderizar galería principal
+function renderizar(lista) {
+    const galeria = document.getElementById('galeria');
+    galeria.innerHTML = '';
+
+    lista.forEach(item => {
+        const fila = Object.values(item);
+        const nombre = fila[0] || "Diseño";
+        const imagenOriginal = fila[1] || "";
+        const imagen = transformarUrlDrive(imagenOriginal);
+        if(imagen && imagen.includes('http')) {
+            const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre.toUpperCase()}\n\nVer imagen: `) + imagen;
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <img src="${imagen}" alt="${nombre}" onerror="this.src='https://via.placeholder.com/180?text=Imagen+no+disponible'">
+                <h3>${nombre}</h3>
+                <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
+                <button class="btn-fav ${favoritos.includes(imagen) ? 'saved' : ''}">❤️</button>
+            `;
+            const imgElemento = card.querySelector('img');
+            imgElemento.addEventListener('click', () => abrirModal(imagen));
+
+            // Botón favoritos
+            const btnFav = card.querySelector('.btn-fav');
+            btnFav.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if(favoritos.includes(imagen)) {
+                    favoritos = favoritos.filter(f => f !== imagen);
+                    btnFav.classList.remove('saved');
+                } else {
+                    favoritos.push(imagen);
+                    btnFav.classList.add('saved');
                 }
+                guardarFavoritos();
             });
+
+            galeria.appendChild(card);
         }
+    });
+}
 
-        function renderizar(lista) {
-            const galeria = document.getElementById('galeria');
-            galeria.innerHTML = '';
+// Renderizar favoritos
+function renderizarFavoritos() {
+    const galFav = document.getElementById('galeriaFav');
+    galFav.innerHTML = '';
+    if(favoritos.length === 0) {
+        galFav.innerHTML = "<p>No hay favoritos aún.</p>";
+        return;
+    }
+    favoritos.forEach(img => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<img src="${img}" onerror="this.src='https://via.placeholder.com/180?text=Imagen+no+disponible'">`;
+        card.querySelector('img').addEventListener('click', () => abrirModal(img));
+        galFav.appendChild(card);
+    });
+}
 
-            lista.forEach(item => {
-                const fila = Object.values(item);
-                const nombre = fila[0] || "Diseño";
-                const imagenOriginal = fila[1] || "";
-                const imagen = transformarUrlDrive(imagenOriginal);
+// Modal con zoom
+const modal = document.getElementById('modalImagen');
+const modalImg = document.getElementById('imagenModal');
+let escala = 1;
 
-                if(imagen && imagen.includes('http')) {
-                    const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre.toUpperCase()}\n\nVer imagen: `) + imagen;
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <img src="${imagen}" alt="${nombre}">
-                        <h3>${nombre}</h3>
-                        <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
-                    `;
+function abrirModal(url) {
+    modal.style.display = 'flex';
+    modalImg.src = url;
+    escala = 1;
+    modalImg.style.transform = `scale(${escala})`;
+}
 
-                    const imgElemento = card.querySelector('img');
-                    imgElemento.addEventListener('click', () => abrirModal(imagen));
+// Cierre modal
+modal.addEventListener('click', () => {
+    modal.style.display = 'none';
+    modalImg.src = '';
+});
 
-                    galeria.appendChild(card);
-                }
-            });
-        }
+// Zoom con rueda
+modalImg.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    escala = e.deltaY < 0 ? escala + 0.1 : Math.max(1, escala - 0.1);
+    modalImg.style.transform = `scale(${escala})`;
+});
 
-        // Modal con zoom
-        const modal = document.getElementById('modalImagen');
-        const modalImg = document.getElementById('imagenModal');
-        let escala = 1;
+// Buscador
+document.getElementById('buscador').oninput = function(e) {
+    const term = e.target.value.toLowerCase();
+    const filtrados = datosCatalogo.filter(item => {
+        const n = (Object.values(item)[0] || "").toLowerCase();
+        return n.includes(term);
+    });
+    renderizar(filtrados);
+};
 
-        function abrirModal(url) {
-            modal.style.display = 'flex';
-            modalImg.src = url;
-            escala = 1;
-            modalImg.style.transform = `scale(${escala})`;
-        }
-
-        // Cierre al hacer clic fuera
-        modal.addEventListener('click', () => {
-            modal.style.display = 'none';
-            modalImg.src = '';
-        });
-
-        // Zoom con rueda del mouse
-        modalImg.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            if(e.deltaY < 0) escala += 0.1;
-            else escala = Math.max(1, escala - 0.1);
-            modalImg.style.transform = `scale(${escala})`;
-        });
-
-        // Buscador
-        document.getElementById('buscador').oninput = function(e) {
-            const term = e.target.value.toLowerCase();
-            const filtrados = datosCatalogo.filter(item => {
-                const n = (Object.values(item)[0] || "").toLowerCase();
-                return n.includes(term);
-            });
-            renderizar(filtrados);
-        };
-
-        window.onload = cargarDatos;
-    </script>
+window.onload = cargarDatos;
+</script>
 </body>
 </html>
