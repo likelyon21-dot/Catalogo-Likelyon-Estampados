@@ -3,157 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogo - Likelyon Estampados</title>
+<title>Likelyon Estampados</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
 <style>
-body{
-    font-family:'Segoe UI',sans-serif;
-    background:#f4f4f9;
-    margin:0;
-    text-align:center;
-}
-
-header{
-    background:#2c3e50;
-    color:white;
-    padding:30px;
-    position:relative;
-}
-
-.logo-pyme{
-    max-width:180px;
-    background:white;
-    padding:10px;
-    border-radius:15px;
-    margin-bottom:15px;
-}
-
-.container{
-    max-width:1100px;
-    margin:20px auto;
-    padding:20px;
-}
-
-.search-bar{
-    width:100%;
-    max-width:500px;
-    padding:12px;
-    border-radius:25px;
-    border:1px solid #ccc;
-    margin-bottom:20px;
-}
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-    gap:20px;
-}
-
-.card{
-    background:white;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-    position:relative;
-    cursor:pointer;
-}
-
-.card:hover{
-    transform:scale(1.05);
-}
-
-.card img{
-    width:100%;
-    height:180px;
-    object-fit:contain;
-}
-
-.card h3{
-    font-size:14px;
-    margin:10px 0;
-    text-transform:uppercase;
-}
-
-.btn-ws{
-    background:#25d366;
-    color:white;
-    text-decoration:none;
-    padding:8px 15px;
-    border-radius:5px;
-    display:inline-block;
-    font-size:13px;
-    font-weight:bold;
-}
-
-.btn-fav{
-    position:absolute;
-    top:10px;
-    right:10px;
-    background:#ff4757;
-    color:white;
-    border:none;
-    padding:6px 8px;
-    border-radius:50%;
-    cursor:pointer;
-    font-size:14px;
-}
-
-.btn-fav.saved{
-    background:#2ecc71;
-}
-
-/* FAVORITOS */
-#favoritos{
-    margin-top:50px;
-    border-top:2px solid #ddd;
-    padding-top:20px;
-}
-
-#toggleFav{
-    background:#2c3e50;
-    color:white;
-    border:none;
-    padding:6px 12px;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-#contadorFav{
-    font-size:14px;
-    color:#666;
-    margin-bottom:15px;
-}
-
-/* MODAL */
-#modalImagen{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.85);
-    justify-content:center;
-    align-items:center;
-    z-index:9999;
-}
-
-#modalImagen img{
-    max-width:90%;
-    max-height:90%;
-    border-radius:10px;
-    transition:transform .3s;
-}
-
-/* CONTADOR VISITAS */
-#contadorVisitas{
-    position:absolute;
-    top:15px;
-    right:20px;
-    background:#34495e;
-    padding:5px 10px;
-    border-radius:20px;
-    font-weight:bold;
-}
+body{font-family:'Segoe UI',sans-serif;margin:0;background:#f4f4f9;text-align:center;}
+header{background:#2c3e50;color:white;padding:30px;position:relative;}
+.logo-pyme{max-width:180px;background:white;padding:10px;border-radius:15px;margin-bottom:15px;}
+.container{max-width:1100px;margin:20px auto;padding:20px;}
+.search-bar{width:100%;max-width:500px;padding:12px;border-radius:25px;border:1px solid #ccc;margin-bottom:20px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;}
+.card{background:white;padding:15px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);position:relative;}
+.card img{width:100%;height:180px;object-fit:contain;}
+.card h3{font-size:14px;margin:10px 0;text-transform:uppercase;}
+.btn-ws{background:#25d366;color:white;text-decoration:none;padding:8px 15px;border-radius:5px;font-size:13px;font-weight:bold;}
+.btn-fav{position:absolute;top:10px;right:10px;background:#ff4757;color:white;border:none;padding:6px 8px;border-radius:50%;cursor:pointer;}
+.btn-fav.saved{background:#2ecc71;}
+#favoritos{margin-top:50px;border-top:2px solid #ddd;padding-top:20px;}
+#toggleFav{background:#2c3e50;color:white;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;}
+#contadorVisitas{position:absolute;top:15px;right:20px;background:#34495e;padding:5px 10px;border-radius:20px;}
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;}
+#modal img{max-width:90%;max-height:90%;}
 </style>
 </head>
 
@@ -173,162 +44,103 @@ header{
 <div id="status">Cargando catálogo...</div>
 <div id="galeria" class="grid"></div>
 
-<!-- FAVORITOS -->
 <div id="favoritos">
-
-<h2 style="display:flex;justify-content:space-between;align-items:center;">
-❤️ Mis Favoritos
+<h2>
+❤️ Mis Favoritos 
 <button id="toggleFav">Mostrar ▼</button>
 </h2>
-
 <p id="contadorFav">0 diseños seleccionados</p>
-
 <div id="galeriaFav" class="grid" style="display:none;"></div>
-
 </div>
 
 </div>
 
-<!-- MODAL -->
-<div id="modalImagen">
-<img id="imagenModal">
-</div>
+<div id="modal"><img id="modalImg"></div>
 
 <script>
 
+document.addEventListener("DOMContentLoaded", function(){
+
 const CSV_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
 
-let datosCatalogo=[];
+let datos=[];
 let favoritos=JSON.parse(localStorage.getItem('favoritos'))||[];
 
-/* TRANSFORMAR URL DRIVE */
-function transformarUrlDrive(url){
-    const regex=/\/file\/d\/([a-zA-Z0-9_-]+)\//;
-    const match=url.match(regex);
-    return match?`https://drive.google.com/uc?export=view&id=${match[1]}`:url;
+const galeria=document.getElementById('galeria');
+const galeriaFav=document.getElementById('galeriaFav');
+const contadorFav=document.getElementById('contadorFav');
+const toggleFav=document.getElementById('toggleFav');
+
+function transformar(url){
+const r=/\/file\/d\/([a-zA-Z0-9_-]+)\//;
+const m=url.match(r);
+return m?`https://drive.google.com/uc?export=view&id=${m[1]}`:url;
 }
 
-/* GUARDAR FAVORITO */
-function guardarFavorito(imagen){
-    if(!favoritos.includes(imagen)){
-        favoritos.push(imagen);
-    }else{
-        favoritos=favoritos.filter(f=>f!==imagen);
-    }
-    localStorage.setItem('favoritos',JSON.stringify(favoritos));
-    renderizarFavoritos();
+function guardarFav(img){
+if(!favoritos.includes(img)){favoritos.push(img);}
+else{favoritos=favoritos.filter(f=>f!==img);}
+localStorage.setItem('favoritos',JSON.stringify(favoritos));
+renderFav();
+render(datos);
 }
 
-/* RENDERIZAR FAVORITOS */
-function renderizarFavoritos(){
-    const galFav=document.getElementById('galeriaFav');
-    const contador=document.getElementById('contadorFav');
-
-    galFav.innerHTML='';
-    contador.textContent=favoritos.length+" diseños seleccionados";
-
-    favoritos.forEach(img=>{
-        const card=document.createElement('div');
-        card.className='card';
-        card.innerHTML=`<img src="${img}">`;
-        card.querySelector('img').addEventListener('click',()=>abrirModal(img));
-        galFav.appendChild(card);
-    });
+function renderFav(){
+galeriaFav.innerHTML='';
+contadorFav.textContent=favoritos.length+" diseños seleccionados";
+favoritos.forEach(img=>{
+const card=document.createElement('div');
+card.className='card';
+card.innerHTML=`<img src="${img}">`;
+galeriaFav.appendChild(card);
+});
 }
 
-/* CARGAR CSV */
-function cargarDatos(){
-    Papa.parse(CSV_URL,{
-        download:true,
-        header:true,
-        skipEmptyLines:true,
-        complete:function(results){
-            datosCatalogo=results.data.filter(item=>Object.values(item)[0]);
-            document.getElementById('status').style.display='none';
-            renderizar(datosCatalogo);
-            renderizarFavoritos();
-        }
-    });
+function render(lista){
+galeria.innerHTML='';
+lista.forEach(item=>{
+const fila=Object.values(item);
+const nombre=fila[0];
+const img=transformar(fila[1]||"");
+if(!img)return;
+const card=document.createElement('div');
+card.className='card';
+card.innerHTML=`
+<img src="${img}">
+<h3>${nombre}</h3>
+<button class="btn-fav ${favoritos.includes(img)?'saved':''}">❤️</button>
+`;
+card.querySelector('.btn-fav').onclick=(e)=>{e.stopPropagation();guardarFav(img);};
+galeria.appendChild(card);
+});
 }
 
-/* RENDER GALERIA */
-function renderizar(lista){
-    const galeria=document.getElementById('galeria');
-    galeria.innerHTML='';
-
-    lista.forEach(item=>{
-        const fila=Object.values(item);
-        const nombre=fila[0]||"Diseño";
-        const imagen=transformarUrlDrive(fila[1]||"");
-
-        if(imagen.includes('http')){
-            const mensaje=encodeURIComponent("Hola! Me interesa el diseño: "+nombre);
-
-            const card=document.createElement('div');
-            card.className='card';
-
-            card.innerHTML=`
-            <img src="${imagen}">
-            <h3>${nombre}</h3>
-            <a href="https://wa.me/56954180844?text=${mensaje}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
-            <button class="btn-fav ${favoritos.includes(imagen)?'saved':''}">❤️</button>
-            `;
-
-            card.querySelector('img').addEventListener('click',()=>abrirModal(imagen));
-
-            card.querySelector('.btn-fav').addEventListener('click',(e)=>{
-                e.stopPropagation();
-                guardarFavorito(imagen);
-                renderizar(datosCatalogo);
-            });
-
-            galeria.appendChild(card);
-        }
-    });
+toggleFav.onclick=function(){
+if(galeriaFav.style.display==="none"){
+galeriaFav.style.display="grid";
+this.textContent="Ocultar ▲";
+}else{
+galeriaFav.style.display="none";
+this.textContent="Mostrar ▼";
 }
+};
 
-/* MODAL */
-const modal=document.getElementById('modalImagen');
-const modalImg=document.getElementById('imagenModal');
-
-function abrirModal(url){
-    modal.style.display='flex';
-    modalImg.src=url;
+Papa.parse(CSV_URL,{
+download:true,
+header:true,
+complete:function(res){
+datos=res.data;
+document.getElementById('status').style.display='none';
+render(datos);
+renderFav();
 }
-
-modal.addEventListener('click',()=>{
-    modal.style.display='none';
 });
 
-/* BUSCADOR */
-document.getElementById('buscador').addEventListener('input',function(e){
-    const term=e.target.value.toLowerCase();
-    const filtrados=datosCatalogo.filter(item=>
-        (Object.values(item)[0]||"").toLowerCase().includes(term)
-    );
-    renderizar(filtrados);
-});
-
-/* TOGGLE FAVORITOS */
-document.getElementById('toggleFav').addEventListener('click',function(){
-    const galFav=document.getElementById('galeriaFav');
-    if(galFav.style.display==='none'){
-        galFav.style.display='grid';
-        this.textContent='Ocultar ▲';
-    }else{
-        galFav.style.display='none';
-        this.textContent='Mostrar ▼';
-    }
-});
-
-/* CONTADOR GLOBAL VISITAS */
 fetch('https://api.countapi.xyz/hit/likelyon-estampados/visitas')
-.then(res=>res.json())
-.then(data=>{
-    document.getElementById('contadorVisitas').textContent="Visitas: "+data.value;
-});
+.then(r=>r.json())
+.then(d=>{document.getElementById('contadorVisitas').textContent="Visitas: "+d.value;});
 
-window.onload=cargarDatos;
+});
 
 </script>
 
