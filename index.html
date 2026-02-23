@@ -65,6 +65,7 @@ const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhyg
 let datosCatalogo = [];
 let cards = [];
 
+// Cargar datos desde CSV
 function cargarDatos() {
     Papa.parse(CSV_URL, {
         download: true,
@@ -78,18 +79,21 @@ function cargarDatos() {
     });
 }
 
-function renderizar(lista) {
+// Renderizar cards
+function renderizar() {
     const galeria = document.getElementById('galeria');
+    const term = document.getElementById('buscador').value.toLowerCase();
 
-    // Crear cards solo la primera vez
+    // Primera vez: crear cards
     if(cards.length === 0){
-        lista.forEach(item => {
+        datosCatalogo.forEach(item => {
             const fila = Object.values(item);
             const nombre = fila[0] || "Diseño";
             let imagen = fila[1] || "";
             if(imagen && imagen.includes('http')){
-                imagen = imagen.replace('&sz=w500', '&sz=w150'); // miniatura más pequeña
+                imagen = imagen.replace('&sz=w500', '&sz=w150'); // miniatura rápida
                 const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre.toUpperCase()}\n\nVer imagen: `) + imagen;
+
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
@@ -99,12 +103,13 @@ function renderizar(lista) {
                 `;
                 galeria.appendChild(card);
                 cards.push({element: card, nombre: nombre.toLowerCase()});
+
+                // Zoom al hacer clic en la imagen
                 card.querySelector('img').addEventListener('click', () => abrirModal(imagen));
             }
         });
     } else {
-        // Filtrar por display
-        const term = document.getElementById('buscador').value.toLowerCase();
+        // Filtrado eficiente sin recrear DOM
         cards.forEach(c => {
             c.element.style.display = c.nombre.includes(term) ? 'block' : 'none';
         });
@@ -123,19 +128,21 @@ function abrirModal(url) {
     modalImg.style.transform = `scale(${escala})`;
 }
 
+// Cierre al hacer clic fuera
 modal.addEventListener('click', () => {
     modal.style.display = 'none';
     modalImg.src = '';
 });
 
+// Zoom con rueda del mouse
 modalImg.addEventListener('wheel', (e) => {
     e.preventDefault();
-    if(e.deltaY < 0) escala += 0.1;
+    if (e.deltaY < 0) escala += 0.1;
     else escala = Math.max(1, escala - 0.1);
     modalImg.style.transform = `scale(${escala})`;
 });
 
-// Buscador
+// Buscador en tiempo real
 document.getElementById('buscador').oninput = renderizar;
 
 window.onload = cargarDatos;
