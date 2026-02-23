@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Catálogo - Likelyon Estampados</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
@@ -28,7 +28,7 @@ header{background:#2c3e50;color:white;padding:30px;position:relative;}
 </head>
 <body>
 <header>
-<img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo">
+<img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo" />
 <h1>Likelyon Estampados</h1>
 <p>Catálogo Oficial de Diseños</p>
 <div id="contadorVisitas">Visitas: ...</div>
@@ -50,76 +50,87 @@ header{background:#2c3e50;color:white;padding:30px;position:relative;}
 <script>
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
 let datosCatalogo = [];
+let favoritos = JSON.parse(localStorage.getItem('favoritos')) || [];
 
+// Transformar Google Drive URL
 function transformarUrlDrive(url){
     const regex=/\/file\/d\/([a-zA-Z0-9_-]+)\//;
     const match=url.match(regex);
     return match&&match[1]?`https://drive.google.com/uc?export=view&id=${match[1]}`:url;
 }
 
-function guardarFavoritoServidor(url){
-    fetch('guardar_favorito.php',{
-        method:'POST',
-        headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:`url=${encodeURIComponent(url)}`
-    }).then(res=>res.json()).then(data=>{
-        if(data.status==='ok') console.log('Guardado en servidor:',data.file);
+// Guardar favorito en localStorage
+function guardarFavorito(imagen){
+    if(!favoritos.includes(imagen)){
+        favoritos.push(imagen);
+    } else {
+        favoritos = favoritos.filter(f => f !== imagen);
+    }
+    localStorage.setItem('favoritos', JSON.stringify(favoritos));
+    renderizarFavoritos();
+}
+
+// Renderizar favoritos
+function renderizarFavoritos(){
+    const galFav = document.getElementById('galeriaFav');
+    galFav.innerHTML = '';
+    if(favoritos.length===0){
+        galFav.innerHTML='<p>No hay favoritos aún.</p>';
+        return;
+    }
+    favoritos.forEach(img=>{
+        const card=document.createElement('div');
+        card.className='card';
+        card.innerHTML=`<img src="${img}">`;
+        card.querySelector('img').addEventListener('click',()=>abrirModal(img));
+        galFav.appendChild(card);
     });
 }
 
+// Cargar datos desde CSV
 function cargarDatos(){
-    Papa.parse(CSV_URL,{download:true,header:true,skipEmptyLines:true,complete:function(results){
-        datosCatalogo = results.data.filter(item=>Object.values(item)[0]);
-        document.getElementById('status').style.display='none';
-        renderizar(datosCatalogo);
-        cargarFavoritosServidor();
-    }});
+    Papa.parse(CSV_URL,{
+        download:true,
+        header:true,
+        skipEmptyLines:true,
+        complete:function(results){
+            datosCatalogo = results.data.filter(item=>Object.values(item)[0]);
+            document.getElementById('status').style.display='none';
+            renderizar(datosCatalogo);
+            renderizarFavoritos();
+        }
+    });
 }
 
+// Renderizar galería principal
 function renderizar(lista){
     const galeria = document.getElementById('galeria');
     galeria.innerHTML='';
     lista.forEach(item=>{
-        const fila=Object.values(item);
-        const nombre=fila[0]||"Diseño";
-        const imagen=transformarUrlDrive(fila[1]||"");
+        const fila = Object.values(item);
+        const nombre = fila[0]||"Diseño";
+        const imagenOriginal = fila[1]||"";
+        const imagen = transformarUrlDrive(imagenOriginal);
         if(imagen.includes('http')){
+            const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre}`)+imagen;
             const card=document.createElement('div');
             card.className='card';
             card.innerHTML=`
                 <img src="${imagen}">
                 <h3>${nombre}</h3>
-                <a href="https://wa.me/56954180844?text=Hola! Me interesa el diseño: ${nombre}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
-                <button class="btn-fav">❤️</button>
+                <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
+                <button class="btn-fav ${favoritos.includes(imagen)?'saved':''}">❤️</button>
             `;
             const imgEl = card.querySelector('img');
             imgEl.addEventListener('click',()=>abrirModal(imagen));
-
             const btnFav = card.querySelector('.btn-fav');
-            btnFav.addEventListener('click',e=>{
+            btnFav.addEventListener('click', e=>{
                 e.stopPropagation();
-                btnFav.classList.add('saved');
-                guardarFavoritoServidor(imagen);
-                cargarFavoritosServidor();
+                guardarFavorito(imagen);
+                btnFav.classList.toggle('saved');
             });
             galeria.appendChild(card);
         }
-    });
-}
-
-// Cargar favoritos desde carpeta del servidor
-function cargarFavoritosServidor(){
-    fetch('listar_favoritos.php').then(res=>res.json()).then(lista=>{
-        const galFav = document.getElementById('galeriaFav');
-        galFav.innerHTML='';
-        if(lista.length===0){ galFav.innerHTML='<p>No hay favoritos aún.</p>'; return; }
-        lista.forEach(file=>{
-            const card=document.createElement('div');
-            card.className='card';
-            card.innerHTML=`<img src="favoritos/${file}">`;
-            card.querySelector('img').addEventListener('click',()=>abrirModal(`favoritos/${file}`));
-            galFav.appendChild(card);
-        });
     });
 }
 
@@ -135,7 +146,7 @@ document.getElementById('buscador').oninput=function(e){
     renderizar(datosCatalogo.filter(item=>(Object.values(item)[0]||"").toLowerCase().includes(term)));
 };
 
-// Contador global de visitas
+// Contador de visitas global
 fetch('https://api.countapi.xyz/hit/likelyon-estampados/visitas')
 .then(res=>res.json())
 .then(data=>{document.getElementById('contadorVisitas').textContent=`Visitas totales: ${data.value}`;});
