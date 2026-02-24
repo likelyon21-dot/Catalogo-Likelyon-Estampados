@@ -1,3 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Likelyon Estampados</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f4f4;
+}
+
+header {
+  background: #2c3e50;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+input {
+  width: 300px;
+  padding: 10px;
+  margin: 20px auto;
+  display: block;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+}
+
+#catalogo {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  text-align: center;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Likelyon Estampados</h1>
+</header>
+
+<input type="text" placeholder="Buscar diseño..." onkeyup="buscarDiseño(this.value)">
+
+<div id="catalogo"></div>
+
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbz--902h3TTuxUcvqY7xtjaBajV_jwuWnFOngmxIW46wSW0021hCF4VSBa78e8IOBb0TQ/exec";
 
@@ -5,13 +67,13 @@ let catalogo = [];
 
 async function cargarCatalogo() {
   try {
-    const response = await fetch(API_URL);
+    const response = await fetch(API_URL + "?nocache=" + new Date().getTime());
     const data = await response.json();
     catalogo = data;
     mostrarCatalogo(catalogo);
   } catch (error) {
-    document.getElementById("catalogo").innerHTML = 
-      "<p>Error cargando catálogo</p>";
+    document.getElementById("catalogo").innerHTML =
+      "<p style='text-align:center'>Error cargando catálogo</p>";
   }
 }
 
@@ -24,7 +86,7 @@ function mostrarCatalogo(data) {
     card.className = "card";
 
     card.innerHTML = `
-      <img src="${item["URL Miniatura"]}" width="200">
+      <img src="${item["URL Miniatura"]}" alt="">
       <h3>${item["Nombre del Diseño"]}</h3>
       <p>${item["Categoria"] || ""}</p>
     `;
@@ -45,3 +107,6 @@ function buscarDiseño(valor) {
 
 window.onload = cargarCatalogo;
 </script>
+
+</body>
+</html>
