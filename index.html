@@ -20,10 +20,31 @@
         .btn-ws { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; display: inline-block; font-size: 13px; font-weight: bold; margin-top: 5px; }
         .btn-fav { background: #ff6b6b; color: white; border: none; padding: 4px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-top: 5px; }
 
-        #favoritos { margin: 20px 0; text-align: left; }
-        #favoritos h2 { font-size: 18px; color: #2c3e50; margin-bottom: 10px; }
-        #favoritos .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; } /* mismo tamaño que galería */
+        /* FAVORITOS */
+        #favoritosContainer {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px dashed #ff6b6b;
+            border-radius: 10px;
+            background-color: #fff4f4;
+            text-align: left;
+        }
+        #favoritosHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #favoritosHeader h2 { font-size: 18px; color: #2c3e50; margin: 0; }
+        #toggleFavoritos { background: #ff6b6b; color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; }
 
+        #galeriaFavoritos { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* imágenes más pequeñas */
+            gap: 15px; 
+        }
+        #galeriaFavoritos .card img { height: 90px; } /* 50% aprox */
+        
         /* MODAL */
         #modalImagen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 9999; }
         #modalImagen img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
@@ -41,8 +62,11 @@
     <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Moto, etc)...">
 
     <!-- FAVORITOS -->
-    <div id="favoritos">
-        <h2>Favoritos ❤️</h2>
+    <div id="favoritosContainer">
+        <div id="favoritosHeader">
+            <h2>Favoritos ❤️</h2>
+            <button id="toggleFavoritos">Ocultar</button>
+        </div>
         <div id="galeriaFavoritos" class="grid"></div>
     </div>
 
@@ -133,6 +157,18 @@ function toggleFavorito(item) {
         renderizarFavoritos();
     }
 }
+
+// Toggle abrir/cerrar favoritos
+document.getElementById('toggleFavoritos').addEventListener('click', function() {
+    const cont = document.getElementById('galeriaFavoritos');
+    if (cont.style.display === 'none') {
+        cont.style.display = 'grid';
+        this.textContent = 'Ocultar';
+    } else {
+        cont.style.display = 'none';
+        this.textContent = 'Abrir';
+    }
+});
 
 // Modal
 const modal = document.getElementById('modalImagen');
