@@ -22,7 +22,7 @@
 
         #favoritos { margin: 20px 0; text-align: left; }
         #favoritos h2 { font-size: 18px; color: #2c3e50; margin-bottom: 10px; }
-        #favoritos .grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+        #favoritos .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; } /* mismo tamaño que galería */
 
         /* MODAL */
         #modalImagen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 9999; }
@@ -40,7 +40,7 @@
 <div class="container">
     <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Moto, etc)...">
 
-    <!-- FAVORITOS AHORA ESTÁ ARRIBA DE LA GALERÍA -->
+    <!-- FAVORITOS -->
     <div id="favoritos">
         <h2>Favoritos ❤️</h2>
         <div id="galeriaFavoritos" class="grid"></div>
