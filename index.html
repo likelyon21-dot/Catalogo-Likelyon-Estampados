@@ -7,37 +7,93 @@
 
 <style>
 body { font-family: Arial; margin:0; background:#f4f4f4; }
-header { background:#111; color:white; text-align:center; padding:15px; }
-input { padding:10px; width:300px; border-radius:20px; border:1px solid #ccc; }
-#catalogo { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:20px; padding:20px; }
-.card { background:white; padding:10px; border-radius:10px; text-align:center; position:relative; }
-.card img { width:100%; border-radius:8px; transition:0.3s; cursor:pointer; }
-.card img.zoom { transform:scale(1.5); z-index:10; position:relative; }
-button { margin:5px; padding:5px 10px; cursor:pointer; border:none; border-radius:5px; }
-#favoritosPanel { display:none; padding:20px; background:white; position:fixed; top:0; left:0; width:100%; height:100%; overflow:auto; }
+
+header {
+  text-align:center;
+  background:#111;
+  color:white;
+  padding:20px;
+}
+
+header img {
+  height:90px;
+  margin-bottom:10px;
+}
+
+input {
+  padding:10px;
+  width:300px;
+  border-radius:20px;
+  border:1px solid #ccc;
+}
+
+#catalogo {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:20px;
+  padding:20px;
+}
+
+.card {
+  background:white;
+  padding:10px;
+  border-radius:10px;
+  text-align:center;
+}
+
+.card img {
+  width:100%;
+  border-radius:8px;
+  transition:0.3s;
+  cursor:pointer;
+}
+
+.card img.zoom {
+  transform:scale(1.5);
+  z-index:10;
+  position:relative;
+}
+
+button {
+  margin:5px;
+  padding:6px 10px;
+  cursor:pointer;
+  border:none;
+  border-radius:5px;
+  background:#111;
+  color:white;
+}
+
+#favoritosPanel {
+  display:none;
+  padding:20px;
+  background:#fff;
+  border-top:3px solid #000;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>Likelyon Estampados</h1>
-<p>Visitas: <span id="contador">0</span></p>
-<button onclick="mostrarFavoritos()">Ver Favoritos</button>
+  <img src="https://drive.google.com/uc?export=view&id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5">
+  <h1>Likelyon Estampados</h1>
+  <p>Visitas: <span id="contador">0</span></p>
+  <button onclick="mostrarFavoritos()">Ver Favoritos</button>
 </header>
 
 <div style="text-align:center;margin:20px;">
-<input type="text" id="buscador" placeholder="Buscar diseño...">
+  <input type="text" id="buscador" placeholder="Buscar diseño...">
 </div>
 
 <div id="catalogo">Cargando catálogo...</div>
 
 <div id="favoritosPanel">
-<h2>Mis Favoritos</h2>
-<div id="listaFavoritos"></div>
-<br>
-<button onclick="enviarWhatsApp()">Enviar por WhatsApp</button>
-<button onclick="cerrarFavoritos()">Cerrar</button>
+  <h2>Mis Favoritos</h2>
+  <div id="listaFavoritos"></div>
+  <br>
+  <button onclick="enviarWhatsApp()">Enviar por WhatsApp</button>
+  <button onclick="cerrarFavoritos()">Cerrar</button>
 </div>
 
 <script>
@@ -117,7 +173,11 @@ function enviarWhatsApp(){
 
 document.getElementById("buscador").addEventListener("input", function(){
   const val=this.value.toLowerCase();
-  const filtrado=catalogo.filter(i=>i["Nombre del Diseño"].toLowerCase().includes(val));
+  const filtrado=catalogo.filter(item =>
+    Object.values(item).some(valor =>
+      String(valor).toLowerCase().includes(val)
+    )
+  );
   mostrarCatalogo(filtrado);
 });
 
