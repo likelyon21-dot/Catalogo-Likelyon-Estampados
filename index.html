@@ -3,35 +3,30 @@ let paginaActual = 0;
 const porPagina = 30;
 let favoritos = [];
 
-// Funciones favoritos
-function esFavorito(imagen) { return favoritos.some(f => f.imagen === imagen); }
+// Función para verificar si un item está en favoritos
+function esFavorito(imagen) {
+    return favoritos.some(f => f.imagen === imagen);
+}
+
+// Función para agregar/eliminar favoritos
 function toggleFavorito(item) {
     const index = favoritos.findIndex(f => f.imagen === item.imagen);
-    if(index >= 0) { favoritos.splice(index, 1); } 
-    else { favoritos.push(item); }
-    renderFavoritos();
-    renderizar(datosCatalogo, false);
-}
-function renderFavoritos() {
-    const favGrid = document.getElementById('favGrid');
-    favGrid.innerHTML = '';
-    favoritos.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.style.width = '100px';
-        card.innerHTML = `
-            <img src="${item.imagen}" alt="${item.nombre}" style="height:80px; object-fit:cover;">
-            <h4 style="font-size:12px;">${item.nombre}</h4>
-            <button onclick="toggleFavorito({nombre:'${item.nombre}', imagen:'${item.imagen}'})" style="font-size:10px;">Eliminar</button>
-        `;
-        favGrid.appendChild(card);
-    });
+    if (index >= 0) {
+        favoritos.splice(index, 1); // eliminar
+    } else {
+        favoritos.push(item); // agregar
+    }
+    renderFavoritos(); // actualizar sección favoritos
+    renderizar(datosCatalogo, false); // refresca tarjetas para actualizar el corazón
 }
 
 // Renderizar bloque por bloque
 function renderizar(lista, reset = true) {
     const galeria = document.getElementById('galeria');
-    if(reset) { galeria.innerHTML = ''; paginaActual = 0; }
+    if(reset) {
+        galeria.innerHTML = '';
+        paginaActual = 0;
+    }
 
     const fragment = document.createDocumentFragment();
     const inicio = paginaActual * porPagina;
@@ -54,28 +49,57 @@ function renderizar(lista, reset = true) {
                 <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
                 <button class="btn-fav ${esFavorito(imagen) ? 'active' : ''}">❤</button>
             `;
+
             card.querySelector('img').addEventListener('click', () => abrirModal(imagen));
             card.querySelector('.btn-fav').addEventListener('click', () => toggleFavorito({nombre, imagen}));
+
             fragment.appendChild(card);
         }
     });
 
     galeria.appendChild(fragment);
 
-    // Si hay más imágenes, mostrar botón
-    document.getElementById('cargarMas').style.display = (fin < lista.length) ? 'inline-block' : 'none';
+    // Mostrar botón "Cargar más" solo si hay más imágenes
+    const btnCargar = document.getElementById('cargarMas');
+    if(btnCargar) {
+        btnCargar.style.display = (fin < lista.length) ? 'inline-block' : 'none';
+    }
+}
+
+// Renderizar sección favoritos
+function renderFavoritos() {
+    const favGrid = document.getElementById('favGrid');
+    if(!favGrid) return;
+    favGrid.innerHTML = '';
+    favoritos.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.width = '100px';
+        card.innerHTML = `
+            <img src="${item.imagen}" alt="${item.nombre}" style="height:80px; object-fit:cover;">
+            <h4 style="font-size:12px;">${item.nombre}</h4>
+            <button onclick="toggleFavorito({nombre:'${item.nombre}', imagen:'${item.imagen}'})" style="font-size:10px;">Eliminar</button>
+        `;
+        favGrid.appendChild(card);
+    });
 }
 
 // Cargar siguiente bloque
-document.getElementById('cargarMas').addEventListener('click', () => {
-    paginaActual++;
-    renderizar(datosCatalogo, false);
-});
+const btnCargar = document.getElementById('cargarMas');
+if(btnCargar) {
+    btnCargar.addEventListener('click', () => {
+        paginaActual++;
+        renderizar(datosCatalogo, false);
+    });
+}
 
-// Enviar todos favoritos por WhatsApp
-document.getElementById('enviarFavs').addEventListener('click', () => {
-    if(favoritos.length === 0) return alert('No hay favoritos seleccionados');
-    const mensaje = favoritos.map(f => `${f.nombre}: ${f.imagen}`).join('\n');
-    const url = `https://wa.me/56954180844?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-});
+// Enviar favoritos por WhatsApp
+const btnEnviarFavs = document.getElementById('enviarFavs');
+if(btnEnviarFavs) {
+    btnEnviarFavs.addEventListener('click', () => {
+        if(favoritos.length === 0) return alert('No hay favoritos seleccionados');
+        const mensaje = favoritos.map(f => `${f.nombre}: ${f.imagen}`).join('\n');
+        const url = `https://wa.me/56954180844?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, '_blank');
+    });
+}
