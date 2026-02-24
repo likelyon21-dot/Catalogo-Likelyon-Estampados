@@ -5,10 +5,13 @@ const CSV_URL='TU_URL_CSV_AQUI';
 
 let datosOriginal=[];
 let datosFiltrados=[];
+let categoriaSeleccionada="";
 let favoritos=JSON.parse(localStorage.getItem('favoritos'))||[];
 
 const galeria=document.getElementById('galeria');
 const sugerencias=document.getElementById('sugerencias');
+const filtroCategoria=document.getElementById('filtroCategoria');
+const contadorResultados=document.getElementById('contadorResultados');
 
 const MAX_RESULTADOS = 60;
 let timeoutBusqueda=null;
@@ -44,23 +47,32 @@ function renderGaleria(){
     });
 
     galeria.appendChild(fragment);
+
+    contadorResultados.textContent =
+        datosFiltrados.length + " resultados encontrados";
 }
 
-function buscar(term){
-    if(term===""){
-        datosFiltrados=[...datosOriginal];
-        sugerencias.style.display="none";
-        renderGaleria();
-        return;
-    }
+function aplicarFiltros(term){
 
-    datosFiltrados=datosOriginal.filter(d=>d.indexBusqueda.includes(term));
+    datosFiltrados = datosOriginal.filter(d=>{
+
+        const coincideTexto = term === "" || d.indexBusqueda.includes(term);
+        const coincideCategoria = categoriaSeleccionada === "" || d.categoria === categoriaSeleccionada;
+
+        return coincideTexto && coincideCategoria;
+    });
+
     renderGaleria();
-    mostrarSugerencias(term);
 }
 
 function mostrarSugerencias(term){
     sugerencias.innerHTML='';
+
+    if(term===""){
+        sugerencias.style.display="none";
+        return;
+    }
+
     const coincidencias=datosOriginal
         .filter(d=>d.indexBusqueda.includes(term))
         .slice(0,8);
@@ -76,9 +88,8 @@ function mostrarSugerencias(term){
         div.textContent=item.nombre;
         div.onclick=function(){
             document.getElementById('buscador').value=item.nombre;
-            datosFiltrados=[item];
             sugerencias.style.display="none";
-            renderGaleria();
+            aplicarFiltros(normalizar(item.nombre));
         };
         sugerencias.appendChild(div);
     });
@@ -89,13 +100,19 @@ function mostrarSugerencias(term){
 document.getElementById('buscador').addEventListener('input',function(e){
 
     clearTimeout(timeoutBusqueda);
-
     const term=normalizar(e.target.value);
 
     timeoutBusqueda=setTimeout(()=>{
-        buscar(term);
+        aplicarFiltros(term);
+        mostrarSugerencias(term);
     },250);
 
+});
+
+filtroCategoria.addEventListener('change',function(){
+    categoriaSeleccionada=this.value;
+    const term=normalizar(document.getElementById('buscador').value);
+    aplicarFiltros(term);
 });
 
 document.addEventListener('click',function(e){
@@ -114,15 +131,29 @@ Papa.parse(CSV_URL,{
         .filter(d=>d["Nombre del Diseño"] && d["URL Miniatura"] && d["URL Archivo"])
         .map(d=>{
             const nombre=d["Nombre del Diseño"];
+            const categoria=d["Categoria"] || "Sin categoría";
+
             return{
                 nombre:nombre,
                 urlMini:d["URL Miniatura"],
                 urlArchivo:d["URL Archivo"],
+                categoria:categoria,
                 indexBusqueda:normalizar(nombre)
             };
         });
 
         datosOriginal=eliminarDuplicados(datosOriginal);
+
+        // Crear lista única de categorías
+        const categoriasUnicas=[...new Set(datosOriginal.map(d=>d.categoria))].sort();
+
+        categoriasUnicas.forEach(cat=>{
+            const option=document.createElement('option');
+            option.value=cat;
+            option.textContent=cat;
+            filtroCategoria.appendChild(option);
+        });
+
         datosFiltrados=[...datosOriginal];
 
         document.getElementById('status').style.display='none';
