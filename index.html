@@ -1,12 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Likelyon Estampados - Catálogo</title>
+
+<style>
+body { font-family:'Segoe UI',sans-serif; margin:0; background:#f4f4f9; text-align:center; }
+header { background:#2c3e50; color:white; padding:20px; }
+.container { max-width:1200px; margin:20px auto; padding:10px 20px; }
+
+.search-container { position:relative; max-width:500px; margin:0 auto 20px auto; }
+.search-bar { width:100%; padding:12px; border-radius:25px; border:1px solid #ccc; }
+
+#sugerencias {
+position:absolute;
+top:100%;
+left:0;
+right:0;
+background:white;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.15);
+max-height:250px;
+overflow-y:auto;
+display:none;
+z-index:999;
+}
+
+.sugerencia-item {
+padding:10px;
+cursor:pointer;
+text-align:left;
+}
+
+.sugerencia-item:hover { background:#f0f0f0; }
+
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:15px; }
+
+.card {
+background:white;
+padding:10px;
+border-radius:10px;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+cursor:pointer;
+transition:0.2s;
+}
+
+.card:hover { transform:scale(1.03); }
+
+.card img {
+width:100%;
+max-height:200px;
+object-fit:contain;
+}
+
+.card h3 {
+font-size:14px;
+margin:8px 0;
+text-transform:uppercase;
+}
+
+#contadorResultados {
+font-weight:bold;
+margin-left:15px;
+}
+
+#status {
+margin:20px;
+font-size:18px;
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Likelyon Estampados</h1>
+</header>
+
+<div class="container">
+
+<div class="search-container">
+<input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño...">
+<div id="sugerencias"></div>
+</div>
+
+<div style="margin-bottom:15px;">
+<select id="filtroCategoria" style="padding:10px;border-radius:8px;border:1px solid #ccc;">
+<option value="">Todas las categorías</option>
+</select>
+
+<span id="contadorResultados"></span>
+</div>
+
+<div id="status">Cargando catálogo...</div>
+<div id="galeria" class="grid"></div>
+
+</div>
+
 <script>
 document.addEventListener("DOMContentLoaded",function(){
 
-const CSV_URL='TU_URL_CSV_AQUI';
+const API_URL = "PEGA_AQUI_TU_URL_APPSCRIPT";
 
 let datosOriginal=[];
 let datosFiltrados=[];
 let categoriaSeleccionada="";
-let favoritos=JSON.parse(localStorage.getItem('favoritos'))||[];
 
 const galeria=document.getElementById('galeria');
 const sugerencias=document.getElementById('sugerencias');
@@ -17,13 +115,10 @@ const MAX_RESULTADOS = 60;
 let timeoutBusqueda=null;
 
 function normalizar(texto){
+    if(!texto) return "";
     return texto.toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g,"");
-}
-
-function eliminarDuplicados(array){
-    return array.filter((item,index,self)=>self.findIndex(t=>t.urlArchivo===item.urlArchivo)===index);
 }
 
 function renderGaleria(){
@@ -66,6 +161,7 @@ function aplicarFiltros(term){
 }
 
 function mostrarSugerencias(term){
+
     sugerencias.innerHTML='';
 
     if(term===""){
@@ -86,11 +182,13 @@ function mostrarSugerencias(term){
         const div=document.createElement('div');
         div.className='sugerencia-item';
         div.textContent=item.nombre;
+
         div.onclick=function(){
             document.getElementById('buscador').value=item.nombre;
             sugerencias.style.display="none";
             aplicarFiltros(normalizar(item.nombre));
         };
+
         sugerencias.appendChild(div);
     });
 
@@ -115,51 +213,41 @@ filtroCategoria.addEventListener('change',function(){
     aplicarFiltros(term);
 });
 
-document.addEventListener('click',function(e){
-    if(!e.target.closest('.search-container')){
-        sugerencias.style.display="none";
-    }
-});
+// 🔥 CARGA DESDE APPS SCRIPT
+fetch(API_URL)
+.then(res => res.json())
+.then(data => {
 
-Papa.parse(CSV_URL,{
-    download:true,
-    header:true,
-    skipEmptyLines:true,
-    complete:function(res){
+    datosOriginal = data.map(d => ({
+        nombre: d.nombre,
+        urlMini: d.urlMini,
+        urlArchivo: d.urlArchivo,
+        categoria: d.categoria || "Sin categoría",
+        indexBusqueda: normalizar(d.nombre)
+    }));
 
-        datosOriginal=res.data
-        .filter(d=>d["Nombre del Diseño"] && d["URL Miniatura"] && d["URL Archivo"])
-        .map(d=>{
-            const nombre=d["Nombre del Diseño"];
-            const categoria=d["Categoria"] || "Sin categoría";
+    datosFiltrados=[...datosOriginal];
 
-            return{
-                nombre:nombre,
-                urlMini:d["URL Miniatura"],
-                urlArchivo:d["URL Archivo"],
-                categoria:categoria,
-                indexBusqueda:normalizar(nombre)
-            };
-        });
+    // Cargar categorías únicas
+    const categoriasUnicas=[...new Set(datosOriginal.map(d=>d.categoria))].sort();
 
-        datosOriginal=eliminarDuplicados(datosOriginal);
+    categoriasUnicas.forEach(cat=>{
+        const option=document.createElement('option');
+        option.value=cat;
+        option.textContent=cat;
+        filtroCategoria.appendChild(option);
+    });
 
-        // Crear lista única de categorías
-        const categoriasUnicas=[...new Set(datosOriginal.map(d=>d.categoria))].sort();
-
-        categoriasUnicas.forEach(cat=>{
-            const option=document.createElement('option');
-            option.value=cat;
-            option.textContent=cat;
-            filtroCategoria.appendChild(option);
-        });
-
-        datosFiltrados=[...datosOriginal];
-
-        document.getElementById('status').style.display='none';
-        renderGaleria();
-    }
+    document.getElementById('status').style.display='none';
+    renderGaleria();
+})
+.catch(err=>{
+    console.error(err);
+    document.getElementById('status').textContent="Error cargando catálogo";
 });
 
 });
 </script>
+
+</body>
+</html>
