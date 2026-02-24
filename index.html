@@ -13,8 +13,8 @@ input { padding:10px; width:300px; border-radius:20px; border:1px solid #ccc; }
 .card { background:white; padding:10px; border-radius:10px; text-align:center; position:relative; }
 .card img { width:100%; border-radius:8px; transition:0.3s; cursor:pointer; }
 .card img.zoom { transform:scale(1.5); z-index:10; position:relative; }
-button { margin:5px; padding:5px 10px; cursor:pointer; }
-#favoritosPanel { display:none; padding:20px; background:white; }
+button { margin:5px; padding:5px 10px; cursor:pointer; border:none; border-radius:5px; }
+#favoritosPanel { display:none; padding:20px; background:white; position:fixed; top:0; left:0; width:100%; height:100%; overflow:auto; }
 </style>
 </head>
 
@@ -30,33 +30,40 @@ button { margin:5px; padding:5px 10px; cursor:pointer; }
 <input type="text" id="buscador" placeholder="Buscar diseño...">
 </div>
 
-<div id="catalogo"></div>
+<div id="catalogo">Cargando catálogo...</div>
 
 <div id="favoritosPanel">
 <h2>Mis Favoritos</h2>
 <div id="listaFavoritos"></div>
+<br>
 <button onclick="enviarWhatsApp()">Enviar por WhatsApp</button>
 <button onclick="cerrarFavoritos()">Cerrar</button>
 </div>
 
 <script>
-const API_URL = "TU_URL_EXEC_AQUI";
+const API_URL = "https://script.google.com/macros/s/AKfycbwMaqJaxLu7wSSL6axwCNkdhc_YfAbxUbo1wo_FJUy7sZDeCJ2U5loQ2j47vKeD-rn2Ig/exec";
 const WHATSAPP = "56954180844";
 
 let catalogo = [];
 let favoritos = [];
 
 async function cargarCatalogo(){
-  const res = await fetch(API_URL);
-  catalogo = await res.json();
-  mostrarCatalogo(catalogo);
-  registrarVisita();
+  try {
+    const res = await fetch(API_URL);
+    catalogo = await res.json();
+    mostrarCatalogo(catalogo);
+    registrarVisita();
+  } catch (error) {
+    document.getElementById("catalogo").innerHTML="Error cargando catálogo";
+  }
 }
 
 async function registrarVisita(){
-  const res = await fetch(API_URL, { method:"POST" });
-  const data = await res.json();
-  document.getElementById("contador").innerText = data.visitas;
+  try {
+    const res = await fetch(API_URL, { method:"POST" });
+    const data = await res.json();
+    document.getElementById("contador").innerText = data.visitas;
+  } catch(e){}
 }
 
 function mostrarCatalogo(data){
@@ -68,7 +75,7 @@ function mostrarCatalogo(data){
     card.innerHTML=`
       <img src="${item["URL Miniatura"]}" onclick="toggleZoom(this)">
       <h4>${item["Nombre del Diseño"]}</h4>
-      <button onclick='agregarFavorito(${JSON.stringify(item)})'>⭐</button>
+      <button onclick='agregarFavorito(${JSON.stringify(item)})'>⭐ Agregar</button>
     `;
     cont.appendChild(card);
   });
@@ -97,6 +104,10 @@ function cerrarFavoritos(){
 }
 
 function enviarWhatsApp(){
+  if(favoritos.length === 0){
+    alert("No hay favoritos seleccionados");
+    return;
+  }
   let mensaje="Hola, me interesan estos diseños:%0A";
   favoritos.forEach(f=>{
     mensaje += f["Nombre del Diseño"]+" - "+f["URL Archivo"]+"%0A";
