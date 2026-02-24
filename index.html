@@ -56,9 +56,9 @@ input {
   <h1>Likelyon Estampados</h1>
 </header>
 
-<input type="text" placeholder="Buscar diseño..." onkeyup="buscarDiseño(this.value)">
+<input type="text" placeholder="Buscar diseño..." id="buscador">
 
-<div id="catalogo"></div>
+<div id="catalogo">Cargando catálogo...</div>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbz--902h3TTuxUcvqY7xtjaBajV_jwuWnFOngmxIW46wSW0021hCF4VSBa78e8IOBb0TQ/exec";
@@ -67,13 +67,14 @@ let catalogo = [];
 
 async function cargarCatalogo() {
   try {
-    const response = await fetch(API_URL + "?nocache=" + new Date().getTime());
+    const response = await fetch(API_URL + "?v=" + Date.now());
     const data = await response.json();
     catalogo = data;
     mostrarCatalogo(catalogo);
   } catch (error) {
     document.getElementById("catalogo").innerHTML =
       "<p style='text-align:center'>Error cargando catálogo</p>";
+    console.error(error);
   }
 }
 
@@ -86,7 +87,7 @@ function mostrarCatalogo(data) {
     card.className = "card";
 
     card.innerHTML = `
-      <img src="${item["URL Miniatura"]}" alt="">
+      <img src="${item["URL Miniatura"]}">
       <h3>${item["Nombre del Diseño"]}</h3>
       <p>${item["Categoria"] || ""}</p>
     `;
@@ -95,15 +96,17 @@ function mostrarCatalogo(data) {
   });
 }
 
-function buscarDiseño(valor) {
+document.getElementById("buscador").addEventListener("input", function() {
+  const valor = this.value.toLowerCase();
+
   const filtrado = catalogo.filter(item =>
     item["Nombre del Diseño"]
       .toLowerCase()
-      .includes(valor.toLowerCase())
+      .includes(valor)
   );
 
   mostrarCatalogo(filtrado);
-}
+});
 
 window.onload = cargarCatalogo;
 </script>
