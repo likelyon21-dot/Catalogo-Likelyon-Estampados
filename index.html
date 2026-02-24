@@ -1,105 +1,25 @@
-// Variables para paginación
-let paginaActual = 0;
-const porPagina = 30;
-let favoritos = [];
-
-// Función para verificar si un item está en favoritos
-function esFavorito(imagen) {
-    return favoritos.some(f => f.imagen === imagen);
-}
-
-// Función para agregar/eliminar favoritos
-function toggleFavorito(item) {
-    const index = favoritos.findIndex(f => f.imagen === item.imagen);
-    if (index >= 0) {
-        favoritos.splice(index, 1); // eliminar
-    } else {
-        favoritos.push(item); // agregar
-    }
-    renderFavoritos(); // actualizar sección favoritos
-    renderizar(datosCatalogo, false); // refresca tarjetas para actualizar el corazón
-}
-
-// Renderizar bloque por bloque
-function renderizar(lista, reset = true) {
-    const galeria = document.getElementById('galeria');
-    if(reset) {
-        galeria.innerHTML = '';
-        paginaActual = 0;
+ function abrirModal(url) {
+        modal.style.display = 'flex';
+        modalImg.src = url;
     }
 
-    const fragment = document.createDocumentFragment();
-    const inicio = paginaActual * porPagina;
-    const fin = inicio + porPagina;
-    const bloque = lista.slice(inicio, fin);
-
-    bloque.forEach(item => {
-        const fila = Object.values(item);
-        const nombre = fila[0] || "Diseño";
-        const imagen = fila[1] || "";
-
-        if(imagen && imagen.includes('http')) {
-            const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre.toUpperCase()}\n\nVer imagen: `) + imagen;
-
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <img src="${imagen}" alt="${nombre}">
-                <h3>${nombre}</h3>
-                <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
-                <button class="btn-fav ${esFavorito(imagen) ? 'active' : ''}">❤</button>
-            `;
-
-            card.querySelector('img').addEventListener('click', () => abrirModal(imagen));
-            card.querySelector('.btn-fav').addEventListener('click', () => toggleFavorito({nombre, imagen}));
-
-            fragment.appendChild(card);
-        }
+    modal.addEventListener('click', () => {
+        modal.style.display = 'none';
+        modalImg.src = '';
     });
 
-    galeria.appendChild(fragment);
+    // Buscador
+    document.getElementById('buscador').oninput = function(e) {
+        const term = e.target.value.toLowerCase();
+        const filtrados = datosCatalogo.filter(item => {
+            const n = (Object.values(item)[0] || "").toLowerCase();
+            return n.includes(term);
+        });
+        renderizar(filtrados);
+    };
 
-    // Mostrar botón "Cargar más" solo si hay más imágenes
-    const btnCargar = document.getElementById('cargarMas');
-    if(btnCargar) {
-        btnCargar.style.display = (fin < lista.length) ? 'inline-block' : 'none';
-    }
-}
+    window.onload = cargarDatos;
+</script>
 
-// Renderizar sección favoritos
-function renderFavoritos() {
-    const favGrid = document.getElementById('favGrid');
-    if(!favGrid) return;
-    favGrid.innerHTML = '';
-    favoritos.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.style.width = '100px';
-        card.innerHTML = `
-            <img src="${item.imagen}" alt="${item.nombre}" style="height:80px; object-fit:cover;">
-            <h4 style="font-size:12px;">${item.nombre}</h4>
-            <button onclick="toggleFavorito({nombre:'${item.nombre}', imagen:'${item.imagen}'})" style="font-size:10px;">Eliminar</button>
-        `;
-        favGrid.appendChild(card);
-    });
-}
-
-// Cargar siguiente bloque
-const btnCargar = document.getElementById('cargarMas');
-if(btnCargar) {
-    btnCargar.addEventListener('click', () => {
-        paginaActual++;
-        renderizar(datosCatalogo, false);
-    });
-}
-
-// Enviar favoritos por WhatsApp
-const btnEnviarFavs = document.getElementById('enviarFavs');
-if(btnEnviarFavs) {
-    btnEnviarFavs.addEventListener('click', () => {
-        if(favoritos.length === 0) return alert('No hay favoritos seleccionados');
-        const mensaje = favoritos.map(f => `${f.nombre}: ${f.imagen}`).join('\n');
-        const url = `https://wa.me/56954180844?text=${encodeURIComponent(mensaje)}`;
-        window.open(url, '_blank');
-    });
-}
+</body>
+</html>
