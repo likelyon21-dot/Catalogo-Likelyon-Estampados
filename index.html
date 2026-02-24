@@ -6,109 +6,111 @@
 <title>Likelyon Estampados</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: #f4f4f4;
-}
-
-header {
-  background: #2c3e50;
-  color: white;
-  text-align: center;
-  padding: 20px;
-}
-
-input {
-  width: 300px;
-  padding: 10px;
-  margin: 20px auto;
-  display: block;
-  border-radius: 20px;
-  border: 1px solid #ccc;
-}
-
-#catalogo {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
-
-.card {
-  background: white;
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  text-align: center;
-}
-
-.card img {
-  width: 100%;
-  border-radius: 8px;
-}
+body { font-family: Arial; margin:0; background:#f4f4f4; }
+header { background:#111; color:white; text-align:center; padding:15px; }
+input { padding:10px; width:300px; border-radius:20px; border:1px solid #ccc; }
+#catalogo { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:20px; padding:20px; }
+.card { background:white; padding:10px; border-radius:10px; text-align:center; position:relative; }
+.card img { width:100%; border-radius:8px; transition:0.3s; cursor:pointer; }
+.card img.zoom { transform:scale(1.5); z-index:10; position:relative; }
+button { margin:5px; padding:5px 10px; cursor:pointer; }
+#favoritosPanel { display:none; padding:20px; background:white; }
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>Likelyon Estampados</h1>
+<h1>Likelyon Estampados</h1>
+<p>Visitas: <span id="contador">0</span></p>
+<button onclick="mostrarFavoritos()">Ver Favoritos</button>
 </header>
 
-<input type="text" placeholder="Buscar diseño..." id="buscador">
+<div style="text-align:center;margin:20px;">
+<input type="text" id="buscador" placeholder="Buscar diseño...">
+</div>
 
-<div id="catalogo">Cargando catálogo...</div>
+<div id="catalogo"></div>
+
+<div id="favoritosPanel">
+<h2>Mis Favoritos</h2>
+<div id="listaFavoritos"></div>
+<button onclick="enviarWhatsApp()">Enviar por WhatsApp</button>
+<button onclick="cerrarFavoritos()">Cerrar</button>
+</div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbz--902h3TTuxUcvqY7xtjaBajV_jwuWnFOngmxIW46wSW0021hCF4VSBa78e8IOBb0TQ/exec";
+const API_URL = "TU_URL_EXEC_AQUI";
+const WHATSAPP = "56954180844";
 
 let catalogo = [];
+let favoritos = [];
 
-async function cargarCatalogo() {
-  try {
-    const response = await fetch(API_URL + "?v=" + Date.now());
-    const data = await response.json();
-    catalogo = data;
-    mostrarCatalogo(catalogo);
-  } catch (error) {
-    document.getElementById("catalogo").innerHTML =
-      "<p style='text-align:center'>Error cargando catálogo</p>";
-    console.error(error);
-  }
+async function cargarCatalogo(){
+  const res = await fetch(API_URL);
+  catalogo = await res.json();
+  mostrarCatalogo(catalogo);
+  registrarVisita();
 }
 
-function mostrarCatalogo(data) {
-  const contenedor = document.getElementById("catalogo");
-  contenedor.innerHTML = "";
+async function registrarVisita(){
+  const res = await fetch(API_URL, { method:"POST" });
+  const data = await res.json();
+  document.getElementById("contador").innerText = data.visitas;
+}
 
-  data.forEach(item => {
+function mostrarCatalogo(data){
+  const cont = document.getElementById("catalogo");
+  cont.innerHTML="";
+  data.forEach(item=>{
     const card = document.createElement("div");
-    card.className = "card";
-
-    card.innerHTML = `
-      <img src="${item["URL Miniatura"]}">
-      <h3>${item["Nombre del Diseño"]}</h3>
-      <p>${item["Categoria"] || ""}</p>
+    card.className="card";
+    card.innerHTML=`
+      <img src="${item["URL Miniatura"]}" onclick="toggleZoom(this)">
+      <h4>${item["Nombre del Diseño"]}</h4>
+      <button onclick='agregarFavorito(${JSON.stringify(item)})'>⭐</button>
     `;
-
-    contenedor.appendChild(card);
+    cont.appendChild(card);
   });
 }
 
-document.getElementById("buscador").addEventListener("input", function() {
-  const valor = this.value.toLowerCase();
+function toggleZoom(img){
+  img.classList.toggle("zoom");
+}
 
-  const filtrado = catalogo.filter(item =>
-    item["Nombre del Diseño"]
-      .toLowerCase()
-      .includes(valor)
-  );
+function agregarFavorito(item){
+  favoritos.push(item);
+  alert("Agregado a favoritos");
+}
 
+function mostrarFavoritos(){
+  document.getElementById("favoritosPanel").style.display="block";
+  const lista = document.getElementById("listaFavoritos");
+  lista.innerHTML="";
+  favoritos.forEach(f=>{
+    lista.innerHTML += `<p>${f["Nombre del Diseño"]}</p>`;
+  });
+}
+
+function cerrarFavoritos(){
+  document.getElementById("favoritosPanel").style.display="none";
+}
+
+function enviarWhatsApp(){
+  let mensaje="Hola, me interesan estos diseños:%0A";
+  favoritos.forEach(f=>{
+    mensaje += f["Nombre del Diseño"]+" - "+f["URL Archivo"]+"%0A";
+  });
+  window.open(`https://wa.me/${WHATSAPP}?text=${mensaje}`);
+}
+
+document.getElementById("buscador").addEventListener("input", function(){
+  const val=this.value.toLowerCase();
+  const filtrado=catalogo.filter(i=>i["Nombre del Diseño"].toLowerCase().includes(val));
   mostrarCatalogo(filtrado);
 });
 
-window.onload = cargarCatalogo;
+window.onload=cargarCatalogo;
 </script>
 
 </body>
