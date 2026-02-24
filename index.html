@@ -11,6 +11,7 @@
         .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin-bottom: 15px; }
         .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
         .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; }
+
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
         .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; cursor: pointer; position: relative; }
         .card:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
@@ -38,13 +39,15 @@
 
 <div class="container">
     <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Moto, etc)...">
-    <div id="status">Cargando catálogo...</div>
-    <div id="galeria" class="grid"></div>
 
+    <!-- FAVORITOS AHORA ESTÁ ARRIBA DE LA GALERÍA -->
     <div id="favoritos">
         <h2>Favoritos ❤️</h2>
         <div id="galeriaFavoritos" class="grid"></div>
     </div>
+
+    <div id="status">Cargando catálogo...</div>
+    <div id="galeria" class="grid"></div>
 </div>
 
 <!-- MODAL -->
