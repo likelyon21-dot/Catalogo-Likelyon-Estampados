@@ -2,6 +2,41 @@
 let paginaActual = 0;
 const porPagina = 30;
 
+// Lista de favoritos
+let favoritos = [];
+
+// Funciones para manejar favoritos
+function esFavorito(imagen) {
+    return favoritos.some(f => f.imagen === imagen);
+}
+
+function toggleFavorito(item) {
+    const index = favoritos.findIndex(f => f.imagen === item.imagen);
+    if(index >= 0) {
+        favoritos.splice(index, 1);
+    } else {
+        favoritos.push(item);
+    }
+    renderFavoritos();
+    renderizar(datosCatalogo, false); // refresca las tarjetas para actualizar el botón
+}
+
+function renderFavoritos() {
+    const favGrid = document.getElementById('favGrid');
+    favGrid.innerHTML = '';
+    favoritos.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.width = '100px';
+        card.innerHTML = `
+            <img src="${item.imagen}" alt="${item.nombre}" style="height:80px; object-fit:cover;">
+            <h4 style="font-size:12px;">${item.nombre}</h4>
+            <button onclick="toggleFavorito({nombre:'${item.nombre}', imagen:'${item.imagen}'})" style="font-size:10px;">Eliminar</button>
+        `;
+        favGrid.appendChild(card);
+    });
+}
+
 // Renderizar bloque por bloque
 function renderizar(lista, reset = true) {
     const galeria = document.getElementById('galeria');
@@ -49,4 +84,12 @@ function renderizar(lista, reset = true) {
 document.getElementById('cargarMas').addEventListener('click', () => {
     paginaActual++;
     renderizar(datosCatalogo, false);
+});
+
+// Botón enviar todos favoritos por WhatsApp
+document.getElementById('enviarFavs').addEventListener('click', () => {
+    if(favoritos.length === 0) return alert('No hay favoritos seleccionados');
+    const mensaje = favoritos.map(f => `${f.nombre}: ${f.imagen}`).join('\n');
+    const url = `https://wa.me/56954180844?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
 });
