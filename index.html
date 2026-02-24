@@ -6,7 +6,7 @@
 <title>Catálogo - Likelyon Estampados</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
-    body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; position: relative; min-height: 100vh;}
+    body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; min-height: 100vh; position: relative; }
     header { background-color: #2c3e50; color: white; padding: 30px; position: relative; }
     .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin-bottom: 15px; }
     .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
@@ -20,20 +20,12 @@
     .btn-eliminar { background: #e74c3c; margin-left: 5px; }
 
     /* Favoritos */
-    #favoritosContainer { 
-        display: flex; 
-        overflow-x: auto; 
-        padding: 10px; 
-        background: #d0e7ff; 
-        border-radius: 10px; 
-        margin-bottom: 20px; 
-        gap: 10px; 
-    }
+    #favoritosContainer { display: flex; overflow-x: auto; padding: 10px; background: #d0e7ff; border-radius: 10px; margin-bottom: 20px; gap: 10px; }
     .fav-card { flex: 0 0 auto; width: 100px; text-align: center; position: relative; }
     .fav-card img { width: 50%; height: auto; border-radius: 5px; cursor: pointer; }
     .fav-card button { position: absolute; top: -5px; right: -5px; font-size: 10px; padding: 3px 5px; }
 
-    /* MODAL */
+    /* Modal */
     #modalImagen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 9999; }
     #modalImagen img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
 
@@ -41,28 +33,10 @@
     #cargarMas { margin: 20px auto; display: none; padding: 10px 20px; font-size: 14px; cursor: pointer; background: #3498db; color: white; border: none; border-radius: 5px; }
 
     /* Contador de visitas */
-    #contadorVisitas {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: rgba(255,255,255,0.8);
-        color: #333;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-weight: bold;
-        font-size: 14px;
-    }
+    #contadorVisitas { position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.8); color: #333; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px; }
 
     /* Redes sociales */
-    #redesSociales {
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        z-index: 1000;
-    }
+    #redesSociales { position: fixed; bottom: 10px; right: 10px; display: flex; justify-content: center; gap: 10px; z-index: 1000; }
     #redesSociales a img { width: 30px; height: 30px; transition: 0.3s; }
     #redesSociales a img:hover { transform: scale(1.2); }
 </style>
@@ -70,7 +44,7 @@
 <body>
 
 <header>
-    <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo">
+    <img src="https://drive.google.com/uc?export=view&id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5" class="logo-pyme" alt="Likelyon Logo">
     <h1>Likelyon Estampados</h1>
     <p>Catálogo Oficial de Diseños</p>
     <div id="contadorVisitas">Visitas: 0</div>
@@ -79,16 +53,13 @@
 <div class="container">
     <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Moto, etc)...">
 
-    <!-- FAVORITOS -->
     <div id="favoritosContainer"></div>
-
     <div id="status">Cargando catálogo...</div>
     <div id="galeria" class="grid"></div>
-
     <button id="cargarMas">Cargar más imágenes</button>
 </div>
 
-<!-- MODAL -->
+<!-- Modal -->
 <div id="modalImagen">
     <img id="imagenModal" src="">
 </div>
@@ -106,7 +77,6 @@ let favoritos = [];
 let paginaActual = 0;
 const porPagina = 30;
 
-// Contador de visitas
 let visitas = localStorage.getItem('visitas') ? parseInt(localStorage.getItem('visitas')) : 0;
 visitas++;
 localStorage.setItem('visitas', visitas);
@@ -114,16 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('contadorVisitas').innerText = `Visitas: ${visitas}`;
 });
 
-// Función para convertir URLs de Google Drive a enlace directo
+// Convierte URLs de Drive a enlace directo
 function urlDirectaDrive(url) {
     try {
         const regex = /\/d\/([a-zA-Z0-9_-]+)/;
         const match = url.match(regex);
         if(match && match[1]) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
         return url;
-    } catch(e) {
-        return url;
-    }
+    } catch(e) { return url; }
 }
 
 function cargarDatos() {
@@ -186,23 +154,18 @@ function renderFavoritos() {
     favoritos.forEach((item, idx) => {
         const div = document.createElement('div');
         div.className = 'fav-card';
-        div.innerHTML = `
-            <img src="${item.imagen}" alt="${item.nombre}">
-            <button class="btn-eliminar">X</button>
-        `;
+        div.innerHTML = `<img src="${item.imagen}" alt="${item.nombre}"><button class="btn-eliminar">X</button>`;
         div.querySelector('img').addEventListener('click', () => abrirModal(item.imagen));
         div.querySelector('.btn-eliminar').addEventListener('click', () => { favoritos.splice(idx, 1); renderFavoritos(); });
         cont.appendChild(div);
     });
 }
 
-// Modal
 const modal = document.getElementById('modalImagen');
 const modalImg = document.getElementById('imagenModal');
 function abrirModal(url) { modal.style.display = 'flex'; modalImg.src = url; }
 modal.addEventListener('click', () => { modal.style.display = 'none'; modalImg.src = ''; });
 
-// Buscador
 document.getElementById('buscador').oninput = function(e) {
     const term = e.target.value.toLowerCase();
     const filtrados = datosCatalogo.filter(item => { const n = (Object.values(item)[0] || "").toLowerCase(); return n.includes(term); });
