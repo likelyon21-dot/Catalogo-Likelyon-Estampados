@@ -100,7 +100,7 @@ function renderizar(lista) {
     });
 }
 
-// Render favoritos
+// Render favoritos con botón eliminar
 function renderizarFavoritos() {
     const galeriaFav = document.getElementById('galeriaFavoritos');
     galeriaFav.innerHTML = '';
@@ -113,9 +113,7 @@ function renderizarFavoritos() {
             <h3>${item.nombre}</h3>
             <button class="btn-fav">Eliminar</button>
         `;
-        // Abrir modal al click en la imagen
         card.querySelector('img').addEventListener('click', () => abrirModal(item.imagen));
-        // Botón eliminar
         card.querySelector('.btn-fav').addEventListener('click', () => {
             favoritos.splice(index, 1);
             renderizarFavoritos();
@@ -125,7 +123,7 @@ function renderizarFavoritos() {
     });
 }
 
-// Agregar/quitar favoritos desde galería
+// Agregar a favoritos desde galería
 function toggleFavorito(item) {
     if (!favoritos.find(f => f.imagen === item.imagen)) {
         favoritos.push(item);
