@@ -24,7 +24,7 @@
         display: flex; 
         overflow-x: auto; 
         padding: 10px; 
-        background: #a8d0e6;  /* azul suave */
+        background: #cce6ff; /* azul claro */
         border-radius: 10px; 
         margin-bottom: 20px; 
         gap: 10px; 
@@ -51,8 +51,9 @@
     <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Moto, etc)...">
     
     <!-- FAVORITOS -->
-    <div id="favoritosContainer"></div>
-    <button class="btn-ws-fav" id="enviarFavoritos">Enviar Favoritos WhatsApp</button>
+    <div id="favoritosContainer">
+        <button id="btnWhatsAppFavoritos" class="btn-ws-fav">Enviar WhatsApp Favoritos</button>
+    </div>
 
     <div id="status">Cargando catálogo...</div>
     <div id="galeria" class="grid"></div>
@@ -64,108 +65,113 @@
 </div>
 
 <script>
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
-    let datosCatalogo = [];
-    let favoritos = [];
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
+let datosCatalogo = [];
+let favoritos = [];
 
-    function cargarDatos() {
-        Papa.parse(CSV_URL, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                datosCatalogo = results.data.filter(item => Object.values(item)[0]);
-                document.getElementById('status').style.display = 'none';
-                renderizar(datosCatalogo);
-                renderFavoritos();
-            }
-        });
-    }
-
-    function renderizar(lista) {
-        const galeria = document.getElementById('galeria');
-        galeria.innerHTML = '';
-        
-        lista.forEach(item => {
-            const fila = Object.values(item);
-            const nombre = fila[0] || "Diseño";
-            const imagen = fila[1] || "";
-            
-            if(imagen && imagen.includes('http')) {
-                const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre.toUpperCase()}\n\nVer imagen: `) + imagen;
-                
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <img src="${imagen}" alt="${nombre}">
-                    <h3>${nombre}</h3>
-                    <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
-                    <button class="btn-fav">❤ Favorito</button>
-                `;
-                
-                card.querySelector('img').addEventListener('click', () => abrirModal(imagen));
-                card.querySelector('.btn-fav').addEventListener('click', () => toggleFavorito({nombre, imagen}));
-                galeria.appendChild(card);
-            }
-        });
-    }
-
-    function toggleFavorito(item) {
-        if(!favoritos.find(f => f.imagen === item.imagen)) {
-            favoritos.push(item);
+function cargarDatos() {
+    Papa.parse(CSV_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+            datosCatalogo = results.data.filter(item => Object.values(item)[0]);
+            document.getElementById('status').style.display = 'none';
+            renderizar(datosCatalogo);
+            renderFavoritos();
         }
-        renderFavoritos();
-    }
+    });
+}
 
-    function renderFavoritos() {
-        const cont = document.getElementById('favoritosContainer');
-        cont.innerHTML = '';
-        favoritos.forEach((item, idx) => {
-            const div = document.createElement('div');
-            div.className = 'fav-card';
-            div.innerHTML = `
-                <img src="${item.imagen}" alt="${item.nombre}">
-                <button class="btn-eliminar">X</button>
+function renderizar(lista) {
+    const galeria = document.getElementById('galeria');
+    galeria.innerHTML = '';
+    
+    lista.forEach(item => {
+        const fila = Object.values(item);
+        const nombre = fila[0] || "Diseño";
+        const imagen = fila[1] || "";
+        
+        if(imagen && imagen.includes('http')) {
+            const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre.toUpperCase()}\n\nVer imagen: `) + imagen;
+            
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <img src="${imagen}" alt="${nombre}">
+                <h3>${nombre}</h3>
+                <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
+                <button class="btn-fav">❤ Favorito</button>
             `;
-            div.querySelector('img').addEventListener('click', () => abrirModal(item.imagen));
-            div.querySelector('.btn-eliminar').addEventListener('click', () => {
-                favoritos.splice(idx, 1);
-                renderFavoritos();
-            });
-            cont.appendChild(div);
-        });
-    }
+            
+            card.querySelector('img').addEventListener('click', () => abrirModal(imagen));
+            card.querySelector('.btn-fav').addEventListener('click', () => toggleFavorito({nombre, imagen}));
+            galeria.appendChild(card);
+        }
+    });
+}
 
-    document.getElementById('enviarFavoritos').addEventListener('click', () => {
-        if(favoritos.length === 0) return alert("No hay favoritos para enviar!");
-        let mensaje = favoritos.map(f => `${f.nombre}: ${f.imagen}`).join('\n');
-        let url = `https://wa.me/56954180844?text=${encodeURIComponent(mensaje)}`;
-        window.open(url, '_blank');
+function toggleFavorito(item) {
+    if(!favoritos.find(f => f.imagen === item.imagen)) {
+        favoritos.push(item);
+    }
+    renderFavoritos();
+}
+
+function renderFavoritos() {
+    const cont = document.getElementById('favoritosContainer');
+    // mantener botón de enviar al inicio
+    cont.innerHTML = '<button id="btnWhatsAppFavoritos" class="btn-ws-fav">Enviar WhatsApp Favoritos</button>';
+
+    favoritos.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'fav-card';
+        div.innerHTML = `
+            <img src="${item.imagen}" alt="${item.nombre}">
+            <button class="btn-eliminar">X</button>
+        `;
+        div.querySelector('img').addEventListener('click', () => abrirModal(item.imagen));
+        div.querySelector('.btn-eliminar').addEventListener('click', () => {
+            favoritos.splice(idx, 1);
+            renderFavoritos();
+        });
+        cont.appendChild(div);
     });
 
-    // Modal
-    const modal = document.getElementById('modalImagen');
-    const modalImg = document.getElementById('imagenModal');
-    function abrirModal(url) {
-        modal.style.display = 'flex';
-        modalImg.src = url;
-    }
-    modal.addEventListener('click', () => {
-        modal.style.display = 'none';
-        modalImg.src = '';
-    });
-
-    // Buscador
-    document.getElementById('buscador').oninput = function(e) {
-        const term = e.target.value.toLowerCase();
-        const filtrados = datosCatalogo.filter(item => {
-            const n = (Object.values(item)[0] || "").toLowerCase();
-            return n.includes(term);
+    document.getElementById('btnWhatsAppFavoritos').onclick = () => {
+        if(favoritos.length === 0) return alert("No hay favoritos para enviar");
+        let mensaje = "Hola Likelyon! Me interesan estos diseños:\n\n";
+        favoritos.forEach(f => {
+            mensaje += `${f.nombre}\n${f.imagen}\n\n`;
         });
-        renderizar(filtrados);
+        const url = `https://wa.me/56954180844?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, "_blank");
     };
+}
 
-    window.onload = cargarDatos;
+// Modal
+const modal = document.getElementById('modalImagen');
+const modalImg = document.getElementById('imagenModal');
+function abrirModal(url) {
+    modal.style.display = 'flex';
+    modalImg.src = url;
+}
+modal.addEventListener('click', () => {
+    modal.style.display = 'none';
+    modalImg.src = '';
+});
+
+// Buscador
+document.getElementById('buscador').oninput = function(e) {
+    const term = e.target.value.toLowerCase();
+    const filtrados = datosCatalogo.filter(item => {
+        const n = (Object.values(item)[0] || "").toLowerCase();
+        return n.includes(term);
+    });
+    renderizar(filtrados);
+};
+
+window.onload = cargarDatos;
 </script>
 
 </body>
