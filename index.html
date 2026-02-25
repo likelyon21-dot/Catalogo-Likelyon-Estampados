@@ -22,18 +22,19 @@ header {
 }
 
 .logo {
-    max-width: 200px;
+    max-width: 220px;
 }
 
 .rrss {
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .rrss a {
-    margin: 0 10px;
+    margin: 0 12px;
     text-decoration: none;
     font-weight: bold;
-    color: #333;
+    color: #000;
+    font-size: 15px;
 }
 
 /* BUSCADOR */
@@ -172,12 +173,13 @@ button {
 <body>
 
 <header>
-    <!-- CAMBIA LA URL POR TU LOGO SI ES NECESARIO -->
-    <img src="https://via.placeholder.com/200x80?text=Likelyon+Logo" class="logo">
+    <!-- 🔴 PEGA AQUÍ LA URL REAL DE TU LOGO -->
+    <img src="PEGA_AQUI_URL_REAL_DEL_LOGO" class="logo">
 
     <div class="rrss">
-        <a href="https://instagram.com" target="_blank">Instagram</a>
-        <a href="https://facebook.com" target="_blank">Facebook</a>
+        <!-- 🔴 PEGA AQUÍ TUS LINKS REALES -->
+        <a href="https://instagram.com/TU_USUARIO_REAL" target="_blank">Instagram</a>
+        <a href="https://facebook.com/TU_PAGINA_REAL" target="_blank">Facebook</a>
         <a href="https://wa.me/56954188440" target="_blank">WhatsApp</a>
     </div>
 </header>
@@ -197,7 +199,6 @@ button {
     <button onclick="paginaSiguiente()">Siguiente ➡</button>
 </div>
 
-<!-- MODAL -->
 <div id="modal">
     <span id="cerrarModal">&times;</span>
     <img id="imagenModal">
@@ -257,7 +258,6 @@ function mostrarDiseños() {
             <a href="https://wa.me/${miTelefono}?text=${mensajeWs}" class="btn-ws" target="_blank">WhatsApp</a>
             <button class="btn-fav" onclick="agregarFavorito('${nombreLimpio}','${diseño["URL Imagen"]}')">⭐ Favorito</button>
         `;
-
         galeria.appendChild(card);
     });
 
