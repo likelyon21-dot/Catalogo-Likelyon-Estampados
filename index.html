@@ -10,14 +10,14 @@
     header { background-color: #2c3e50; color: white; padding: 30px; }
     .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; margin-bottom: 15px; }
     .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
-    .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; }
+    .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; font-size: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
     .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; }
     .card:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     .card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 5px; }
     .card h3 { font-size: 13px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
     .card .folder-info { font-size: 10px; color: #7f8c8d; margin-bottom: 8px; font-weight: bold; }
-    .btn-ws, .btn-fav { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 12px; font-weight: bold; border: none; cursor: pointer; }
+    .btn-ws, .btn-fav { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 12px; font-weight: bold; border: none; cursor: pointer; text-align: center; }
     .btn-fav { background: #f39c12; margin-top: 5px; }
     
     /* Favoritos */
@@ -26,9 +26,26 @@
     .fav-card img { width: 100%; height: 50px; object-fit: cover; border-radius: 5px; border: 2px solid white; }
     .btn-eliminar { position: absolute; top: -5px; right: -5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 10px; }
 
-    #modalImagen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 9999; }
-    #modalImagen img { max-width: 90%; max-height: 90%; }
+    /* MODAL CORREGIDO */
+    #modalImagen { 
+        display: none; 
+        position: fixed; 
+        inset: 0; 
+        background: rgba(0,0,0,0.9); 
+        justify-content: center; 
+        align-items: center; 
+        z-index: 9999; 
+        cursor: zoom-out;
+    }
+    #modalImagen img { 
+        max-width: 95%; 
+        max-height: 95%; 
+        border-radius: 5px; 
+        box-shadow: 0 0 20px rgba(255,255,255,0.2);
+    }
+
     #cargarMas { margin: 20px auto; display: none; padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    #status { font-weight: bold; color: #2c3e50; }
 </style>
 </head>
 <body>
@@ -47,7 +64,9 @@
     <button id="cargarMas">Ver más diseños</button>
 </div>
 
-<div id="modalImagen" onclick="this.style.display='none'"><img id="imagenModal" src=""></div>
+<div id="modalImagen" onclick="cerrarModal()">
+    <img id="imagenModal" src="" alt="Vista ampliada">
+</div>
 
 <script>
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=547930647&single=true&output=csv';
@@ -81,12 +100,14 @@ function renderizar(reset = true, lista = datosCatalogo) {
     bloque.forEach(item => {
         const fila = Object.values(item);
         const nombre = fila[0], imagen = fila[1], carpeta = fila[2] || "General";
-        if(imagen.includes('http')) {
+        
+        if(imagen && imagen.includes('http')) {
             const card = document.createElement('div');
             card.className = 'card';
             const msg = encodeURIComponent(`¡Hola! Me interesa este diseño: *${nombre}* (Cat: ${carpeta})`);
+            
             card.innerHTML = `
-                <img src="${imagen}" onclick="abrirModal('${imagen}')" loading="lazy">
+                <img src="${imagen}" onclick="abrirModal('${imagen}')" title="Clic para ampliar">
                 <h3>${nombre}</h3>
                 <div class="folder-info">📂 ${carpeta}</div>
                 <a href="https://wa.me/56954180844?text=${msg}" target="_blank" class="btn-ws">WhatsApp</a>
@@ -100,8 +121,31 @@ function renderizar(reset = true, lista = datosCatalogo) {
 
 document.getElementById('cargarMas').onclick = () => { paginaActual++; renderizar(false); };
 
+// FUNCIONES DEL MODAL CORREGIDAS
+function abrirModal(url) {
+    const modal = document.getElementById('modalImagen');
+    const modalImg = document.getElementById('imagenModal');
+    
+    // Cambiamos el tamaño de la miniatura a uno grande para el modal
+    const urlGrande = url.replace("&sz=w1000", "&sz=w1500");
+    
+    modalImg.src = urlGrande;
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Bloquea el scroll del fondo
+}
+
+function cerrarModal() {
+    const modal = document.getElementById('modalImagen');
+    modal.style.display = 'none';
+    document.getElementById('imagenModal').src = '';
+    document.body.style.overflow = 'auto'; // Devuelve el scroll
+}
+
 function toggleFavorito(nombre, imagen) {
-    if(!favoritos.find(f => f.imagen === imagen)) { favoritos.push({nombre, imagen}); renderFavoritos(); }
+    if(!favoritos.find(f => f.imagen === imagen)) { 
+        favoritos.push({nombre, imagen}); 
+        renderFavoritos(); 
+    }
 }
 
 function renderFavoritos() {
@@ -110,7 +154,8 @@ function renderFavoritos() {
     if(favoritos.length > 0) {
         const btn = document.createElement('button');
         btn.innerHTML = 'Consultar lista ❤';
-        btn.style.cssText = "background:#25d366; color:white; border:none; padding:10px; border-radius:20px; font-weight:bold; cursor:pointer;";
+        btn.className = 'btn-ws';
+        btn.style.borderRadius = "20px";
         btn.onclick = () => {
             let t = '¡Hola! 👋 Me interesan estos diseños:\n\n';
             favoritos.forEach((f, i) => t += `${i+1}. *${f.nombre}*\n🔗 ${f.imagen}\n\n`);
@@ -125,8 +170,6 @@ function renderFavoritos() {
         cont.appendChild(d);
     });
 }
-
-function abrirModal(u) { document.getElementById('modalImagen').style.display='flex'; document.getElementById('imagenModal').src=u; }
 
 document.getElementById('buscador').oninput = function(e) {
     const term = e.target.value.toLowerCase();
