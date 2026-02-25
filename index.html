@@ -8,26 +8,52 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
 <style>
-body { font-family: Arial, sans-serif; background:#f4f4f9; margin:0; text-align:center;}
-header { background:#2c3e50; color:white; padding:30px;}
-.container { max-width:1100px; margin:auto; padding:20px;}
+:root { --primary:#2c3e50; --whatsapp:#25d366; --bg:#f4f4f9; }
+
+body { font-family:'Segoe UI',sans-serif; background:var(--bg); margin:0; text-align:center;}
+header { background:var(--primary); color:white; padding:30px; position:relative;}
+.logo-pyme { max-width:180px; background:white; padding:10px; border-radius:15px; margin-bottom:15px;}
+
+#redesSociales { margin:10px 0; display:flex; justify-content:center; gap:15px;}
+#redesSociales img { width:30px; }
+
+.container { max-width:1100px; margin:20px auto; padding:20px;}
 .search-bar { width:100%; max-width:500px; padding:15px; border-radius:30px; border:2px solid #ddd; margin-bottom:20px; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px;}
+
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:25px;}
+
 .card { background:white; padding:15px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08);}
 .card img { width:100%; height:200px; object-fit:contain; background:#fafafa; border-radius:8px; cursor:pointer;}
 .card h3 { font-size:14px; margin:10px 0;}
-.btn-ws { background:#25d366; color:white; padding:8px; display:block; text-decoration:none; border-radius:6px; margin-bottom:6px;}
+
+.btn-ws { background:var(--whatsapp); color:white; padding:8px; display:block; text-decoration:none; border-radius:6px; margin-bottom:6px;}
+.btn-fav-add { padding:6px; border:none; background:#f1c40f; border-radius:6px; cursor:pointer;}
+
 #status { padding:20px; font-weight:bold;}
-#modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); justify-content:center; align-items:center;}
-#modal img { max-width:90%; max-height:90vh;}
+
+#modalImagen { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); justify-content:center; align-items:center;}
+#modalImagen img { max-width:90%; max-height:90vh;}
 </style>
 </head>
 
 <body>
 
 <header>
+
+<img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme">
+
+<div id="redesSociales">
+<a href="https://www.instagram.com/likelyon_estampados/" target="_blank">
+<img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg">
+</a>
+<a href="https://web.facebook.com/LikelyonSpa" target="_blank">
+<img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png">
+</a>
+</div>
+
 <h1>Likelyon Estampados</h1>
-<p>Catálogo Oficial</p>
+<p>Catálogo Oficial de Diseños</p>
+
 </header>
 
 <div class="container">
@@ -36,100 +62,102 @@ header { background:#2c3e50; color:white; padding:30px;}
 <div id="galeria" class="grid"></div>
 </div>
 
-<div id="modal" onclick="this.style.display='none'">
-<img id="imgModal">
+<div id="modalImagen" onclick="this.style.display='none'">
+<img id="imagenModal">
 </div>
 
 <script>
 
-// ✅ CSV CORRECTO (gid actualizado)
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=547930647&single=true&output=csv";
+// 🔥 CSV usando método export (más estable)
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/export?format=csv&gid=547930647";
 
 let datosCatalogo = [];
 
-// Convertir link Drive
-function convertirLinkDrive(url) {
-    if (!url) return "";
+// Convertir links Google Drive correctamente
+function convertirLinkDrive(url){
+    if(!url) return "";
     const id = url.match(/[-\w]{25,}/);
     return id ? `https://drive.google.com/uc?export=view&id=${id[0]}` : url;
 }
 
 // Cargar CSV
-function cargarDatos() {
-    Papa.parse(CSV_URL, {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
+function cargarDatos(){
+    Papa.parse(CSV_URL,{
+        download:true,
+        header:true,
+        skipEmptyLines:true,
+        complete:function(results){
 
-            console.log("Respuesta CSV:", results);
+            console.log("Datos recibidos:", results);
 
-            if (!results.data || results.data.length === 0) {
-                document.getElementById("status").innerText = "⚠️ El CSV está vacío o no está publicado correctamente.";
+            if(!results.data || results.data.length===0){
+                document.getElementById("status").innerText="⚠️ El CSV está vacío o bloqueado.";
                 return;
             }
 
             datosCatalogo = results.data
-                .filter(f => f["Nombre"] && f["URL Imagen"])
-                .map(f => ({
-                    nombre: f["Nombre"].trim(),
-                    imagen: convertirLinkDrive(f["URL Imagen"].trim())
-                }));
+            .filter(f=>f["Nombre"] && f["URL Imagen"])
+            .map(f=>({
+                nombre:f["Nombre"].trim(),
+                imagen:convertirLinkDrive(f["URL Imagen"].trim())
+            }));
 
-            if (datosCatalogo.length === 0) {
-                document.getElementById("status").innerText = "⚠️ No se encontraron columnas 'Nombre' y 'URL Imagen'.";
+            if(datosCatalogo.length===0){
+                document.getElementById("status").innerText="⚠️ No se detectaron columnas válidas.";
                 return;
             }
 
-            document.getElementById("status").style.display = "none";
+            document.getElementById("status").style.display="none";
             mostrarDiseños();
         },
-        error: function(error) {
-            console.error("Error PapaParse:", error);
-            document.getElementById("status").innerText = "❌ Error cargando CSV.";
+        error:function(err){
+            console.error("Error PapaParse:", err);
+            document.getElementById("status").innerText="❌ Error cargando CSV.";
         }
     });
 }
 
 // Mostrar diseños
-function mostrarDiseños() {
-    const galeria = document.getElementById('galeria');
-    const busqueda = document.getElementById('buscador').value.toLowerCase();
-    const miTelefono = "56954188440";
-    
-    const filtrados = datosCatalogo.filter(d => 
+function mostrarDiseños(){
+    const galeria=document.getElementById('galeria');
+    const busqueda=document.getElementById('buscador').value.toLowerCase();
+    const miTelefono="56954188440";
+
+    const filtrados=datosCatalogo.filter(d=>
         d.nombre.toLowerCase().includes(busqueda)
     );
 
-    galeria.innerHTML = "";
-    
-    filtrados.forEach(diseño => {
+    galeria.innerHTML="";
 
-        const nombreLimpio = diseño.nombre.replace(/\.[^/.]+$/, "");
-        const mensajeWs = encodeURIComponent(`¡Hola Likelyon! 👋 Me interesa este diseño para un estampado: ${nombreLimpio}`);
-        
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            <img src="${diseño.imagen}" onclick="ampliarImagen('${diseño.imagen}')" loading="lazy">
+    filtrados.forEach(diseño=>{
+
+        const nombreLimpio=diseño.nombre.replace(/\.[^/.]+$/,"");
+        const mensajeWs=encodeURIComponent(`¡Hola Likelyon! 👋 Me interesa este diseño: ${nombreLimpio}`);
+
+        const card=document.createElement('div');
+        card.className='card';
+        card.innerHTML=`
+            <img src="${diseño.imagen}" onclick="abrirModal('${diseño.imagen}')" loading="lazy" onerror="this.src='https://via.placeholder.com/200x200?text=Sin+Imagen'">
             <h3>${nombreLimpio}</h3>
-            <a href="https://wa.me/${miTelefono}?text=${mensajeWs}" class="btn-ws" target="_blank">📲 Consultar por WhatsApp</a>
+            <a href="https://wa.me/${miTelefono}?text=${mensajeWs}" class="btn-ws" target="_blank">📲 Consultar</a>
+            <button class="btn-fav-add">⭐ Favorito</button>
         `;
+
         galeria.appendChild(card);
     });
 }
 
-// Modal imagen
-function ampliarImagen(url) {
-    document.getElementById("modal").style.display = "flex";
-    document.getElementById("imgModal").src = url;
+// Modal
+function abrirModal(url){
+    document.getElementById("modalImagen").style.display="flex";
+    document.getElementById("imagenModal").src=url;
 }
 
 // Buscador
-document.getElementById("buscador").addEventListener("input", mostrarDiseños);
+document.getElementById("buscador").addEventListener("input",mostrarDiseños);
 
 // Iniciar
-window.onload = cargarDatos;
+window.onload=cargarDatos;
 
 </script>
 
