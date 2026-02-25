@@ -114,14 +114,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('contadorVisitas').innerText = `Visitas: ${visitas}`;
 });
 
-// Convertir links de Google Drive a directos (solo si tienen /d/ID/)
+// Función para transformar enlaces de Drive a enlaces directos
 function urlDirectaDrive(url) {
-    try {
-        const regex = /\/d\/([a-zA-Z0-9_-]+)/;
-        const match = url.match(regex);
-        if(match && match[1]) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
-        return url; // si no es de Drive, usar URL tal cual
-    } catch(e) { return url; }
+    let match = url.match(/(?:id=|\/d\/)([\w-]+)/);
+    if(match && match[1]) {
+        return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+    }
+    return url;
 }
 
 function cargarDatos() {
@@ -151,7 +150,9 @@ function renderizar(reset = true, lista = datosCatalogo) {
         const nombre = fila[0] || "Diseño";
         let imagen = fila[1] || "";
         if(imagen && imagen.includes('http')) {
+            // Convertir Drive a enlace directo
             imagen = urlDirectaDrive(imagen);
+
             const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre.toUpperCase()}\n\nVer imagen: `) + imagen;
             const card = document.createElement('div');
             card.className = 'card';
@@ -182,7 +183,6 @@ function renderFavoritos() {
     cont.innerHTML = '';
 
     if(favoritos.length > 0) {
-        // Botón WhatsApp para todos los favoritos
         const btnWsFav = document.createElement('button');
         btnWsFav.id = 'btnWsFavoritos';
         btnWsFav.innerText = 'Enviar Favoritos WhatsApp';
