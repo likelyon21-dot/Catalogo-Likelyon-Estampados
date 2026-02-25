@@ -1,117 +1,267 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogo - Likelyon Estampados</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-<style>
-    body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; min-height: 100vh;}
-    header { background-color: #2c3e50; color: white; padding: 30px; }
-    .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-    .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
-    .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; font-size: 16px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-    .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
-    .card:hover { transform: scale(1.03); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-    .card img { width: 100%; height: 200px; object-fit: contain; background: #fff; border-radius: 5px; }
-    .card h3 { font-size: 13px; color: #333; margin: 12px 0; text-transform: uppercase; height: 32px; overflow: hidden; }
-    .categoria-tag { font-size: 10px; color: #7f8c8d; background: #f0f3f4; padding: 4px; border-radius: 4px; margin-bottom: 10px; font-weight: bold; }
-    .btn-ws { background: #25d366; color: white; text-decoration: none; padding: 10px; border-radius: 5px; font-size: 12px; font-weight: bold; }
-    
-    /* Modal */
-    #modalImagen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; z-index: 9999; }
-    #modalImagen img { max-width: 95%; max-height: 95%; border-radius: 5px; }
-    #status { padding: 40px; font-weight: bold; color: #2c3e50; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Diseños - Likelyon Estampados</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .logo-pyme {
+            max-width: 180px; 
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background-color: white;
+            padding: 5px;
+        }
+
+        header h1 { margin: 0; font-size: 2.5em; letter-spacing: 1px; }
+        header p { font-size: 1.2em; color: #d1d8e0; margin-top: 5px; margin-bottom: 15px; }
+        
+        .datos-contacto {
+            font-size: 1em;
+            color: white;
+            background-color: #25d366;
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .datos-contacto:hover { background-color: #128c7e; }
+        
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+        
+        .controles {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            flex: 1;
+            min-width: 280px;
+            max-width: 500px;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-bar:focus { border-color: #3498db; }
+
+        .filter-select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #bdc3c7;
+            background: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #estado-carga { font-size: 1.1em; font-weight: bold; color: #27ae60; margin-bottom: 30px; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            text-align: center;
+            padding: 15px;
+            transition: transform 0.2s;
+            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .card:hover { transform: translateY(-5px); border-color: #3498db; }
+        
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+        }
+
+        .card h3 { font-size: 14px; margin: 15px 0 5px; color: #2c3e50; height: 35px; overflow: hidden; }
+        
+        .tag-carpeta {
+            font-size: 11px;
+            color: #7f8c8d;
+            background: #ecf0f1;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .card a {
+            display: block;
+            padding: 10px;
+            background-color: #25d366;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 13px;
+            transition: background-color 0.3s;
+        }
+        .card a:hover { background-color: #128c7e; }
+        
+        .mensaje-limite {
+            grid-column: 1 / -1;
+            margin-top: 30px;
+            font-size: 1.1em;
+            color: #7f8c8d;
+            background-color: #e8ecef;
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
 
-<header>
-    <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Logo">
-    <h1>Likelyon Estampados</h1>
-    <p>Catálogo de Diseños JPG</p>
-</header>
+    <header>
+        <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" alt="Logo Likelyon Estampados" class="logo-pyme">
+        <h1>Likelyon Estampados</h1>
+        <p>Catálogo Oficial de Diseños</p>
+        <a href="https://wa.me/56954180844" class="datos-contacto" target="_blank">📱 Consultas al WhatsApp</a>
+    </header>
 
-<div class="container">
-    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño o categoría...">
-    <div id="status">Cargando galería de imágenes...</div>
-    <div id="galeria" class="grid"></div>
-</div>
+    <div class="container">
+        <div class="controles">
+            <input type="text" id="buscador" class="search-bar" placeholder="⏳ Cargando base de datos..." disabled>
+            <select id="filtro-carpeta" class="filter-select" disabled>
+                <option value="">Todas las categorías</option>
+            </select>
+        </div>
+        
+        <div id="estado-carga">Preparando catálogo...</div>
+        <div id="galeria" class="grid"></div>
+    </div>
 
-<div id="modalImagen" onclick="this.style.display='none'"><img id="imagenModal" src=""></div>
+    <script>
+        // REEMPLAZA ESTE URL POR EL DE TU GOOGLE SHEETS PUBLICADO COMO CSV
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
+        
+        let todosLosDisenos = [];
+        const LIMITE_MOSTRAR = 60; 
 
-<script>
-// URL vinculada a la hoja "Catalogo"
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=547930647&single=true&output=csv';
-
-let datosCatalogo = [];
-
-function cargarDatos() {
-    // Forzamos actualización con timestamp
-    Papa.parse(CSV_URL + '&t=' + new Date().getTime(), {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-            datosCatalogo = results.data.filter(item => {
-                const f = Object.values(item);
-                return f[0] && f[1]; 
+        function inicializar() {
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                complete: function(resultados) {
+                    // Adaptamos a los nombres de columna del nuevo script
+                    todosLosDisenos = resultados.data.filter(fila => fila['Nombre del Diseño'] || fila['Nombre']);
+                    
+                    configurarFiltros();
+                    document.getElementById('estado-carga').style.display = 'none';
+                    document.getElementById('buscador').disabled = false;
+                    document.getElementById('buscador').placeholder = `🔍 Buscar entre ${todosLosDisenos.length} diseños...`;
+                    document.getElementById('filtro-carpeta').disabled = false;
+                    
+                    filtrarYMostrar();
+                }
             });
-            document.getElementById('status').style.display = 'none';
-            renderizar();
-        },
-        error: function() {
-            document.getElementById('status').innerText = "Error al cargar la base de datos.";
         }
-    });
-}
 
-function renderizar(lista = datosCatalogo) {
-    const galeria = document.getElementById('galeria');
-    galeria.innerHTML = '';
-
-    lista.forEach(item => {
-        const fila = Object.values(item);
-        const nombre = fila[0];
-        const url = fila[1];
-        const carpeta = fila[2] || "General";
-
-        if(url && url.includes('http')) {
-            const card = document.createElement('div');
-            card.className = 'card';
-            const msg = encodeURIComponent(`¡Hola Likelyon! Me interesa el diseño: *${nombre}*`);
+        function configurarFiltros() {
+            const selector = document.getElementById('filtro-carpeta');
+            const carpetas = [...new Set(todosLosDisenos.map(d => d.Carpeta).filter(Boolean))].sort();
             
-            card.innerHTML = `
-                <img src="${url}" 
-                     onclick="abrirModal('${url}')" 
-                     referrerpolicy="no-referrer" 
-                     onerror="this.src='https://via.placeholder.com/200?text=Cargando...'">
-                <h3>${nombre}</h3>
-                <span class="categoria-tag">📂 ${carpeta}</span>
-                <a href="https://wa.me/56954180844?text=${msg}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
-            `;
-            galeria.appendChild(card);
+            carpetas.forEach(carpeta => {
+                const opt = document.createElement('option');
+                opt.value = carpeta;
+                opt.textContent = carpeta;
+                selector.appendChild(opt);
+            });
         }
-    });
-}
 
-function abrirModal(url) {
-    document.getElementById('modalImagen').style.display = 'flex';
-    document.getElementById('imagenModal').src = url;
-}
+        function filtrarYMostrar() {
+            const texto = document.getElementById('buscador').value.toLowerCase();
+            const carpetaSeleccionada = document.getElementById('filtro-carpeta').value;
 
-// Buscador
-document.getElementById('buscador').oninput = function(e) {
-    const term = e.target.value.toLowerCase();
-    const filtrados = datosCatalogo.filter(item => {
-        const fila = Object.values(item);
-        return (fila[0] + " " + (fila[2] || "")).toLowerCase().includes(term);
-    });
-    renderizar(filtrados);
-};
+            const filtrados = todosLosDisenos.filter(d => {
+                const nombre = (d['Nombre del Diseño'] || d['Nombre'] || '').toLowerCase();
+                const carpeta = (d['Carpeta'] || '');
+                const coincideTexto = nombre.includes(texto);
+                const coincideCarpeta = carpetaSeleccionada === "" || carpeta === carpetaSeleccionada;
+                return coincideTexto && coincideCarpeta;
+            });
 
-window.onload = cargarDatos;
-</script>
+            mostrarDisenos(filtrados);
+        }
+
+        function mostrarDisenos(disenos) {
+            const galeria = document.getElementById('galeria');
+            galeria.innerHTML = '';
+            
+            disenos.slice(0, LIMITE_MOSTRAR).forEach(d => {
+                const nombreRaw = d['Nombre del Diseño'] || d['Nombre'];
+                const nombreLimpio = nombreRaw.replace(/\.[^/.]+$/, "");
+                const urlImg = d['URL Miniatura'] || d['URL Imagen'];
+                const carpeta = d['Carpeta'] || 'General';
+                const linkWA = `https://wa.me/56954180844?text=Hola! Me interesa el diseño: ${encodeURIComponent(nombreLimpio)}`;
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <img src="${urlImg}" alt="${nombreLimpio}" loading="lazy">
+                    <div>
+                        <h3>${nombreLimpio}</h3>
+                        <span class="tag-carpeta">📂 ${carpeta}</span>
+                    </div>
+                    <a href="${linkWA}" target="_blank">Consultar WhatsApp</a>
+                `;
+                galeria.appendChild(card);
+            });
+
+            if (disenos.length > LIMITE_MOSTRAR) {
+                const aviso = document.createElement('div');
+                aviso.className = 'mensaje-limite';
+                aviso.innerHTML = `Mostrando los primeros <b>${LIMITE_MOSTRAR}</b> de <b>${disenos.length}</b> resultados. <br>Usa el buscador para filtrar más específicamente.`;
+                galeria.appendChild(aviso);
+            }
+        }
+
+        document.getElementById('buscador').addEventListener('input', filtrarYMostrar);
+        document.getElementById('filtro-carpeta').addEventListener('change', filtrarYMostrar);
+
+        inicializar();
+    </script>
 </body>
 </html>
