@@ -3,173 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo Likelyon Estampados</title>
+    <title>Catálogo - Likelyon Estampados</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
         :root { --primary: #2c3e50; --accent: #e74c3c; --whatsapp: #25d366; --bg: #f4f4f9; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 0; }
-        header { background-color: var(--primary); color: white; padding: 20px; text-align: center; }
-        .logo-pyme { max-width: 120px; background: white; padding: 5px; border-radius: 8px; margin-bottom: 10px; }
-        .container { max-width: 1100px; margin: 20px auto; padding: 0 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: #333; }
         
-        /* Controles */
-        .controles { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-        .search-bar { flex: 2; min-width: 250px; padding: 12px; border: 2px solid #bdc3c7; border-radius: 8px; }
-        .filter-select { flex: 1; padding: 12px; border: 2px solid #bdc3c7; border-radius: 8px; }
+        header { background-color: var(--primary); color: white; padding: 25px 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .logo-pyme { max-width: 140px; background: white; padding: 5px; border-radius: 10px; margin-bottom: 10px; }
 
-        /* Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; text-align: center; }
-        .card img { width: 100%; height: 180px; object-fit: contain; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px; }
-        
-        /* Favoritos */
-        .btn-fav { position: absolute; top: 20px; right: 20px; background: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 20px; color: #ccc; }
+        .container { max-width: 1100px; margin: 20px auto; padding: 0 20px; }
+
+        /* Controles de búsqueda */
+        .controles { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; }
+        .search-bar { flex: 2; min-width: 250px; padding: 15px; border: 2px solid #bdc3c7; border-radius: 10px; font-size: 16px; outline: none; }
+        .search-bar:focus { border-color: var(--primary); }
+        .filter-select { flex: 1; padding: 15px; border: 2px solid #bdc3c7; border-radius: 10px; background: white; cursor: pointer; }
+
+        /* Cuadrícula de Diseños */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
+        .card { background: white; border-radius: 15px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); position: relative; transition: 0.3s; border: 1px solid #eee; display: flex; flex-direction: column; text-align: center; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: 200px; object-fit: contain; background: #fdfdfd; border-radius: 10px; margin-bottom: 12px; }
+        .card h3 { font-size: 14px; margin: 5px 0; color: var(--primary); height: 40px; overflow: hidden; }
+        .tag-cat { font-size: 11px; background: #edf2f7; color: #4a5568; padding: 3px 10px; border-radius: 20px; align-self: center; margin-bottom: 10px; }
+
+        /* Sistema de Favoritos */
+        .btn-fav { position: absolute; top: 20px; right: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.15); font-size: 22px; color: #ddd; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-fav.active { color: var(--accent); }
-        #panel-favoritos { position: fixed; right: -350px; top: 0; width: 300px; height: 100%; background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.1); transition: 0.4s; z-index: 1000; padding: 20px; display: flex; flex-direction: column; }
+
+        #panel-favoritos { position: fixed; right: -350px; top: 0; width: 320px; height: 100%; background: white; box-shadow: -10px 0 30px rgba(0,0,0,0.15); transition: 0.4s; z-index: 1000; padding: 25px; display: flex; flex-direction: column; }
         #panel-favoritos.open { right: 0; }
-        .fav-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .fav-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        .fav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f4f4f9; padding-bottom: 10px; }
         
-        .float-fav { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; z-index: 999; }
-        .badge { position: absolute; top: 0; right: 0; background: var(--accent); color: white; border-radius: 50%; padding: 2px 7px; font-size: 12px; }
-        .btn-send-wa { background: var(--whatsapp); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: auto; width: 100%; }
+        .lista-favs { flex: 1; overflow-y: auto; }
+        .fav-item { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; background: #f8fafc; padding: 10px; border-radius: 10px; }
+        .fav-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
+        .fav-item h4 { flex: 1; font-size: 12px; margin: 0; }
+
+        .float-btn { position: fixed; bottom: 25px; right: 25px; background: var(--primary); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 28px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 999; }
+        .counter { position: absolute; top: 0; right: 0; background: var(--accent); color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
+
+        .btn-wa-final { background: var(--whatsapp); color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 15px; width: 100%; transition: 0.3s; }
+        .btn-wa-final:hover { background: #1ebe57; }
+
+        #msg-vacio { text-align: center; color: #a0aec0; margin-top: 40px; font-size: 18px; grid-column: 1/-1; }
     </style>
 </head>
 <body>
 
-    <header>
-        <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme">
-        <h1>Likelyon Estampados</h1>
-    </header>
+<header>
+    <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Logo">
+    <h1>Likelyon Estampados</h1>
+    <p>Selecciona tus diseños y haz tu pedido</p>
+</header>
 
-    <div class="container">
-        <div class="controles">
-            <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar por nombre...">
-            <select id="filtro-carpeta" class="filter-select">
-                <option value="">Todas las categorías</option>
-            </select>
+<div class="container">
+    <div class="controles">
+        <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar por nombre de diseño...">
+        <select id="filtro-cat" class="filter-select">
+            <option value="">📂 Todas las categorías</option>
+        </select>
+    </div>
+
+    <div id="galeria" class="grid">
+        <div id="msg-vacio">Conectando con la base de datos...</div>
+    </div>
+</div>
+
+<div class="float-btn" onclick="toggleMenu()">
+    ❤️ <span id="fav-count" class="counter">0</span>
+</div>
+
+<div id="panel-favoritos">
+    <div class="fav-header">
+        <h3>Mis Seleccionados</h3>
+        <span style="cursor:pointer; font-size: 20px;" onclick="toggleMenu()">✖</span>
+    </div>
+    <div id="lista-favs" class="lista-favs">
         </div>
-        <div id="estado-carga" style="text-align: center; padding: 20px;">Cargando catálogo...</div>
-        <div id="galeria" class="grid"></div>
-    </div>
+    <button class="btn-wa-final" onclick="enviarPedido()">
+        Enviar pedido por WhatsApp 📱
+    </button>
+</div>
 
-    <div class="float-fav" onclick="toggleFavs()">❤️ <span id="fav-count" class="badge">0</span></div>
+<script>
+    // TU LINK ACTUALIZADO
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=547930647&single=true&output=csv';
+    
+    let disenos = [];
+    let favoritos = JSON.parse(localStorage.getItem('lib_favs')) || [];
 
-    <div id="panel-favoritos">
-        <div style="cursor:pointer; color:red; font-weight:bold" onclick="toggleFavs()">✖ CERRAR</div>
-        <h3>Mis Favoritos</h3>
-        <div id="lista-favoritos" style="overflow-y: auto; flex: 1;"></div>
-        <button class="btn-send-wa" onclick="enviarPedido()">Enviar Pedido WhatsApp 📱</button>
-    </div>
+    function cargarDatos() {
+        Papa.parse(CSV_URL, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                // Buscamos las columnas sin importar cómo se llamen (Nombre, URL, Carpeta)
+                disenos = results.data.map(item => {
+                    const keys = Object.keys(item);
+                    return {
+                        nombre: item[keys.find(k => k.toLowerCase().includes('nom'))] || 'Sin nombre',
+                        url: item[keys.find(k => k.toLowerCase().includes('url') || k.toLowerCase().includes('mini') || k.toLowerCase().includes('imagen'))] || '',
+                        cat: item[keys.find(k => k.toLowerCase().includes('carp') || k.toLowerCase().includes('cat'))] || 'General'
+                    };
+                }).filter(d => d.url !== '');
 
-    <script>
-        // TU URL DE GOOGLE SHEETS (CSV)
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
+                generarFiltros();
+                mostrarDisenos();
+                actualizarPanel();
+            },
+            error: function() {
+                document.getElementById('msg-vacio').innerHTML = "⚠️ Error al conectar. Verifica que el archivo esté publicado.";
+            }
+        });
+    }
+
+    function generarFiltros() {
+        const selector = document.getElementById('filtro-cat');
+        const categorias = [...new Set(disenos.map(d => d.cat))].sort();
+        categorias.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c; opt.innerText = c;
+            selector.appendChild(opt);
+        });
+    }
+
+    function mostrarDisenos() {
+        const galeria = document.getElementById('galeria');
+        const search = document.getElementById('buscador').value.toLowerCase();
+        const filter = document.getElementById('filtro-cat').value;
+
+        const filtrados = disenos.filter(d => {
+            const matchSearch = d.nombre.toLowerCase().includes(search);
+            const matchCat = filter === "" || d.cat === filter;
+            return matchSearch && matchCat;
+        });
+
+        galeria.innerHTML = filtrados.length ? '' : '<div id="msg-vacio">No se encontraron diseños con ese nombre.</div>';
+
+        filtrados.forEach(d => {
+            const isFav = favoritos.some(f => f.nombre === d.nombre);
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${encodeURIComponent(JSON.stringify(d))}')">❤</button>
+                <img src="${d.url}" onerror="this.src='https://via.placeholder.com/200?text=Cargando...'">
+                <span class="tag-cat">${d.cat}</span>
+                <h3>${d.nombre.replace(/\.[^/.]+$/, "")}</h3>
+            `;
+            galeria.appendChild(div);
+        });
+    }
+
+    function toggleFav(dataStr) {
+        const d = JSON.parse(decodeURIComponent(dataStr));
+        const index = favoritos.findIndex(f => f.nombre === d.nombre);
         
-        let todosLosDisenos = [];
-        let favoritos = JSON.parse(localStorage.getItem('favs_likelyon')) || [];
-
-        function inicializar() {
-            Papa.parse(CSV_URL, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(res) {
-                    console.log("Datos recibidos:", res.data); // Para revisar en consola si hay dudas
-                    
-                    // Mapeo flexible: intenta detectar cualquier nombre de columna
-                    todosLosDisenos = res.data.map(fila => {
-                        return {
-                            nombre: fila['Nombre'] || fila['Nombre del Diseño'] || fila['nombre'] || '',
-                            url: fila['URL Imagen'] || fila['URL Miniatura'] || fila['url'] || '',
-                            carpeta: fila['Carpeta'] || fila['carpeta'] || 'General'
-                        };
-                    }).filter(d => d.nombre !== '');
-
-                    document.getElementById('estado-carga').style.display = 'none';
-                    renderFiltros();
-                    renderGaleria();
-                    actualizarFavoritosUI();
-                },
-                error: function() {
-                    document.getElementById('estado-carga').innerHTML = "⚠️ Error al conectar con Google Sheets.";
-                }
-            });
+        if (index > -1) {
+            favoritos.splice(index, 1);
+        } else {
+            favoritos.push(d);
         }
+        
+        localStorage.setItem('lib_favs', JSON.stringify(favoritos));
+        actualizarPanel();
+        mostrarDisenos();
+    }
 
-        function renderFiltros() {
-            const selector = document.getElementById('filtro-carpeta');
-            const cats = [...new Set(todosLosDisenos.map(d => d.carpeta))].sort();
-            cats.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c; opt.textContent = c;
-                selector.appendChild(opt);
-            });
-        }
+    function actualizarPanel() {
+        const lista = document.getElementById('lista-favs');
+        document.getElementById('fav-count').innerText = favoritos.length;
+        lista.innerHTML = favoritos.length ? '' : '<p style="text-align:center; color:gray">Aún no tienes favoritos</p>';
 
-        function renderGaleria() {
-            const galeria = document.getElementById('galeria');
-            const texto = document.getElementById('buscador').value.toLowerCase();
-            const cat = document.getElementById('filtro-carpeta').value;
+        favoritos.forEach(f => {
+            const item = document.createElement('div');
+            item.className = 'fav-item';
+            item.innerHTML = `
+                <img src="${f.url}">
+                <h4>${f.nombre.replace(/\.[^/.]+$/, "")}</h4>
+                <span style="cursor:pointer" onclick="toggleFav('${encodeURIComponent(JSON.stringify(f))}')">🗑️</span>
+            `;
+            lista.appendChild(item);
+        });
+    }
 
-            const filtrados = todosLosDisenos.filter(d => {
-                return d.nombre.toLowerCase().includes(texto) && (cat === "" || d.carpeta === cat);
-            });
+    function toggleMenu() {
+        document.getElementById('panel-favoritos').classList.toggle('open');
+    }
 
-            galeria.innerHTML = filtrados.length === 0 ? '<p>No se encontraron diseños.</p>' : '';
-            
-            filtrados.forEach(d => {
-                const isFav = favoritos.some(f => f.id === d.nombre);
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${d.nombre}', '${d.url}')">❤</button>
-                    <img src="${d.url}" onerror="this.src='https://via.placeholder.com/200?text=Sin+Imagen'">
-                    <h3 style="font-size:13px;">${d.nombre.replace(/\.[^/.]+$/, "")}</h3>
-                    <small style="color:gray">${d.carpeta}</small>
-                `;
-                galeria.appendChild(card);
-            });
-        }
+    function enviarPedido() {
+        if (!favoritos.length) return alert("Selecciona al menos un diseño");
+        
+        let mensaje = "¡Hola Likelyon Estampados! 👋 Me interesan estos diseños:\n\n";
+        favoritos.forEach((f, i) => {
+            mensaje += `${i + 1}. ${f.nombre.replace(/\.[^/.]+$/, "")} (Cat: ${f.cat})\n`;
+        });
+        
+        const urlWA = `https://wa.me/56954180844?text=${encodeURIComponent(mensaje)}`;
+        window.open(urlWA, '_blank');
+    }
 
-        function toggleFav(id, img) {
-            const index = favoritos.findIndex(f => f.id === id);
-            if (index > -1) favoritos.splice(index, 1);
-            else favoritos.push({ id, img });
-            
-            localStorage.setItem('favs_likelyon', JSON.stringify(favoritos));
-            actualizarFavoritosUI();
-            renderGaleria();
-        }
+    document.getElementById('buscador').addEventListener('input', mostrarDisenos);
+    document.getElementById('filtro-cat').addEventListener('change', mostrarDisenos);
 
-        function actualizarFavoritosUI() {
-            const lista = document.getElementById('lista-favoritos');
-            document.getElementById('fav-count').innerText = favoritos.length;
-            lista.innerHTML = '';
-            favoritos.forEach(f => {
-                const item = document.createElement('div');
-                item.className = 'fav-item';
-                item.innerHTML = `
-                    <img src="${f.img}">
-                    <h4 style="font-size:11px">${f.id.replace(/\.[^/.]+$/, "")}</h4>
-                    <span style="cursor:pointer" onclick="toggleFav('${f.id}')">🗑️</span>
-                `;
-                lista.appendChild(item);
-            });
-        }
+    cargarDatos();
+</script>
 
-        function toggleFavs() { document.getElementById('panel-favoritos').classList.toggle('open'); }
-
-        function enviarPedido() {
-            if (favoritos.length === 0) return alert("Selecciona diseños primero.");
-            let msg = "¡Hola Likelyon Estampados! 👋 Me interesan estos diseños:\n\n";
-            favoritos.forEach((f, i) => msg += `${i+1}. ${f.id.replace(/\.[^/.]+$/, "")}\n`);
-            window.open(`https://wa.me/56954180844?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        document.getElementById('buscador').addEventListener('input', renderGaleria);
-        document.getElementById('filtro-carpeta').addEventListener('change', renderGaleria);
-        inicializar();
-    </script>
 </body>
 </html>
