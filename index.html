@@ -17,15 +17,14 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; text-align: center; }
         .card img { width: 100%; height: 180px; object-fit: contain; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px; }
-        .btn-fav { position: absolute; top: 20px; right: 20px; background: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 20px; color: #ccc; display: flex; align-items: center; justify-content: center; }
+        .btn-fav { position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 20px; color: #ccc; display: flex; align-items: center; justify-content: center; }
         .btn-fav.active { color: var(--accent); }
         #panel-favoritos { position: fixed; right: -350px; top: 0; width: 300px; height: 100%; background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.1); transition: 0.4s; z-index: 1000; padding: 20px; display: flex; flex-direction: column; }
         #panel-favoritos.open { right: 0; }
-        .fav-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .fav-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
         .float-btn { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; z-index: 999; }
-        .badge { position: absolute; top: 0; right: 0; background: var(--accent); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: flex; align-items: center; justify-content: center; }
-        .btn-wa-final { background: var(--whatsapp); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: auto; width: 100%; }
+        .badge { position: absolute; top: 0; right: 0; background: var(--accent); color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+        .btn-wa { background: var(--whatsapp); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: auto; width: 100%; }
+        .error-box { background: #fee2e2; color: #b91c1c; padding: 20px; border-radius: 8px; border: 1px solid #f87171; text-align: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -36,129 +35,146 @@
 </header>
 
 <div class="container">
+    <div id="error-display"></div>
+    
     <div class="controles">
-        <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño...">
-        <select id="filtro-cat" class="filter-select">
+        <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño..." oninput="filtrar()">
+        <select id="filtro-cat" class="filter-select" onchange="filtrar()">
             <option value="">📂 Todas las categorías</option>
         </select>
     </div>
-    <div id="estado" style="text-align: center; padding: 20px; font-weight: bold;">Cargando diseños...</div>
+    
+    <div id="cargando" style="text-align:center; padding: 50px;">
+        <h3>⏳ Cargando catálogo...</h3>
+        <p>Si tarda demasiado, verifica los permisos del Excel.</p>
+    </div>
+
     <div id="galeria" class="grid"></div>
 </div>
 
-<div class="float-btn" onclick="toggleMenu()">❤️ <span id="fav-count" class="badge">0</span></div>
+<div class="float-btn" onclick="toggleFavs()">❤️ <span id="fav-count" class="badge">0</span></div>
 
 <div id="panel-favoritos">
-    <div style="display:flex; justify-content: space-between; align-items: center;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
         <h3>Mis Favoritos</h3>
-        <span style="cursor:pointer; font-weight:bold; color:red" onclick="toggleMenu()">✖</span>
+        <span onclick="toggleFavs()" style="cursor:pointer; font-weight:bold; color:red">✖</span>
     </div>
-    <div id="lista-favs" style="flex:1; overflow-y:auto;"></div>
-    <button class="btn-wa-final" onclick="enviarPedido()">Enviar a WhatsApp 📱</button>
+    <div id="lista-favs" style="flex:1; overflow-y:auto; margin: 15px 0;"></div>
+    <button class="btn-wa" onclick="enviarWA()">Enviar a WhatsApp 📱</button>
 </div>
 
 <script>
-    // URL FORZADA PARA DESCARGA DIRECTA (Evita bloqueos de Google)
+    // URL DE RESPALDO (FORMATO EXPORT)
     const SHEET_ID = '1tJRmftiJnrdtYLHzoYmD7nnp-4G3GeCtcbNDn5KKUSw';
-    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=547930647`;
+    const GID = '547930647';
+    const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}`;
 
-    let datos = [];
-    let favoritos = JSON.parse(localStorage.getItem('favs_lik')) || [];
+    let todosLosDatos = [];
+    let favs = JSON.parse(localStorage.getItem('favs_lik')) || [];
 
-    function cargarCatalogo() {
-        Papa.parse(CSV_URL, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                if(results.data.length > 0) {
-                    datos = results.data.map(f => ({
-                        n: f['Nombre'] || f['Nombre del Diseño'] || '',
-                        u: f['URL Imagen'] || f['URL Miniatura'] || '',
-                        c: f['Carpeta'] || 'General'
-                    })).filter(item => item.u !== '');
-                    
-                    document.getElementById('estado').style.display = 'none';
-                    generarCategorias();
-                    renderizar();
-                    actualizarFavs();
-                } else {
-                    document.getElementById('estado').innerText = "⚠️ La hoja de Excel parece estar vacía.";
+    async function cargar() {
+        try {
+            const response = await fetch(URL);
+            if (!response.ok) throw new Error("No se pudo acceder al archivo.");
+            
+            const texto = await response.text();
+            
+            Papa.parse(texto, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    todosLosDatos = results.data.map(f => ({
+                        nombre: f['Nombre'] || f['Nombre del Diseño'] || Object.values(f)[0],
+                        url: f['URL Imagen'] || f['URL Miniatura'] || Object.values(f)[1],
+                        cat: f['Carpeta'] || 'General'
+                    })).filter(d => d.url && d.url.includes('http'));
+
+                    document.getElementById('cargando').style.display = 'none';
+                    if(todosLosDatos.length === 0) {
+                        mostrarError("El Excel se leyó pero está vacío o las columnas no coinciden.");
+                    } else {
+                        llenarCategorias();
+                        filtrar();
+                        actualizarFavsUI();
+                    }
                 }
-            },
-            error: function() {
-                document.getElementById('estado').innerHTML = "⚠️ Error de conexión. Asegúrate de que el Excel esté 'Publicado en la Web'.";
-            }
-        });
+            });
+        } catch (e) {
+            mostrarError("Error de conexión. Asegúrate de que el Excel esté configurado como 'Cualquier persona con el enlace puede leer'.");
+        }
     }
 
-    function generarCategorias() {
+    function mostrarError(msg) {
+        document.getElementById('cargando').style.display = 'none';
+        document.getElementById('error-display').innerHTML = `<div class="error-box">${msg}</div>`;
+    }
+
+    function llenarCategorias() {
         const sel = document.getElementById('filtro-cat');
-        const cats = [...new Set(datos.map(d => d.c))].sort();
+        const cats = [...new Set(todosLosDatos.map(d => d.cat))].sort();
         cats.forEach(c => {
-            let o = document.createElement('option');
-            o.value = c; o.innerText = c;
-            sel.appendChild(o);
+            let opt = document.createElement('option');
+            opt.value = c; opt.innerText = c;
+            sel.appendChild(opt);
         });
     }
 
-    function renderizar() {
-        const g = document.getElementById('galeria');
-        const s = document.getElementById('buscador').value.toLowerCase();
-        const f = document.getElementById('filtro-cat').value;
+    function filtrar() {
+        const busqueda = document.getElementById('buscador').value.toLowerCase();
+        const cat = document.getElementById('filtro-cat').value;
+        const galeria = document.getElementById('galeria');
+        
+        const filtrados = todosLosDatos.filter(d => 
+            d.nombre.toLowerCase().includes(busqueda) && (cat === "" || d.cat === cat)
+        );
 
-        const filtrados = datos.filter(d => d.n.toLowerCase().includes(s) && (f === "" || d.c === f));
-        g.innerHTML = '';
-
+        galeria.innerHTML = '';
         filtrados.forEach(d => {
-            const isFav = favoritos.some(fav => fav.n === d.n);
+            const esFav = favs.some(f => f.nombre === d.nombre);
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${encodeURIComponent(JSON.stringify(d))}')">❤</button>
-                <img src="${d.u}" loading="lazy" onerror="this.src='https://via.placeholder.com/200?text=Imagen'">
-                <h3 style="font-size:12px;">${d.n.replace(/\.[^/.]+$/, "")}</h3>
-                <small style="color:gray">${d.c}</small>
+                <button class="btn-fav ${esFav ? 'active' : ''}" onclick="toggleFav('${encodeURIComponent(JSON.stringify(d))}')">❤</button>
+                <img src="${d.url}" onerror="this.src='https://via.placeholder.com/200?text=Error+Imagen'">
+                <h4 style="margin:10px 0 5px; font-size:13px;">${d.nombre.split('.')[0]}</h4>
+                <small style="color:gray">${d.cat}</small>
             `;
-            g.appendChild(card);
+            galeria.appendChild(card);
         });
     }
 
-    function toggleFav(str) {
-        const d = JSON.parse(decodeURIComponent(str));
-        const i = favoritos.findIndex(f => f.n === d.n);
-        if(i > -1) favoritos.splice(i, 1);
-        else favoritos.push(d);
-        localStorage.setItem('favs_lik', JSON.stringify(favoritos));
-        actualizarFavs();
-        renderizar();
+    function toggleFav(json) {
+        const d = JSON.parse(decodeURIComponent(json));
+        const idx = favs.findIndex(f => f.nombre === d.nombre);
+        if(idx > -1) favs.splice(idx, 1);
+        else favs.push(d);
+        localStorage.setItem('favs_lik', JSON.stringify(favs));
+        actualizarFavsUI();
+        filtrar();
     }
 
-    function actualizarFavs() {
-        const l = document.getElementById('lista-favs');
-        document.getElementById('fav-count').innerText = favoritos.length;
-        l.innerHTML = '';
-        favoritos.forEach(f => {
-            const div = document.createElement('div');
-            div.className = 'fav-item';
-            div.innerHTML = `<img src="${f.u}"><h4>${f.n.substring(0,20)}</h4><span onclick="toggleFav('${encodeURIComponent(JSON.stringify(f))}')" style="cursor:pointer">🗑️</span>`;
-            l.appendChild(div);
-        });
+    function actualizarFavsUI() {
+        const lista = document.getElementById('lista-favs');
+        document.getElementById('fav-count').innerText = favs.length;
+        lista.innerHTML = favs.map(f => `
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
+                <img src="${f.url}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">
+                <span style="font-size:11px; flex:1;">${f.nombre.split('.')[0]}</span>
+                <span onclick="toggleFav('${encodeURIComponent(JSON.stringify(f))}')" style="cursor:pointer; color:red;">🗑️</span>
+            </div>
+        `).join('');
     }
 
-    function toggleMenu() { document.getElementById('panel-favoritos').classList.toggle('open'); }
+    function toggleFavs() { document.getElementById('panel-favoritos').classList.toggle('open'); }
 
-    function enviarPedido() {
-        if(!favoritos.length) return alert("Selecciona diseños");
-        let m = "¡Hola Likelyon Estampados! 👋 Mi pedido:\n\n";
-        favoritos.forEach((f, i) => m += `${i+1}. ${f.n.replace(/\.[^/.]+$/, "")}\n`);
-        window.open(`https://wa.me/56954180844?text=${encodeURIComponent(m)}`, '_blank');
+    function enviarWA() {
+        if(favs.length === 0) return alert("Selecciona diseños");
+        let m = "¡Hola Likelyon Estampados! 👋 Me interesan estos diseños:\n\n" + 
+                favs.map((f, i) => `${i+1}. ${f.nombre.split('.')[0]}`).join('\n');
+        window.open(`https://wa.me/56954180844?text=${encodeURIComponent(m)}`);
     }
 
-    document.getElementById('buscador').addEventListener('input', renderizar);
-    document.getElementById('filtro-cat').addEventListener('change', renderizar);
-    cargarCatalogo();
+    cargar();
 </script>
-
 </body>
 </html>
