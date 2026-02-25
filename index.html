@@ -73,10 +73,17 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhyg
 let datosCatalogo = [];
 let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
 
+// 🔥 CONVERSIÓN INTELIGENTE PARA TODOS LOS FORMATOS DRIVE
 function convertirLinkDrive(url){
     if(!url) return "";
-    const id = url.match(/[-\w]{25,}/);
-    return id ? `https://drive.google.com/uc?export=view&id=${id[0]}` : url;
+
+    // Extrae ID largo
+    const match = url.match(/[-\w]{25,}/);
+    if(match){
+        return `https://drive.google.com/uc?export=view&id=${match[0]}`;
+    }
+
+    return url;
 }
 
 function cargarDatos(){
@@ -122,13 +129,15 @@ function mostrarDiseños(){
 
         const nombreLimpio=diseño.nombre.replace(/\.[^/.]+$/,"");
         const mensajeWs=encodeURIComponent(`¡Hola Likelyon! 👋 Me interesa este diseño: ${nombreLimpio}`);
-
         const esFavorito = favoritos.includes(diseño.nombre);
 
         const card=document.createElement('div');
         card.className='card';
         card.innerHTML=`
-            <img src="${diseño.imagen}" onclick="abrirModal('${diseño.imagen}')" loading="lazy">
+            <img src="${diseño.imagen}" 
+                 onclick="abrirModal('${diseño.imagen}')" 
+                 loading="lazy"
+                 onerror="this.src='https://via.placeholder.com/200x200?text=Sin+Imagen'">
             <h3>${nombreLimpio}</h3>
             <a href="https://wa.me/${miTelefono}?text=${mensajeWs}" class="btn-ws" target="_blank">📲 Consultar</a>
             <button class="btn-fav-add" onclick="toggleFavorito('${diseño.nombre}')">
