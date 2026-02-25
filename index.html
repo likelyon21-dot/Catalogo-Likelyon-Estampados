@@ -1,180 +1,228 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo Likelyon Estampados</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <style>
-        :root { --primary: #2c3e50; --accent: #e74c3c; --whatsapp: #25d366; --bg: #f4f4f9; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 0; }
-        header { background-color: var(--primary); color: white; padding: 20px; text-align: center; }
-        .logo-pyme { max-width: 120px; background: white; padding: 5px; border-radius: 8px; margin-bottom: 10px; }
-        .container { max-width: 1100px; margin: 20px auto; padding: 0 20px; }
-        .controles { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-        .search-bar { flex: 2; min-width: 250px; padding: 12px; border: 2px solid #bdc3c7; border-radius: 8px; }
-        .filter-select { flex: 1; padding: 12px; border: 2px solid #bdc3c7; border-radius: 8px; background: white; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; text-align: center; }
-        .card img { width: 100%; height: 180px; object-fit: contain; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px; }
-        .btn-fav { position: absolute; top: 15px; right: 15px; background: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 20px; color: #ccc; display: flex; align-items: center; justify-content: center; }
-        .btn-fav.active { color: var(--accent); }
-        #panel-favoritos { position: fixed; right: -350px; top: 0; width: 300px; height: 100%; background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.1); transition: 0.4s; z-index: 1000; padding: 20px; display: flex; flex-direction: column; }
-        #panel-favoritos.open { right: 0; }
-        .float-btn { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; z-index: 999; }
-        .badge { position: absolute; top: 0; right: 0; background: var(--accent); color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; display: flex; align-items: center; justify-content: center; }
-        .btn-wa { background: var(--whatsapp); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: auto; width: 100%; }
-        .error-box { background: #fee2e2; color: #b91c1c; padding: 20px; border-radius: 8px; border: 1px solid #f87171; text-align: center; margin-bottom: 20px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo - Likelyon Estampados</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<style>
+    body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; position: relative; min-height: 100vh;}
+    header { background-color: #2c3e50; color: white; padding: 30px; position: relative; }
+    .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin-bottom: 15px; }
+    .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
+    .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+    .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; cursor: pointer; }
+    .card:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 5px; transition: 0.3s; }
+    .card h3 { font-size: 14px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
+    .btn-ws, .btn-fav, .btn-eliminar { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; display: inline-block; font-size: 13px; font-weight: bold; cursor: pointer; }
+    .btn-eliminar { background: #e74c3c; margin-left: 5px; }
+
+    /* Favoritos */
+    #favoritosContainer { 
+        display: flex; 
+        overflow-x: auto; 
+        padding: 10px; 
+        background: #d0e7ff; 
+        border-radius: 10px; 
+        margin-bottom: 20px; 
+        gap: 10px; 
+        align-items: center;
+    }
+    .fav-card { flex: 0 0 auto; width: 100px; text-align: center; position: relative; }
+    .fav-card img { width: 50%; height: auto; border-radius: 5px; cursor: pointer; }
+    .fav-card button { position: absolute; top: -5px; right: -5px; font-size: 10px; padding: 3px 5px; }
+
+    /* Botón WhatsApp Favoritos */
+    #btnWsFavoritos { background: #25d366; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; flex: 0 0 auto; height: 40px; }
+
+    /* MODAL */
+    #modalImagen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 9999; }
+    #modalImagen img { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+
+    /* Botón Cargar Más */
+    #cargarMas { margin: 20px auto; display: none; padding: 10px 20px; font-size: 14px; cursor: pointer; background: #3498db; color: white; border: none; border-radius: 5px; }
+
+    /* Contador de visitas */
+    #contadorVisitas {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255,255,255,0.8);
+        color: #333;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    /* Redes sociales debajo del logo */
+    #redesSociales {
+        margin: 10px 0;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+    #redesSociales a img { width: 30px; height: 30px; transition: 0.3s; }
+    #redesSociales a img:hover { transform: scale(1.2); }
+</style>
 </head>
 <body>
 
 <header>
-    <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme">
+    <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo">
+    <!-- Redes Sociales -->
+    <div id="redesSociales">
+        <a href="https://www.instagram.com/likelyon_estampados/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram"></a>
+        <a href="https://web.facebook.com/LikelyonSpa" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png" alt="Facebook"></a>
+    </div>
     <h1>Likelyon Estampados</h1>
+    <p>Catálogo Oficial de Diseños</p>
+    <div id="contadorVisitas">Visitas: 0</div>
 </header>
 
 <div class="container">
-    <div id="error-display"></div>
+    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño (Batman, Moto, etc)...">
     
-    <div class="controles">
-        <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño..." oninput="filtrar()">
-        <select id="filtro-cat" class="filter-select" onchange="filtrar()">
-            <option value="">📂 Todas las categorías</option>
-        </select>
-    </div>
-    
-    <div id="cargando" style="text-align:center; padding: 50px;">
-        <h3>⏳ Cargando catálogo...</h3>
-        <p>Si tarda demasiado, verifica los permisos del Excel.</p>
-    </div>
+    <!-- FAVORITOS -->
+    <div id="favoritosContainer"></div>
 
+    <div id="status">Cargando catálogo...</div>
     <div id="galeria" class="grid"></div>
+
+    <button id="cargarMas">Cargar más imágenes</button>
 </div>
 
-<div class="float-btn" onclick="toggleFavs()">❤️ <span id="fav-count" class="badge">0</span></div>
-
-<div id="panel-favoritos">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h3>Mis Favoritos</h3>
-        <span onclick="toggleFavs()" style="cursor:pointer; font-weight:bold; color:red">✖</span>
-    </div>
-    <div id="lista-favs" style="flex:1; overflow-y:auto; margin: 15px 0;"></div>
-    <button class="btn-wa" onclick="enviarWA()">Enviar a WhatsApp 📱</button>
+<!-- MODAL -->
+<div id="modalImagen">
+    <img id="imagenModal" src="">
 </div>
 
 <script>
-    // URL DE RESPALDO (FORMATO EXPORT)
-    const SHEET_ID = '1tJRmftiJnrdtYLHzoYmD7nnp-4G3GeCtcbNDn5KKUSw';
-    const GID = '547930647';
-    const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}`;
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
+let datosCatalogo = [];
+let favoritos = [];
+let paginaActual = 0;
+const porPagina = 30;
 
-    let todosLosDatos = [];
-    let favs = JSON.parse(localStorage.getItem('favs_lik')) || [];
+// Contador de visitas
+let visitas = localStorage.getItem('visitas') ? parseInt(localStorage.getItem('visitas')) : 0;
+visitas++;
+localStorage.setItem('visitas', visitas);
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('contadorVisitas').innerText = `Visitas: ${visitas}`;
+});
 
-    async function cargar() {
-        try {
-            const response = await fetch(URL);
-            if (!response.ok) throw new Error("No se pudo acceder al archivo.");
-            
-            const texto = await response.text();
-            
-            Papa.parse(texto, {
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    todosLosDatos = results.data.map(f => ({
-                        nombre: f['Nombre'] || f['Nombre del Diseño'] || Object.values(f)[0],
-                        url: f['URL Imagen'] || f['URL Miniatura'] || Object.values(f)[1],
-                        cat: f['Carpeta'] || 'General'
-                    })).filter(d => d.url && d.url.includes('http'));
+// Convertir links de Google Drive a directos (solo si tienen /d/ID/)
+function urlDirectaDrive(url) {
+    try {
+        const regex = /\/d\/([a-zA-Z0-9_-]+)/;
+        const match = url.match(regex);
+        if(match && match[1]) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+        return url; // si no es de Drive, usar URL tal cual
+    } catch(e) { return url; }
+}
 
-                    document.getElementById('cargando').style.display = 'none';
-                    if(todosLosDatos.length === 0) {
-                        mostrarError("El Excel se leyó pero está vacío o las columnas no coinciden.");
-                    } else {
-                        llenarCategorias();
-                        filtrar();
-                        actualizarFavsUI();
-                    }
-                }
-            });
-        } catch (e) {
-            mostrarError("Error de conexión. Asegúrate de que el Excel esté configurado como 'Cualquier persona con el enlace puede leer'.");
+function cargarDatos() {
+    Papa.parse(CSV_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+            datosCatalogo = results.data.filter(item => Object.values(item)[0]);
+            document.getElementById('status').style.display = 'none';
+            renderizar();
+            renderFavoritos();
         }
-    }
+    });
+}
 
-    function mostrarError(msg) {
-        document.getElementById('cargando').style.display = 'none';
-        document.getElementById('error-display').innerHTML = `<div class="error-box">${msg}</div>`;
-    }
+function renderizar(reset = true, lista = datosCatalogo) {
+    const galeria = document.getElementById('galeria');
+    if(reset) { galeria.innerHTML = ''; paginaActual = 0; }
 
-    function llenarCategorias() {
-        const sel = document.getElementById('filtro-cat');
-        const cats = [...new Set(todosLosDatos.map(d => d.cat))].sort();
-        cats.forEach(c => {
-            let opt = document.createElement('option');
-            opt.value = c; opt.innerText = c;
-            sel.appendChild(opt);
-        });
-    }
+    const inicio = paginaActual * porPagina;
+    const fin = inicio + porPagina;
+    const bloque = lista.slice(inicio, fin);
 
-    function filtrar() {
-        const busqueda = document.getElementById('buscador').value.toLowerCase();
-        const cat = document.getElementById('filtro-cat').value;
-        const galeria = document.getElementById('galeria');
-        
-        const filtrados = todosLosDatos.filter(d => 
-            d.nombre.toLowerCase().includes(busqueda) && (cat === "" || d.cat === cat)
-        );
-
-        galeria.innerHTML = '';
-        filtrados.forEach(d => {
-            const esFav = favs.some(f => f.nombre === d.nombre);
+    bloque.forEach(item => {
+        const fila = Object.values(item);
+        const nombre = fila[0] || "Diseño";
+        let imagen = fila[1] || "";
+        if(imagen && imagen.includes('http')) {
+            imagen = urlDirectaDrive(imagen);
+            const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre.toUpperCase()}\n\nVer imagen: `) + imagen;
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <button class="btn-fav ${esFav ? 'active' : ''}" onclick="toggleFav('${encodeURIComponent(JSON.stringify(d))}')">❤</button>
-                <img src="${d.url}" onerror="this.src='https://via.placeholder.com/200?text=Error+Imagen'">
-                <h4 style="margin:10px 0 5px; font-size:13px;">${d.nombre.split('.')[0]}</h4>
-                <small style="color:gray">${d.cat}</small>
+                <img src="${imagen}" alt="${nombre}">
+                <h3>${nombre}</h3>
+                <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
+                <button class="btn-fav">❤ Favorito</button>
             `;
+            card.querySelector('img').addEventListener('click', () => abrirModal(imagen));
+            card.querySelector('.btn-fav').addEventListener('click', () => toggleFavorito({nombre, imagen}));
             galeria.appendChild(card);
+        }
+    });
+
+    document.getElementById('cargarMas').style.display = (fin < lista.length) ? 'inline-block' : 'none';
+}
+
+document.getElementById('cargarMas').addEventListener('click', () => { paginaActual++; renderizar(false); });
+
+function toggleFavorito(item) {
+    if(!favoritos.find(f => f.imagen === item.imagen)) { favoritos.push(item); }
+    renderFavoritos();
+}
+
+function renderFavoritos() {
+    const cont = document.getElementById('favoritosContainer');
+    cont.innerHTML = '';
+
+    if(favoritos.length > 0) {
+        // Botón WhatsApp para todos los favoritos
+        const btnWsFav = document.createElement('button');
+        btnWsFav.id = 'btnWsFavoritos';
+        btnWsFav.innerText = 'Enviar Favoritos WhatsApp';
+        btnWsFav.addEventListener('click', () => {
+            let texto = 'Hola Likelyon! Me interesan estos diseños:\n\n';
+            favoritos.forEach(f => { texto += `Nombre: ${f.nombre}\nURL: ${f.imagen}\n\n`; });
+            const urlWs = `https://wa.me/56954180844?text=${encodeURIComponent(texto)}`;
+            window.open(urlWs, '_blank');
         });
+        cont.appendChild(btnWsFav);
     }
 
-    function toggleFav(json) {
-        const d = JSON.parse(decodeURIComponent(json));
-        const idx = favs.findIndex(f => f.nombre === d.nombre);
-        if(idx > -1) favs.splice(idx, 1);
-        else favs.push(d);
-        localStorage.setItem('favs_lik', JSON.stringify(favs));
-        actualizarFavsUI();
-        filtrar();
-    }
+    favoritos.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'fav-card';
+        div.innerHTML = `
+            <img src="${item.imagen}" alt="${item.nombre}">
+            <button class="btn-eliminar">X</button>
+        `;
+        div.querySelector('img').addEventListener('click', () => abrirModal(item.imagen));
+        div.querySelector('.btn-eliminar').addEventListener('click', () => { favoritos.splice(idx, 1); renderFavoritos(); });
+        cont.appendChild(div);
+    });
+}
 
-    function actualizarFavsUI() {
-        const lista = document.getElementById('lista-favs');
-        document.getElementById('fav-count').innerText = favs.length;
-        lista.innerHTML = favs.map(f => `
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
-                <img src="${f.url}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;">
-                <span style="font-size:11px; flex:1;">${f.nombre.split('.')[0]}</span>
-                <span onclick="toggleFav('${encodeURIComponent(JSON.stringify(f))}')" style="cursor:pointer; color:red;">🗑️</span>
-            </div>
-        `).join('');
-    }
+// Modal
+const modal = document.getElementById('modalImagen');
+const modalImg = document.getElementById('imagenModal');
+function abrirModal(url) { modal.style.display = 'flex'; modalImg.src = url; }
+modal.addEventListener('click', () => { modal.style.display = 'none'; modalImg.src = ''; });
 
-    function toggleFavs() { document.getElementById('panel-favoritos').classList.toggle('open'); }
+// Buscador
+document.getElementById('buscador').oninput = function(e) {
+    const term = e.target.value.toLowerCase();
+    const filtrados = datosCatalogo.filter(item => { const n = (Object.values(item)[0] || "").toLowerCase(); return n.includes(term); });
+    renderizar(true, filtrados);
+};
 
-    function enviarWA() {
-        if(favs.length === 0) return alert("Selecciona diseños");
-        let m = "¡Hola Likelyon Estampados! 👋 Me interesan estos diseños:\n\n" + 
-                favs.map((f, i) => `${i+1}. ${f.nombre.split('.')[0]}`).join('\n');
-        window.open(`https://wa.me/56954180844?text=${encodeURIComponent(m)}`);
-    }
-
-    cargar();
+window.onload = cargarDatos;
 </script>
+
 </body>
 </html>
