@@ -10,172 +10,73 @@
     header { background-color: #2c3e50; color: white; padding: 30px; }
     .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; margin-bottom: 15px; }
     .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
-    .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; font-size: 16px; }
+    .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
     .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; }
-    .card:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-    .card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 5px; }
-    .card h3 { font-size: 13px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
-    .card .folder-info { font-size: 10px; color: #7f8c8d; margin-bottom: 8px; font-weight: bold; }
-    .btn-ws, .btn-fav { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 12px; font-weight: bold; border: none; cursor: pointer; text-align: center; }
+    .card img { width: 100%; height: 180px; object-fit: contain; background: #eee; border-radius: 5px; }
+    .card h3 { font-size: 13px; color: #333; margin: 10px 0; text-transform: uppercase; }
+    .btn-ws, .btn-fav { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 12px; font-weight: bold; border: none; cursor: pointer; }
     .btn-fav { background: #f39c12; margin-top: 5px; }
-    
-    /* Favoritos */
-    #favoritosContainer { display: flex; overflow-x: auto; padding: 15px; background: #d0e7ff; border-radius: 10px; margin-bottom: 20px; gap: 15px; align-items: center; min-height: 60px; }
-    .fav-card { flex: 0 0 auto; width: 70px; position: relative; }
-    .fav-card img { width: 100%; height: 50px; object-fit: cover; border-radius: 5px; border: 2px solid white; }
-    .btn-eliminar { position: absolute; top: -5px; right: -5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 10px; }
-
-    /* MODAL CORREGIDO */
-    #modalImagen { 
-        display: none; 
-        position: fixed; 
-        inset: 0; 
-        background: rgba(0,0,0,0.9); 
-        justify-content: center; 
-        align-items: center; 
-        z-index: 9999; 
-        cursor: zoom-out;
-    }
-    #modalImagen img { 
-        max-width: 95%; 
-        max-height: 95%; 
-        border-radius: 5px; 
-        box-shadow: 0 0 20px rgba(255,255,255,0.2);
-    }
-
-    #cargarMas { margin: 20px auto; display: none; padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
-    #status { font-weight: bold; color: #2c3e50; }
+    #modalImagen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 9999; }
+    #modalImagen img { max-width: 95%; max-height: 95%; }
 </style>
 </head>
 <body>
 
 <header>
-    <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo">
+    <img src="https://lh3.googleusercontent.com/d/1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5" class="logo-pyme" alt="Logo">
     <h1>Likelyon Estampados</h1>
-    <p>Catálogo Oficial de Diseños</p>
 </header>
 
 <div class="container">
-    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar por nombre o categoría...">
-    <div id="favoritosContainer"><span style="color: #5d6d7e; font-size: 13px;">Tus favoritos aparecerán aquí...</span></div>
-    <div id="status" style="padding: 20px;">Cargando catálogo...</div>
+    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño...">
+    <div id="status">Cargando catálogo...</div>
     <div id="galeria" class="grid"></div>
-    <button id="cargarMas">Ver más diseños</button>
+    <button id="cargarMas" style="display:none; margin: 20px; padding: 10px 20px;">Cargar más</button>
 </div>
 
-<div id="modalImagen" onclick="cerrarModal()">
-    <img id="imagenModal" src="" alt="Vista ampliada">
-</div>
+<div id="modalImagen" onclick="this.style.display='none'"><img id="imagenModal" src=""></div>
 
 <script>
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=547930647&single=true&output=csv';
 let datosCatalogo = [];
-let favoritos = [];
 let paginaActual = 0;
 const porPagina = 40;
 
 function cargarDatos() {
-    const urlFinal = CSV_URL + '&t=' + new Date().getTime();
-    Papa.parse(urlFinal, {
+    Papa.parse(CSV_URL + '&t=' + new Date().getTime(), {
         download: true,
         header: true,
-        skipEmptyLines: true,
         complete: function(results) {
-            datosCatalogo = results.data.filter(item => {
-                const f = Object.values(item);
-                return f[0] && f[1];
-            });
+            datosCatalogo = results.data.filter(item => Object.values(item)[1]);
             document.getElementById('status').style.display = 'none';
             renderizar();
         }
     });
 }
 
-function renderizar(reset = true, lista = datosCatalogo) {
+function renderizar(reset = true) {
     const galeria = document.getElementById('galeria');
     if(reset) { galeria.innerHTML = ''; paginaActual = 0; }
-    const bloque = lista.slice(paginaActual * porPagina, (paginaActual + 1) * porPagina);
+    const bloque = datosCatalogo.slice(paginaActual * porPagina, (paginaActual + 1) * porPagina);
 
     bloque.forEach(item => {
         const fila = Object.values(item);
-        const nombre = fila[0], imagen = fila[1], carpeta = fila[2] || "General";
-        
-        if(imagen && imagen.includes('http')) {
-            const card = document.createElement('div');
-            card.className = 'card';
-            const msg = encodeURIComponent(`¡Hola! Me interesa este diseño: *${nombre}* (Cat: ${carpeta})`);
-            
-            card.innerHTML = `
-                <img src="${imagen}" onclick="abrirModal('${imagen}')" title="Clic para ampliar">
-                <h3>${nombre}</h3>
-                <div class="folder-info">📂 ${carpeta}</div>
-                <a href="https://wa.me/56954180844?text=${msg}" target="_blank" class="btn-ws">WhatsApp</a>
-                <button class="btn-fav" onclick="toggleFavorito('${nombre}', '${imagen}')">❤ Favorito</button>
-            `;
-            galeria.appendChild(card);
-        }
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <img src="${fila[1]}" onclick="abrirModal('${fila[1]}')" referrerpolicy="no-referrer">
+            <h3>${fila[0]}</h3>
+            <a href="https://wa.me/56954180844?text=Me interesa: ${fila[0]}" target="_blank" class="btn-ws">WhatsApp</a>
+        `;
+        galeria.appendChild(card);
     });
-    document.getElementById('cargarMas').style.display = ((paginaActual + 1) * porPagina < lista.length) ? 'inline-block' : 'none';
 }
 
-document.getElementById('cargarMas').onclick = () => { paginaActual++; renderizar(false); };
-
-// FUNCIONES DEL MODAL CORREGIDAS
 function abrirModal(url) {
-    const modal = document.getElementById('modalImagen');
-    const modalImg = document.getElementById('imagenModal');
-    
-    // Cambiamos el tamaño de la miniatura a uno grande para el modal
-    const urlGrande = url.replace("&sz=w1000", "&sz=w1500");
-    
-    modalImg.src = urlGrande;
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Bloquea el scroll del fondo
+    document.getElementById('modalImagen').style.display = 'flex';
+    document.getElementById('imagenModal').src = url;
 }
-
-function cerrarModal() {
-    const modal = document.getElementById('modalImagen');
-    modal.style.display = 'none';
-    document.getElementById('imagenModal').src = '';
-    document.body.style.overflow = 'auto'; // Devuelve el scroll
-}
-
-function toggleFavorito(nombre, imagen) {
-    if(!favoritos.find(f => f.imagen === imagen)) { 
-        favoritos.push({nombre, imagen}); 
-        renderFavoritos(); 
-    }
-}
-
-function renderFavoritos() {
-    const cont = document.getElementById('favoritosContainer');
-    cont.innerHTML = '';
-    if(favoritos.length > 0) {
-        const btn = document.createElement('button');
-        btn.innerHTML = 'Consultar lista ❤';
-        btn.className = 'btn-ws';
-        btn.style.borderRadius = "20px";
-        btn.onclick = () => {
-            let t = '¡Hola! 👋 Me interesan estos diseños:\n\n';
-            favoritos.forEach((f, i) => t += `${i+1}. *${f.nombre}*\n🔗 ${f.imagen}\n\n`);
-            window.open(`https://wa.me/56954180844?text=${encodeURIComponent(t)}`, '_blank');
-        };
-        cont.appendChild(btn);
-    }
-    favoritos.forEach((f, i) => {
-        const d = document.createElement('div');
-        d.className = 'fav-card';
-        d.innerHTML = `<img src="${f.imagen}" onclick="abrirModal('${f.imagen}')"><button class="btn-eliminar" onclick="favoritos.splice(${i},1);renderFavoritos()">X</button>`;
-        cont.appendChild(d);
-    });
-}
-
-document.getElementById('buscador').oninput = function(e) {
-    const term = e.target.value.toLowerCase();
-    const f = datosCatalogo.filter(item => (Object.values(item)[0] + " " + (Object.values(item)[2] || "")).toLowerCase().includes(term));
-    renderizar(true, f);
-};
 
 window.onload = cargarDatos;
 </script>
