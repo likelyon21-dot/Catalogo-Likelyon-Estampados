@@ -5,149 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Catálogo - Likelyon Estampados</title>
 
-<!-- PapaParse -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
 <style>
-:root { 
-    --primary: #2c3e50; 
-    --accent: #e74c3c; 
-    --whatsapp: #25d366; 
-    --bg: #f4f4f9; 
-}
-
-body { 
-    font-family: 'Segoe UI', sans-serif; 
-    background-color: var(--bg); 
-    margin: 0; 
-    text-align: center; 
-}
-
-header { 
-    background-color: var(--primary); 
-    color: white; 
-    padding: 30px; 
-    position: relative; 
-}
-
-.logo-pyme { 
-    max-width: 180px; 
-    background: white; 
-    padding: 10px; 
-    border-radius: 15px; 
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
-    margin-bottom: 15px; 
-}
-
-.container { 
-    max-width: 1100px; 
-    margin: 20px auto; 
-    padding: 20px; 
-}
-
-.search-bar { 
-    width: 100%; 
-    max-width: 500px; 
-    padding: 15px; 
-    border-radius: 30px; 
-    border: 2px solid #ddd; 
-    margin-bottom: 20px; 
-    font-size: 16px; 
-}
-
-.grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-    gap: 25px; 
-}
-
-.card { 
-    background: white; 
-    padding: 15px; 
-    border-radius: 12px; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
-    transition: 0.3s; 
-}
-
-.card:hover { 
-    transform: translateY(-5px); 
-}
-
-.card img { 
-    width: 100%; 
-    height: 200px; 
-    object-fit: contain; 
-    background: #fafafa; 
-    border-radius: 8px; 
-    cursor: zoom-in; 
-}
-
-.card h3 { 
-    font-size: 14px; 
-    color: #333; 
-    margin: 12px 0; 
-    height: 40px; 
-    overflow: hidden; 
-    text-transform: uppercase; 
-}
-
-.btn-ws { 
-    background: var(--whatsapp); 
-    color: white; 
-    text-decoration: none; 
-    padding: 10px; 
-    border-radius: 8px; 
-    display: block; 
-    font-size: 13px; 
-    font-weight: bold; 
-}
-
-#status { 
-    padding: 20px; 
-    font-weight: bold; 
-    color: #666; 
-}
-
-#modalImagen { 
-    display: none; 
-    position: fixed; 
-    inset: 0; 
-    background: rgba(0,0,0,0.9); 
-    justify-content: center; 
-    align-items: center; 
-    z-index: 9999; 
-}
-
-#modalImagen img { 
-    max-width: 90%; 
-    max-height: 90vh; 
-    border-radius: 10px; 
-}
-
-#contadorVisitas { 
-    position: absolute; 
-    top: 15px; 
-    left: 15px; 
-    background: white; 
-    padding: 5px 12px; 
-    border-radius: 20px; 
-    font-size: 12px; 
-    font-weight: bold; 
-    color: var(--primary); 
-}
+body { font-family: Arial, sans-serif; background:#f4f4f9; margin:0; text-align:center;}
+header { background:#2c3e50; color:white; padding:30px;}
+.container { max-width:1100px; margin:auto; padding:20px;}
+.search-bar { width:100%; max-width:500px; padding:15px; border-radius:30px; border:2px solid #ddd; margin-bottom:20px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:20px;}
+.card { background:white; padding:15px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08);}
+.card img { width:100%; height:200px; object-fit:contain; background:#fafafa; border-radius:8px; cursor:pointer;}
+.card h3 { font-size:14px; margin:10px 0;}
+.btn-ws { background:#25d366; color:white; padding:8px; display:block; text-decoration:none; border-radius:6px; margin-bottom:6px;}
+.btn-fav-add { padding:6px; border:none; background:#f1c40f; border-radius:6px; cursor:pointer;}
+#status { padding:20px; font-weight:bold;}
+#modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); justify-content:center; align-items:center;}
+#modal img { max-width:90%; max-height:90vh;}
 </style>
 </head>
 
 <body>
 
 <header>
-<div id="contadorVisitas">Visitas: 0</div>
-
-<img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" 
-class="logo-pyme" alt="Likelyon Logo">
-
 <h1>Likelyon Estampados</h1>
-<p>Catálogo Oficial de Diseños</p>
+<p>Catálogo Oficial</p>
 </header>
 
 <div class="container">
@@ -156,33 +37,24 @@ class="logo-pyme" alt="Likelyon Logo">
 <div id="galeria" class="grid"></div>
 </div>
 
-<div id="modalImagen" onclick="this.style.display='none'">
-<img id="imagenModal" src="">
+<div id="modal" onclick="this.style.display='none'">
+<img id="imgModal">
 </div>
 
 <script>
 
-// 🔗 TU CSV
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv";
 
 let datosCatalogo = [];
 
-// 📊 Contador visitas
-let visitas = localStorage.getItem("visitas_likelyon") || 0;
-visitas++;
-localStorage.setItem("visitas_likelyon", visitas);
-document.getElementById("contadorVisitas").innerText = "Visitas: " + visitas;
-
-// 🔄 Convertir link Drive
-function urlDirectaDrive(url) {
+// Convertir link Drive
+function convertirLinkDrive(url) {
     if (!url) return "";
-    const match = url.match(/[-\w]{25,}/);
-    return match 
-        ? "https://drive.google.com/uc?export=view&id=" + match[0]
-        : url;
+    const id = url.match(/[-\w]{25,}/);
+    return id ? `https://drive.google.com/uc?export=view&id=${id[0]}` : url;
 }
 
-// 📥 Cargar CSV
+// Cargar CSV correctamente
 function cargarDatos() {
     Papa.parse(CSV_URL, {
         download: true,
@@ -190,78 +62,74 @@ function cargarDatos() {
         skipEmptyLines: true,
         complete: function(results) {
 
+            console.log("Datos recibidos:", results.data);
+
             if (!results.data || results.data.length === 0) {
-                document.getElementById("status").innerText = "⚠️ El CSV está vacío.";
+                document.getElementById("status").innerText = "⚠️ El CSV está vacío o no está publicado correctamente.";
                 return;
             }
 
             datosCatalogo = results.data
-                .filter(fila => fila["Nombre"] && fila["URL Imagen"])
-                .map(fila => ({
-                    nombre: fila["Nombre"].trim(),
-                    imagen: urlDirectaDrive(fila["URL Imagen"].trim())
+                .filter(f => f["Nombre"] && f["URL Imagen"])
+                .map(f => ({
+                    nombre: f["Nombre"].trim(),
+                    imagen: convertirLinkDrive(f["URL Imagen"].trim())
                 }));
 
             if (datosCatalogo.length === 0) {
-                document.getElementById("status").innerText = "⚠️ No se encontraron datos válidos.";
+                document.getElementById("status").innerText = "⚠️ No se encontraron columnas válidas.";
                 return;
             }
 
             document.getElementById("status").style.display = "none";
-            renderizar(datosCatalogo);
+            mostrarDiseños();
         },
-        error: function(err) {
-            console.error(err);
+        error: function(error) {
+            console.error(error);
             document.getElementById("status").innerText = "❌ Error cargando CSV.";
         }
     });
 }
 
-// 🖼 Renderizar
-function renderizar(lista) {
-    const galeria = document.getElementById("galeria");
+// Mostrar diseños (TU FUNCIÓN adaptada)
+function mostrarDiseños() {
+    const galeria = document.getElementById('galeria');
+    const busqueda = document.getElementById('buscador').value.toLowerCase();
+    const miTelefono = "56954188440";
+    
+    const filtrados = datosCatalogo.filter(d => 
+        d.nombre.toLowerCase().includes(busqueda)
+    );
+
     galeria.innerHTML = "";
+    
+    filtrados.forEach(diseño => {
 
-    lista.forEach(item => {
-
-        const mensaje = encodeURIComponent(
-            "Hola Likelyon! Me interesa este diseño: " + item.nombre
-        );
-
-        const card = document.createElement("div");
-        card.className = "card";
+        const nombreLimpio = diseño.nombre.replace(/\.[^/.]+$/, "");
+        const mensajeWs = encodeURIComponent(`¡Hola Likelyon! 👋 Me interesa este diseño para un estampado: ${nombreLimpio}`);
+        
+        const card = document.createElement('div');
+        card.className = 'card';
         card.innerHTML = `
-            <img src="${item.imagen}" 
-                 onclick="abrirModal('${item.imagen}')" 
-                 onerror="this.src='https://via.placeholder.com/200x200?text=Sin+Imagen'">
-            <h3>${item.nombre}</h3>
-            <a href="https://wa.me/56954180844?text=${mensaje}" 
-               target="_blank" 
-               class="btn-ws">
-               Consultar WhatsApp
-            </a>
+            <img src="${diseño.imagen}" onclick="ampliarImagen('${diseño.imagen}')" loading="lazy">
+            <h3>${nombreLimpio}</h3>
+            <a href="https://wa.me/${miTelefono}?text=${mensajeWs}" class="btn-ws" target="_blank">📲 Consultar por WhatsApp</a>
+            <button class="btn-fav-add" onclick="agregarFavorito('${diseño.nombre}', '${diseño.imagen}')">⭐ Agregar a Favoritos</button>
         `;
-
         galeria.appendChild(card);
     });
 }
 
-// 🔍 Buscador
-document.getElementById("buscador").addEventListener("input", function(e) {
-    const texto = e.target.value.toLowerCase();
-    const filtrados = datosCatalogo.filter(item =>
-        item.nombre.toLowerCase().includes(texto)
-    );
-    renderizar(filtrados);
-});
-
-// 🔎 Modal
-function abrirModal(url) {
-    document.getElementById("modalImagen").style.display = "flex";
-    document.getElementById("imagenModal").src = url;
+// Modal imagen
+function ampliarImagen(url) {
+    document.getElementById("modal").style.display = "flex";
+    document.getElementById("imgModal").src = url;
 }
 
-// 🚀 Iniciar
+// Buscador
+document.getElementById("buscador").addEventListener("input", mostrarDiseños);
+
+// Iniciar
 window.onload = cargarDatos;
 
 </script>
