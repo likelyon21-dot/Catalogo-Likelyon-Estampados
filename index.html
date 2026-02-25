@@ -6,65 +6,93 @@
 <title>Catálogo - Likelyon Estampados</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
-    /* Mantenemos exactamente tu estilo original que te gusta */
-    body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; min-height: 100vh; position: relative; }
+    body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; position: relative; min-height: 100vh;}
     header { background-color: #2c3e50; color: white; padding: 30px; position: relative; }
     .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin-bottom: 15px; }
     .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
-    .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; }
+    .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; font-size: 16px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-    .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; cursor: pointer; }
+    .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; }
     .card:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     .card img { width: 100%; height: 180px; object-fit: contain; background: #fafafa; border-radius: 5px; transition: 0.3s; }
-    .card h3 { font-size: 14px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
-    .card .folder-tag { font-size: 10px; color: #95a5a6; margin-bottom: 5px; display: block; }
-    .btn-ws, .btn-fav, .btn-eliminar { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; display: inline-block; font-size: 13px; font-weight: bold; cursor: pointer; }
-    .btn-eliminar { background: #e74c3c; margin-left: 5px; }
-    #favoritosContainer { display: flex; overflow-x: auto; padding: 10px; background: #d0e7ff; border-radius: 10px; margin-bottom: 20px; gap: 10px; }
-    .fav-card { flex: 0 0 auto; width: 100px; text-align: center; position: relative; }
-    .fav-card img { width: 100%; height: 60px; object-fit: cover; border-radius: 5px; cursor: pointer; }
-    #modalImagen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 9999; }
+    .card h3 { font-size: 13px; color: #333; margin: 10px 0; height: 35px; overflow: hidden; text-transform: uppercase; }
+    .card .folder-info { font-size: 10px; color: #7f8c8d; margin-bottom: 8px; font-weight: bold; }
+    .btn-ws, .btn-fav, .btn-eliminar { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; display: inline-block; font-size: 12px; font-weight: bold; cursor: pointer; border: none; }
+    .btn-fav { background: #f39c12; margin-top: 5px; }
+    .btn-eliminar { background: #e74c3c; position: absolute; top: -5px; right: -5px; padding: 3px 6px; border-radius: 50%; }
+
+    /* Favoritos */
+    #favoritosContainer { 
+        display: flex; 
+        overflow-x: auto; 
+        padding: 15px; 
+        background: #d0e7ff; 
+        border-radius: 10px; 
+        margin-bottom: 20px; 
+        gap: 15px; 
+        align-items: center;
+        min-height: 60px;
+    }
+    .fav-card { flex: 0 0 auto; width: 70px; text-align: center; position: relative; }
+    .fav-card img { width: 100%; height: 50px; object-fit: cover; border-radius: 5px; cursor: pointer; border: 2px solid white; }
+
+    /* Botón WhatsApp Favoritos */
+    #btnWsFavoritos { background: #25d366; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold; flex: 0 0 auto; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+    /* MODAL */
+    #modalImagen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 9999; }
     #modalImagen img { max-width: 90%; max-height: 90%; border-radius: 10px; }
+
+    /* Botón Cargar Más */
     #cargarMas { margin: 20px auto; display: none; padding: 10px 20px; font-size: 14px; cursor: pointer; background: #3498db; color: white; border: none; border-radius: 5px; }
-    #contadorVisitas { position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.8); color: #333; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px; }
-    #redesSociales { position: fixed; bottom: 10px; right: 10px; display: flex; justify-content: center; gap: 10px; z-index: 1000; }
+
+    #contadorVisitas {
+        position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.8);
+        color: #333; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 12px;
+    }
+
+    #redesSociales { margin: 10px 0; display: flex; justify-content: center; gap: 15px; }
     #redesSociales a img { width: 30px; height: 30px; }
 </style>
 </head>
 <body>
 
 <header>
-    <img src="https://drive.google.com/uc?export=view&id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5" class="logo-pyme" alt="Likelyon Logo">
+    <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo">
+    <div id="redesSociales">
+        <a href="https://www.instagram.com/likelyon_estampados/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram"></a>
+        <a href="https://web.facebook.com/LikelyonSpa" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png" alt="Facebook"></a>
+    </div>
     <h1>Likelyon Estampados</h1>
     <p>Catálogo Oficial de Diseños</p>
     <div id="contadorVisitas">Visitas: 0</div>
 </header>
 
 <div class="container">
-    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño o categoría...">
-    <div id="favoritosContainer"></div>
-    <div id="status">Cargando catálogo...</div>
+    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar por nombre o categoría...">
+    
+    <div id="favoritosContainer">
+        <span style="color: #5d6d7e; font-size: 13px;">Tus favoritos aparecerán aquí...</span>
+    </div>
+
+    <div id="status" style="padding: 20px; font-weight: bold;">Cargando catálogo...</div>
     <div id="galeria" class="grid"></div>
-    <button id="cargarMas">Cargar más imágenes</button>
+
+    <button id="cargarMas">Ver más diseños</button>
 </div>
 
 <div id="modalImagen" onclick="this.style.display='none'">
     <img id="imagenModal" src="">
 </div>
 
-<div id="redesSociales">
-    <a href="https://www.instagram.com/likelyon_estampados/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram"></a>
-    <a href="https://web.facebook.com/LikelyonSpa" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png" alt="Facebook"></a>
-</div>
-
 <script>
-// ACTUALIZADO: Enlace correcto a la hoja Catalogo
+// URL vinculada a la hoja "Catalogo"
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=547930647&single=true&output=csv';
 
 let datosCatalogo = [];
 let favoritos = [];
 let paginaActual = 0;
-const porPagina = 30;
+const porPagina = 40;
 
 // Visitas
 let visitas = localStorage.getItem('visitas') ? parseInt(localStorage.getItem('visitas')) : 0;
@@ -73,19 +101,23 @@ localStorage.setItem('visitas', visitas);
 document.getElementById('contadorVisitas').innerText = `Visitas: ${visitas}`;
 
 function cargarDatos() {
-    // Cache Buster: fuerza a Google a darnos lo último que escribió el script
-    const urlLimpia = CSV_URL + '&nocache=' + new Date().getTime();
-
-    Papa.parse(urlLimpia, {
+    // Cache buster para evitar datos viejos
+    const urlFinal = CSV_URL + '&t=' + new Date().getTime();
+    
+    Papa.parse(urlFinal, {
         download: true,
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
-            // Filtrar datos válidos
-            datosCatalogo = results.data.filter(item => Object.values(item)[0] && Object.values(item)[1]);
+            datosCatalogo = results.data.filter(item => {
+                const fila = Object.values(item);
+                return fila[0] && fila[1]; // Debe tener nombre y URL
+            });
             document.getElementById('status').style.display = 'none';
             renderizar();
-            renderFavoritos();
+        },
+        error: function() {
+            document.getElementById('status').innerText = "Error: Asegúrate de que el Google Sheet esté publicado.";
         }
     });
 }
@@ -104,18 +136,18 @@ function renderizar(reset = true, lista = datosCatalogo) {
         const imagen = fila[1] || "";
         const carpeta = fila[2] || "General";
 
-        if(imagen && imagen.includes('http')) {
-            const mensajeWs = encodeURIComponent(`¡Hola Likelyon! Me interesa el diseño: ${nombre.toUpperCase()}\nCategoría: ${carpeta}\nEnlace: `) + imagen;
-            
+        if(imagen.includes('http')) {
+            const mensajeWs = encodeURIComponent(`¡Hola Likelyon! Me interesa este diseño:\n\n📌 *${nombre.toUpperCase()}*\n📁 Cat: ${carpeta}\n\nLink: `) + imagen;
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <img src="${imagen}" alt="${nombre}" onclick="abrirModal('${imagen}')">
+                <img src="${imagen}" alt="${nombre}" onclick="abrirModal('${imagen}')" loading="lazy">
                 <h3>${nombre}</h3>
-                <span class="folder-tag">📂 ${carpeta}</span>
+                <div class="folder-info">📂 ${carpeta}</div>
                 <a href="https://wa.me/56954180844?text=${mensajeWs}" target="_blank" class="btn-ws">WhatsApp</a>
-                <button class="btn-fav" onclick="toggleFavorito('${nombre}', '${imagen}')">❤ Favorito</button>
+                <button class="btn-fav">❤ Favorito</button>
             `;
+            card.querySelector('.btn-fav').onclick = () => toggleFavorito(nombre, imagen);
             galeria.appendChild(card);
         }
     });
@@ -123,33 +155,48 @@ function renderizar(reset = true, lista = datosCatalogo) {
     document.getElementById('cargarMas').style.display = (fin < lista.length) ? 'inline-block' : 'none';
 }
 
-document.getElementById('cargarMas').addEventListener('click', () => { paginaActual++; renderizar(false); });
+document.getElementById('cargarMas').onclick = () => { paginaActual++; renderizar(false); };
 
 function toggleFavorito(nombre, imagen) {
     if(!favoritos.find(f => f.imagen === imagen)) { 
         favoritos.push({nombre, imagen}); 
+        renderFavoritos();
     }
-    renderFavoritos();
 }
 
 function renderFavoritos() {
     const cont = document.getElementById('favoritosContainer');
     cont.innerHTML = '';
+
+    if(favoritos.length > 0) {
+        const btnWsFav = document.createElement('button');
+        btnWsFav.id = 'btnWsFavoritos';
+        btnWsFav.innerText = 'Consultar lista ❤';
+        btnWsFav.onclick = () => {
+            let texto = '¡Hola Likelyon! 👋 Me interesan estos diseños de mi lista de favoritos:\n\n';
+            favoritos.forEach((f, i) => { texto += `${i+1}. *${f.nombre}*\n🔗 ${f.imagen}\n\n`; });
+            window.open(`https://wa.me/56954180844?text=${encodeURIComponent(texto)}`, '_blank');
+        };
+        cont.appendChild(btnWsFav);
+    } else {
+        cont.innerHTML = '<span style="color: #5d6d7e; font-size: 13px;">Tus favoritos aparecerán aquí...</span>';
+    }
+
     favoritos.forEach((item, idx) => {
         const div = document.createElement('div');
         div.className = 'fav-card';
-        div.innerHTML = `<img src="${item.imagen}" onclick="abrirModal('${item.imagen}')"><button class="btn-eliminar" onclick="eliminarFav(${idx})">X</button>`;
+        div.innerHTML = `
+            <img src="${item.imagen}" alt="${item.nombre}" onclick="abrirModal('${item.imagen}')">
+            <button class="btn-eliminar">X</button>
+        `;
+        div.querySelector('.btn-eliminar').onclick = () => { favoritos.splice(idx, 1); renderFavoritos(); };
         cont.appendChild(div);
     });
 }
 
-function eliminarFav(idx) {
-    favoritos.splice(idx, 1);
-    renderFavoritos();
-}
-
 function abrirModal(url) {
-    document.getElementById('modalImagen').style.display = 'flex';
+    const modal = document.getElementById('modalImagen');
+    modal.style.display = 'flex';
     document.getElementById('imagenModal').src = url;
 }
 
@@ -157,9 +204,8 @@ document.getElementById('buscador').oninput = function(e) {
     const term = e.target.value.toLowerCase();
     const filtrados = datosCatalogo.filter(item => {
         const fila = Object.values(item);
-        // Busca tanto en el nombre como en la carpeta
-        const texto = (fila[0] + " " + (fila[2] || "")).toLowerCase();
-        return texto.includes(term);
+        const searchTxt = (fila[0] + " " + (fila[2] || "")).toLowerCase();
+        return searchTxt.includes(term);
     });
     renderizar(true, filtrados);
 };
