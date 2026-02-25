@@ -17,24 +17,30 @@ body {
 /* HEADER */
 header {
     text-align: center;
-    padding: 20px;
+    padding: 25px 15px;
     background: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
 .logo {
     max-width: 220px;
+    margin-bottom: 15px;
 }
 
+/* RRSS ICONOS */
 .rrss {
-    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
 }
 
-.rrss a {
-    margin: 0 12px;
-    text-decoration: none;
-    font-weight: bold;
-    color: #000;
-    font-size: 15px;
+.rrss a img {
+    width: 28px;
+    transition: transform 0.2s;
+}
+
+.rrss a img:hover {
+    transform: scale(1.2);
 }
 
 /* BUSCADOR */
@@ -42,7 +48,7 @@ header {
     width: 80%;
     padding: 12px;
     font-size: 16px;
-    margin: 15px auto;
+    margin: 20px auto;
     display: block;
     border-radius: 8px;
     border: 1px solid #ccc;
@@ -134,11 +140,6 @@ header {
     margin: 20px;
 }
 
-button {
-    padding: 8px 12px;
-    margin: 5px;
-}
-
 /* MODAL */
 #modal {
     display: none;
@@ -173,14 +174,22 @@ button {
 <body>
 
 <header>
-    <!-- 🔴 PEGA AQUÍ LA URL REAL DE TU LOGO -->
-    <img src="PEGA_AQUI_URL_REAL_DEL_LOGO" class="logo">
+    <!-- 🔴 PON AQUÍ TU URL DIRECTA DE LOGO -->
+    <img src="https://drive.google.com/uc?export=view&id=ID_DE_TU_LOGO" class="logo">
 
     <div class="rrss">
-        <!-- 🔴 PEGA AQUÍ TUS LINKS REALES -->
-        <a href="https://instagram.com/TU_USUARIO_REAL" target="_blank">Instagram</a>
-        <a href="https://facebook.com/TU_PAGINA_REAL" target="_blank">Facebook</a>
-        <a href="https://wa.me/56954188440" target="_blank">WhatsApp</a>
+        <!-- 🔴 REEMPLAZA CON TUS LINKS REALES -->
+        <a href="https://instagram.com/TU_USUARIO" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png">
+        </a>
+
+        <a href="https://facebook.com/TU_PAGINA" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png">
+        </a>
+
+        <a href="https://wa.me/56954188440" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png">
+        </a>
     </div>
 </header>
 
