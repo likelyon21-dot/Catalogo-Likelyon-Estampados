@@ -6,8 +6,8 @@
 <title>Catálogo - Likelyon Estampados</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <style>
-    body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; }
-    header { background-color: #2c3e50; color: white; padding: 30px; }
+    body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; position: relative; min-height: 100vh;}
+    header { background-color: #2c3e50; color: white; padding: 30px; position: relative; }
     .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin-bottom: 15px; }
     .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
     .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; }
@@ -28,10 +28,14 @@
         border-radius: 10px; 
         margin-bottom: 20px; 
         gap: 10px; 
+        align-items: center;
     }
     .fav-card { flex: 0 0 auto; width: 100px; text-align: center; position: relative; }
     .fav-card img { width: 50%; height: auto; border-radius: 5px; cursor: pointer; }
     .fav-card button { position: absolute; top: -5px; right: -5px; font-size: 10px; padding: 3px 5px; }
+
+    /* Botón WhatsApp Favoritos */
+    #btnWsFavoritos { background: #25d366; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; flex: 0 0 auto; height: 40px; }
 
     /* MODAL */
     #modalImagen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 9999; }
@@ -39,14 +43,43 @@
 
     /* Botón Cargar Más */
     #cargarMas { margin: 20px auto; display: none; padding: 10px 20px; font-size: 14px; cursor: pointer; background: #3498db; color: white; border: none; border-radius: 5px; }
+
+    /* Contador de visitas */
+    #contadorVisitas {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(255,255,255,0.8);
+        color: #333;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    /* Redes sociales debajo del logo */
+    #redesSociales {
+        margin: 10px 0;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+    #redesSociales a img { width: 30px; height: 30px; transition: 0.3s; }
+    #redesSociales a img:hover { transform: scale(1.2); }
 </style>
 </head>
 <body>
 
 <header>
     <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Likelyon Logo">
+    <!-- Redes Sociales -->
+    <div id="redesSociales">
+        <a href="https://www.instagram.com/likelyon_estampados/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram"></a>
+        <a href="https://web.facebook.com/LikelyonSpa" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png" alt="Facebook"></a>
+    </div>
     <h1>Likelyon Estampados</h1>
     <p>Catálogo Oficial de Diseños</p>
+    <div id="contadorVisitas">Visitas: 0</div>
 </header>
 
 <div class="container">
@@ -73,6 +106,24 @@ let favoritos = [];
 let paginaActual = 0;
 const porPagina = 30;
 
+// Contador de visitas
+let visitas = localStorage.getItem('visitas') ? parseInt(localStorage.getItem('visitas')) : 0;
+visitas++;
+localStorage.setItem('visitas', visitas);
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('contadorVisitas').innerText = `Visitas: ${visitas}`;
+});
+
+// Convertir links de Google Drive a directos (solo si tienen /d/ID/)
+function urlDirectaDrive(url) {
+    try {
+        const regex = /\/d\/([a-zA-Z0-9_-]+)/;
+        const match = url.match(regex);
+        if(match && match[1]) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+        return url; // si no es de Drive, usar URL tal cual
+    } catch(e) { return url; }
+}
+
 function cargarDatos() {
     Papa.parse(CSV_URL, {
         download: true,
@@ -89,10 +140,7 @@ function cargarDatos() {
 
 function renderizar(reset = true, lista = datosCatalogo) {
     const galeria = document.getElementById('galeria');
-    if(reset) {
-        galeria.innerHTML = '';
-        paginaActual = 0;
-    }
+    if(reset) { galeria.innerHTML = ''; paginaActual = 0; }
 
     const inicio = paginaActual * porPagina;
     const fin = inicio + porPagina;
@@ -101,8 +149,9 @@ function renderizar(reset = true, lista = datosCatalogo) {
     bloque.forEach(item => {
         const fila = Object.values(item);
         const nombre = fila[0] || "Diseño";
-        const imagen = fila[1] || "";
+        let imagen = fila[1] || "";
         if(imagen && imagen.includes('http')) {
+            imagen = urlDirectaDrive(imagen);
             const mensajeWs = encodeURIComponent(`Hola Likelyon! Me interesa el diseño: ${nombre.toUpperCase()}\n\nVer imagen: `) + imagen;
             const card = document.createElement('div');
             card.className = 'card';
@@ -118,25 +167,34 @@ function renderizar(reset = true, lista = datosCatalogo) {
         }
     });
 
-    // Mostrar botón si hay más imágenes
     document.getElementById('cargarMas').style.display = (fin < lista.length) ? 'inline-block' : 'none';
 }
 
-document.getElementById('cargarMas').addEventListener('click', () => {
-    paginaActual++;
-    renderizar(false);
-});
+document.getElementById('cargarMas').addEventListener('click', () => { paginaActual++; renderizar(false); });
 
 function toggleFavorito(item) {
-    if(!favoritos.find(f => f.imagen === item.imagen)) {
-        favoritos.push(item);
-    }
+    if(!favoritos.find(f => f.imagen === item.imagen)) { favoritos.push(item); }
     renderFavoritos();
 }
 
 function renderFavoritos() {
     const cont = document.getElementById('favoritosContainer');
     cont.innerHTML = '';
+
+    if(favoritos.length > 0) {
+        // Botón WhatsApp para todos los favoritos
+        const btnWsFav = document.createElement('button');
+        btnWsFav.id = 'btnWsFavoritos';
+        btnWsFav.innerText = 'Enviar Favoritos WhatsApp';
+        btnWsFav.addEventListener('click', () => {
+            let texto = 'Hola Likelyon! Me interesan estos diseños:\n\n';
+            favoritos.forEach(f => { texto += `Nombre: ${f.nombre}\nURL: ${f.imagen}\n\n`; });
+            const urlWs = `https://wa.me/56954180844?text=${encodeURIComponent(texto)}`;
+            window.open(urlWs, '_blank');
+        });
+        cont.appendChild(btnWsFav);
+    }
+
     favoritos.forEach((item, idx) => {
         const div = document.createElement('div');
         div.className = 'fav-card';
@@ -145,10 +203,7 @@ function renderFavoritos() {
             <button class="btn-eliminar">X</button>
         `;
         div.querySelector('img').addEventListener('click', () => abrirModal(item.imagen));
-        div.querySelector('.btn-eliminar').addEventListener('click', () => {
-            favoritos.splice(idx, 1);
-            renderFavoritos();
-        });
+        div.querySelector('.btn-eliminar').addEventListener('click', () => { favoritos.splice(idx, 1); renderFavoritos(); });
         cont.appendChild(div);
     });
 }
@@ -156,22 +211,13 @@ function renderFavoritos() {
 // Modal
 const modal = document.getElementById('modalImagen');
 const modalImg = document.getElementById('imagenModal');
-function abrirModal(url) {
-    modal.style.display = 'flex';
-    modalImg.src = url;
-}
-modal.addEventListener('click', () => {
-    modal.style.display = 'none';
-    modalImg.src = '';
-});
+function abrirModal(url) { modal.style.display = 'flex'; modalImg.src = url; }
+modal.addEventListener('click', () => { modal.style.display = 'none'; modalImg.src = ''; });
 
 // Buscador
 document.getElementById('buscador').oninput = function(e) {
     const term = e.target.value.toLowerCase();
-    const filtrados = datosCatalogo.filter(item => {
-        const n = (Object.values(item)[0] || "").toLowerCase();
-        return n.includes(term);
-    });
+    const filtrados = datosCatalogo.filter(item => { const n = (Object.values(item)[0] || "").toLowerCase(); return n.includes(term); });
     renderizar(true, filtrados);
 };
 
