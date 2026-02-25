@@ -6,261 +6,252 @@
     <title>Catálogo de Diseños - Likelyon Estampados</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e74c3c;
+            --whatsapp: #25d366;
+            --bg: #f4f4f9;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
+            background-color: var(--bg);
+            margin: 0; padding: 0;
         }
         
         header {
-            background-color: #2c3e50;
+            background-color: var(--primary);
             color: white;
-            padding: 40px 20px;
+            padding: 30px 20px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .logo-pyme {
-            max-width: 180px; 
-            height: auto;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            background-color: white;
+            max-width: 150px;
+            background: white;
             padding: 5px;
-        }
-
-        header h1 { margin: 0; font-size: 2.5em; letter-spacing: 1px; }
-        header p { font-size: 1.2em; color: #d1d8e0; margin-top: 5px; margin-bottom: 15px; }
-        
-        .datos-contacto {
-            font-size: 1em;
-            color: white;
-            background-color: #25d366;
-            display: inline-block;
-            padding: 10px 20px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-        .datos-contacto:hover { background-color: #128c7e; }
-        
-        .container {
-            max-width: 1100px;
-            margin: 30px auto;
-            padding: 0 20px;
-            text-align: center;
-        }
-        
-        .controles {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .search-bar {
-            flex: 1;
-            min-width: 280px;
-            max-width: 500px;
-            padding: 15px;
-            font-size: 16px;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-        .search-bar:focus { border-color: #3498db; }
-
-        .filter-select {
-            padding: 10px;
-            border-radius: 8px;
-            border: 2px solid #bdc3c7;
-            background: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        #estado-carga { font-size: 1.1em; font-weight: bold; color: #27ae60; margin-bottom: 30px; }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 25px;
-        }
-
-        .card {
-            background: white;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            overflow: hidden;
-            text-align: center;
-            padding: 15px;
-            transition: transform 0.2s;
-            border: 1px solid #eee;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .card:hover { transform: translateY(-5px); border-color: #3498db; }
-        
-        .card img {
-            width: 100%;
-            height: 200px;
-            object-fit: contain;
-            border-radius: 6px;
-            background-color: #f8f9fa;
-        }
-
-        .card h3 { font-size: 14px; margin: 15px 0 5px; color: #2c3e50; height: 35px; overflow: hidden; }
-        
-        .tag-carpeta {
-            font-size: 11px;
-            color: #7f8c8d;
-            background: #ecf0f1;
-            padding: 2px 8px;
-            border-radius: 10px;
-            display: inline-block;
             margin-bottom: 10px;
         }
 
-        .card a {
-            display: block;
-            padding: 10px;
-            background-color: #25d366;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 13px;
-            transition: background-color 0.3s;
+        .container {
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 0 20px;
         }
-        .card a:hover { background-color: #128c7e; }
-        
-        .mensaje-limite {
-            grid-column: 1 / -1;
-            margin-top: 30px;
-            font-size: 1.1em;
-            color: #7f8c8d;
-            background-color: #e8ecef;
-            padding: 15px;
-            border-radius: 8px;
+
+        /* BUSCADOR Y FILTROS */
+        .controles {
+            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
         }
+
+        .search-bar, .filter-select {
+            padding: 12px; border: 2px solid #bdc3c7; border-radius: 8px; font-size: 16px;
+        }
+        .search-bar { flex: 2; min-width: 250px; }
+        .filter-select { flex: 1; }
+
+        /* GRID DE PRODUCTOS */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white; border-radius: 12px; padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            position: relative; transition: 0.3s;
+            display: flex; flex-direction: column;
+        }
+
+        .card img {
+            width: 100%; height: 180px; object-fit: contain;
+            background: #f9f9f9; border-radius: 8px;
+        }
+
+        /* BOTÓN FAVORITO (CORAZÓN) */
+        .btn-fav {
+            position: absolute; top: 20px; right: 20px;
+            background: white; border: none; border-radius: 50%;
+            width: 35px; height: 35px; cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 20px; display: flex; align-items: center; justify-content: center;
+            transition: 0.2s; color: #ccc;
+        }
+        .btn-fav.active { color: var(--accent); }
+
+        /* PANEL DE FAVORITOS */
+        #panel-favoritos {
+            position: fixed; right: -350px; top: 0; width: 300px; height: 100%;
+            background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transition: 0.4s; z-index: 1000; padding: 20px;
+            display: flex; flex-direction: column;
+        }
+        #panel-favoritos.open { right: 0; }
+
+        .fav-item {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;
+        }
+        .fav-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        .fav-item h4 { font-size: 12px; flex: 1; margin: 0; }
+
+        /* BOTÓN FLOTANTE PARA ABRIR FAVORITOS */
+        .float-fav {
+            position: fixed; bottom: 20px; right: 20px;
+            background: var(--primary); color: white;
+            width: 60px; height: 60px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 999;
+        }
+        .badge {
+            position: absolute; top: 0; right: 0; background: var(--accent);
+            color: white; border-radius: 50%; padding: 2px 7px; font-size: 12px;
+        }
+
+        .btn-send-wa {
+            background: var(--whatsapp); color: white; border: none;
+            padding: 15px; border-radius: 8px; font-weight: bold;
+            cursor: pointer; margin-top: auto;
+        }
+
+        .close-fav { cursor: pointer; font-weight: bold; color: var(--accent); margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
     <header>
-        <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" alt="Logo Likelyon Estampados" class="logo-pyme">
+        <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme">
         <h1>Likelyon Estampados</h1>
-        <p>Catálogo Oficial de Diseños</p>
-        <a href="https://wa.me/56954180844" class="datos-contacto" target="_blank">📱 Consultas al WhatsApp</a>
+        <p>Selecciona tus favoritos y envíalos por WhatsApp</p>
     </header>
 
     <div class="container">
         <div class="controles">
-            <input type="text" id="buscador" class="search-bar" placeholder="⏳ Cargando base de datos..." disabled>
-            <select id="filtro-carpeta" class="filter-select" disabled>
-                <option value="">Todas las categorías</option>
+            <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseños...">
+            <select id="filtro-carpeta" class="filter-select">
+                <option value="">Categorías</option>
             </select>
         </div>
-        
-        <div id="estado-carga">Preparando catálogo...</div>
         <div id="galeria" class="grid"></div>
     </div>
 
+    <div class="float-fav" onclick="toggleFavs()">
+        ❤️ <span id="fav-count" class="badge">0</span>
+    </div>
+
+    <div id="panel-favoritos">
+        <div class="close-fav" onclick="toggleFavs()">✖ Cerrar</div>
+        <h3>Mis Favoritos</h3>
+        <div id="lista-favoritos" style="overflow-y: auto; flex: 1;">
+            </div>
+        <button class="btn-send-wa" onclick="enviarPedido()">
+            Pedir por WhatsApp 📱
+        </button>
+    </div>
+
     <script>
-        // REEMPLAZA ESTE URL POR EL DE TU GOOGLE SHEETS PUBLICADO COMO CSV
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv';
-        
         let todosLosDisenos = [];
-        const LIMITE_MOSTRAR = 60; 
+        let favoritos = JSON.parse(localStorage.getItem('favs_likelyon')) || [];
 
         function inicializar() {
             Papa.parse(CSV_URL, {
-                download: true,
-                header: true,
-                complete: function(resultados) {
-                    // Adaptamos a los nombres de columna del nuevo script
-                    todosLosDisenos = resultados.data.filter(fila => fila['Nombre del Diseño'] || fila['Nombre']);
-                    
-                    configurarFiltros();
-                    document.getElementById('estado-carga').style.display = 'none';
-                    document.getElementById('buscador').disabled = false;
-                    document.getElementById('buscador').placeholder = `🔍 Buscar entre ${todosLosDisenos.length} diseños...`;
-                    document.getElementById('filtro-carpeta').disabled = false;
-                    
-                    filtrarYMostrar();
+                download: true, header: true,
+                complete: function(res) {
+                    todosLosDisenos = res.data.filter(f => f.Nombre || f['Nombre del Diseño']);
+                    renderFiltros();
+                    renderGaleria();
+                    actualizarFavoritosUI();
                 }
             });
         }
 
-        function configurarFiltros() {
+        function renderFiltros() {
             const selector = document.getElementById('filtro-carpeta');
-            const carpetas = [...new Set(todosLosDisenos.map(d => d.Carpeta).filter(Boolean))].sort();
-            
-            carpetas.forEach(carpeta => {
+            const cats = [...new Set(todosLosDisenos.map(d => d.Carpeta).filter(Boolean))].sort();
+            cats.forEach(c => {
                 const opt = document.createElement('option');
-                opt.value = carpeta;
-                opt.textContent = carpeta;
+                opt.value = c; opt.textContent = c;
                 selector.appendChild(opt);
             });
         }
 
-        function filtrarYMostrar() {
+        function renderGaleria() {
+            const galeria = document.getElementById('galeria');
             const texto = document.getElementById('buscador').value.toLowerCase();
-            const carpetaSeleccionada = document.getElementById('filtro-carpeta').value;
+            const cat = document.getElementById('filtro-carpeta').value;
 
             const filtrados = todosLosDisenos.filter(d => {
-                const nombre = (d['Nombre del Diseño'] || d['Nombre'] || '').toLowerCase();
-                const carpeta = (d['Carpeta'] || '');
-                const coincideTexto = nombre.includes(texto);
-                const coincideCarpeta = carpetaSeleccionada === "" || carpeta === carpetaSeleccionada;
-                return coincideTexto && coincideCarpeta;
+                const nombre = (d.Nombre || d['Nombre del Diseño'] || '').toLowerCase();
+                return nombre.includes(texto) && (cat === "" || d.Carpeta === cat);
             });
 
-            mostrarDisenos(filtrados);
-        }
-
-        function mostrarDisenos(disenos) {
-            const galeria = document.getElementById('galeria');
             galeria.innerHTML = '';
-            
-            disenos.slice(0, LIMITE_MOSTRAR).forEach(d => {
-                const nombreRaw = d['Nombre del Diseño'] || d['Nombre'];
-                const nombreLimpio = nombreRaw.replace(/\.[^/.]+$/, "");
-                const urlImg = d['URL Miniatura'] || d['URL Imagen'];
-                const carpeta = d['Carpeta'] || 'General';
-                const linkWA = `https://wa.me/56954180844?text=Hola! Me interesa el diseño: ${encodeURIComponent(nombreLimpio)}`;
-
+            filtrados.slice(0, 80).forEach(d => {
+                const id = d.Nombre || d['Nombre del Diseño'];
+                const isFav = favoritos.some(f => f.id === id);
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <img src="${urlImg}" alt="${nombreLimpio}" loading="lazy">
-                    <div>
-                        <h3>${nombreLimpio}</h3>
-                        <span class="tag-carpeta">📂 ${carpeta}</span>
-                    </div>
-                    <a href="${linkWA}" target="_blank">Consultar WhatsApp</a>
+                    <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${id}', '${d['URL Imagen'] || d['URL Miniatura']}')">❤</button>
+                    <img src="${d['URL Imagen'] || d['URL Miniatura']}" loading="lazy">
+                    <h3 style="font-size:13px; margin:10px 0;">${id.replace(/\.[^/.]+$/, "")}</h3>
                 `;
                 galeria.appendChild(card);
             });
-
-            if (disenos.length > LIMITE_MOSTRAR) {
-                const aviso = document.createElement('div');
-                aviso.className = 'mensaje-limite';
-                aviso.innerHTML = `Mostrando los primeros <b>${LIMITE_MOSTRAR}</b> de <b>${disenos.length}</b> resultados. <br>Usa el buscador para filtrar más específicamente.`;
-                galeria.appendChild(aviso);
-            }
         }
 
-        document.getElementById('buscador').addEventListener('input', filtrarYMostrar);
-        document.getElementById('filtro-carpeta').addEventListener('change', filtrarYMostrar);
+        function toggleFav(id, img) {
+            const index = favoritos.findIndex(f => f.id === id);
+            if (index > -1) {
+                favoritos.splice(index, 1);
+            } else {
+                favoritos.push({ id, img });
+            }
+            localStorage.setItem('favs_likelyon', JSON.stringify(favoritos));
+            actualizarFavoritosUI();
+            renderGaleria(); // Para actualizar el corazón en la lista principal
+        }
 
+        function actualizarFavoritosUI() {
+            const lista = document.getElementById('lista-favoritos');
+            const count = document.getElementById('fav-count');
+            count.innerText = favoritos.length;
+            lista.innerHTML = '';
+
+            favoritos.forEach(f => {
+                const item = document.createElement('div');
+                item.className = 'fav-item';
+                item.innerHTML = `
+                    <img src="${f.img}">
+                    <h4>${f.id.replace(/\.[^/.]+$/, "")}</h4>
+                    <span style="cursor:pointer; color:red" onclick="toggleFav('${f.id}')">🗑️</span>
+                `;
+                lista.appendChild(item);
+            });
+        }
+
+        function toggleFavs() {
+            document.getElementById('panel-favoritos').classList.toggle('open');
+        }
+
+        function enviarPedido() {
+            if (favoritos.length === 0) return alert("Agrega algunos diseños primero.");
+            
+            let msg = "¡Hola Likelyon Estampados! 👋 Me interesan estos diseños:\n\n";
+            favoritos.forEach((f, i) => {
+                msg += `${i+1}. ${f.id.replace(/\.[^/.]+$/, "")}\n`;
+            });
+            
+            const url = `https://wa.me/56954180844?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        document.getElementById('buscador').addEventListener('input', renderGaleria);
+        document.getElementById('filtro-carpeta').addEventListener('change', renderGaleria);
         inicializar();
     </script>
 </body>
