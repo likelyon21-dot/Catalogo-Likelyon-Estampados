@@ -8,68 +8,91 @@
 <style>
     body { font-family: 'Segoe UI', sans-serif; background-color: #f4f4f9; margin: 0; text-align: center; min-height: 100vh;}
     header { background-color: #2c3e50; color: white; padding: 30px; }
-    .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; margin-bottom: 15px; }
+    .logo-pyme { max-width: 180px; background: white; padding: 10px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
     .container { max-width: 1100px; margin: 20px auto; padding: 20px; }
-    .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-    .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; }
-    .card img { width: 100%; height: 180px; object-fit: contain; background: #eee; border-radius: 5px; }
-    .card h3 { font-size: 13px; color: #333; margin: 10px 0; text-transform: uppercase; }
-    .btn-ws, .btn-fav { background: #25d366; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 12px; font-weight: bold; border: none; cursor: pointer; }
-    .btn-fav { background: #f39c12; margin-top: 5px; }
-    #modalImagen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 9999; }
-    #modalImagen img { max-width: 95%; max-height: 95%; }
+    .search-bar { width: 100%; max-width: 500px; padding: 12px; border-radius: 25px; border: 1px solid #ccc; margin-bottom: 20px; outline: none; font-size: 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+    .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; }
+    .card:hover { transform: scale(1.03); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .card img { width: 100%; height: 200px; object-fit: contain; background: #fff; border-radius: 5px; }
+    .card h3 { font-size: 13px; color: #333; margin: 12px 0; text-transform: uppercase; height: 32px; overflow: hidden; }
+    .categoria-tag { font-size: 10px; color: #7f8c8d; background: #f0f3f4; padding: 4px; border-radius: 4px; margin-bottom: 10px; font-weight: bold; }
+    .btn-ws { background: #25d366; color: white; text-decoration: none; padding: 10px; border-radius: 5px; font-size: 12px; font-weight: bold; }
+    
+    /* Modal */
+    #modalImagen { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); justify-content: center; align-items: center; z-index: 9999; }
+    #modalImagen img { max-width: 95%; max-height: 95%; border-radius: 5px; }
+    #status { padding: 40px; font-weight: bold; color: #2c3e50; }
 </style>
 </head>
 <body>
 
 <header>
-    <img src="https://lh3.googleusercontent.com/d/1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5" class="logo-pyme" alt="Logo">
+    <img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme" alt="Logo">
     <h1>Likelyon Estampados</h1>
+    <p>Catálogo de Diseños JPG</p>
 </header>
 
 <div class="container">
-    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño...">
-    <div id="status">Cargando catálogo...</div>
+    <input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño o categoría...">
+    <div id="status">Cargando galería de imágenes...</div>
     <div id="galeria" class="grid"></div>
-    <button id="cargarMas" style="display:none; margin: 20px; padding: 10px 20px;">Cargar más</button>
 </div>
 
 <div id="modalImagen" onclick="this.style.display='none'"><img id="imagenModal" src=""></div>
 
 <script>
+// URL vinculada a la hoja "Catalogo"
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=547930647&single=true&output=csv';
+
 let datosCatalogo = [];
-let paginaActual = 0;
-const porPagina = 40;
 
 function cargarDatos() {
+    // Forzamos actualización con timestamp
     Papa.parse(CSV_URL + '&t=' + new Date().getTime(), {
         download: true,
         header: true,
+        skipEmptyLines: true,
         complete: function(results) {
-            datosCatalogo = results.data.filter(item => Object.values(item)[1]);
+            datosCatalogo = results.data.filter(item => {
+                const f = Object.values(item);
+                return f[0] && f[1]; 
+            });
             document.getElementById('status').style.display = 'none';
             renderizar();
+        },
+        error: function() {
+            document.getElementById('status').innerText = "Error al cargar la base de datos.";
         }
     });
 }
 
-function renderizar(reset = true) {
+function renderizar(lista = datosCatalogo) {
     const galeria = document.getElementById('galeria');
-    if(reset) { galeria.innerHTML = ''; paginaActual = 0; }
-    const bloque = datosCatalogo.slice(paginaActual * porPagina, (paginaActual + 1) * porPagina);
+    galeria.innerHTML = '';
 
-    bloque.forEach(item => {
+    lista.forEach(item => {
         const fila = Object.values(item);
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            <img src="${fila[1]}" onclick="abrirModal('${fila[1]}')" referrerpolicy="no-referrer">
-            <h3>${fila[0]}</h3>
-            <a href="https://wa.me/56954180844?text=Me interesa: ${fila[0]}" target="_blank" class="btn-ws">WhatsApp</a>
-        `;
-        galeria.appendChild(card);
+        const nombre = fila[0];
+        const url = fila[1];
+        const carpeta = fila[2] || "General";
+
+        if(url && url.includes('http')) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const msg = encodeURIComponent(`¡Hola Likelyon! Me interesa el diseño: *${nombre}*`);
+            
+            card.innerHTML = `
+                <img src="${url}" 
+                     onclick="abrirModal('${url}')" 
+                     referrerpolicy="no-referrer" 
+                     onerror="this.src='https://via.placeholder.com/200?text=Cargando...'">
+                <h3>${nombre}</h3>
+                <span class="categoria-tag">📂 ${carpeta}</span>
+                <a href="https://wa.me/56954180844?text=${msg}" target="_blank" class="btn-ws">Consultar WhatsApp</a>
+            `;
+            galeria.appendChild(card);
+        }
     });
 }
 
@@ -77,6 +100,16 @@ function abrirModal(url) {
     document.getElementById('modalImagen').style.display = 'flex';
     document.getElementById('imagenModal').src = url;
 }
+
+// Buscador
+document.getElementById('buscador').oninput = function(e) {
+    const term = e.target.value.toLowerCase();
+    const filtrados = datosCatalogo.filter(item => {
+        const fila = Object.values(item);
+        return (fila[0] + " " + (fila[2] || "")).toLowerCase().includes(term);
+    });
+    renderizar(filtrados);
+};
 
 window.onload = cargarDatos;
 </script>
