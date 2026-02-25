@@ -19,10 +19,6 @@ header {
     padding: 20px;
 }
 
-.logo {
-    max-width: 200px;
-}
-
 #buscador {
     width: 80%;
     padding: 12px;
@@ -52,13 +48,24 @@ header {
     border-radius: 6px;
     text-align: center;
     font-size: 12px;
+    position: relative;
+    cursor: pointer;
 }
 
 .fav-item img {
-    width: 50px;
+    width: 60px;
     border-radius: 5px;
     display: block;
     margin-bottom: 5px;
+}
+
+.remove-fav {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    color: red;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 #galeria {
@@ -78,6 +85,7 @@ header {
 .card img {
     width: 100%;
     border-radius: 8px;
+    cursor: pointer;
 }
 
 .btn-ws, .btn-fav {
@@ -108,6 +116,35 @@ button {
     padding: 8px 12px;
     margin: 5px;
 }
+
+/* MODAL */
+#modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    padding-top: 50px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+}
+
+#modal img {
+    display: block;
+    margin: auto;
+    max-width: 90%;
+    max-height: 80%;
+}
+
+#cerrarModal {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+}
 </style>
 </head>
 
@@ -130,6 +167,12 @@ button {
     <button onclick="paginaAnterior()">⬅ Anterior</button>
     <span id="numeroPagina"></span>
     <button onclick="paginaSiguiente()">Siguiente ➡</button>
+</div>
+
+<!-- MODAL -->
+<div id="modal">
+    <span id="cerrarModal">&times;</span>
+    <img id="imagenModal">
 </div>
 
 <script>
@@ -181,7 +224,7 @@ function mostrarDiseños() {
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
-            <img src="${diseño["URL Imagen"]}" loading="lazy">
+            <img src="${diseño["URL Imagen"]}" onclick="abrirModal('${diseño["URL Imagen"]}')">
             <h3>${nombreLimpio}</h3>
             <a href="https://wa.me/${miTelefono}?text=${mensajeWs}" class="btn-ws" target="_blank">WhatsApp</a>
             <button class="btn-fav" onclick="agregarFavorito('${nombreLimpio}','${diseño["URL Imagen"]}')">⭐ Favorito</button>
@@ -207,7 +250,6 @@ function paginaAnterior() {
 }
 
 function agregarFavorito(nombre, imagen) {
-
     let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
 
     if (favoritos.some(f => f.nombre === nombre)) return;
@@ -218,8 +260,14 @@ function agregarFavorito(nombre, imagen) {
     cargarFavoritos();
 }
 
-function cargarFavoritos() {
+function eliminarFavorito(nombre) {
+    let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+    favoritos = favoritos.filter(f => f.nombre !== nombre);
+    localStorage.setItem("favoritos", JSON.stringify(favoritos));
+    cargarFavoritos();
+}
 
+function cargarFavoritos() {
     const lista = document.getElementById("listaFavoritos");
     lista.innerHTML = "";
 
@@ -229,12 +277,29 @@ function cargarFavoritos() {
         const item = document.createElement("div");
         item.className = "fav-item";
         item.innerHTML = `
-            <img src="${f.imagen}">
+            <span class="remove-fav" onclick="event.stopPropagation(); eliminarFavorito('${f.nombre}')">×</span>
+            <img src="${f.imagen}" onclick="abrirModal('${f.imagen}')">
             ${f.nombre}
         `;
         lista.appendChild(item);
     });
 }
+
+/* MODAL */
+function abrirModal(imagen) {
+    document.getElementById("modal").style.display = "block";
+    document.getElementById("imagenModal").src = imagen;
+}
+
+document.getElementById("cerrarModal").onclick = function() {
+    document.getElementById("modal").style.display = "none";
+};
+
+window.onclick = function(event) {
+    if (event.target == document.getElementById("modal")) {
+        document.getElementById("modal").style.display = "none";
+    }
+};
 </script>
 
 </body>
