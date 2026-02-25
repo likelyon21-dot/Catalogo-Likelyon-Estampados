@@ -3,162 +3,133 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogo - Likelyon Estampados</title>
+<title>Likelyon Estampados</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
-:root { --primary:#2c3e50; --whatsapp:#25d366; --bg:#f4f4f9; }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f4f4;
+}
 
-body { font-family:'Segoe UI',sans-serif; background:var(--bg); margin:0; text-align:center;}
-header { background:var(--primary); color:white; padding:30px; position:relative;}
-.logo-pyme { max-width:180px; background:white; padding:10px; border-radius:15px; margin-bottom:15px;}
+header {
+    background: black;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
 
-#redesSociales { margin:10px 0; display:flex; justify-content:center; gap:15px;}
-#redesSociales img { width:30px; }
+#buscador {
+    width: 90%;
+    max-width: 400px;
+    padding: 10px;
+    margin: 15px auto;
+    display: block;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
 
-.container { max-width:1100px; margin:20px auto; padding:20px;}
-.search-bar { width:100%; max-width:500px; padding:15px; border-radius:30px; border:2px solid #ddd; margin-bottom:20px; }
+#galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
 
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:25px;}
+.card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    padding: 10px;
+    text-align: center;
+}
 
-.card { background:white; padding:15px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08);}
-.card img { width:100%; height:200px; object-fit:contain; background:#fafafa; border-radius:8px; cursor:pointer;}
-.card h3 { font-size:14px; margin:10px 0;}
+.card img {
+    width: 100%;
+    border-radius: 8px;
+}
 
-.btn-ws { background:var(--whatsapp); color:white; padding:8px; display:block; text-decoration:none; border-radius:6px; margin-bottom:6px;}
-.btn-fav-add { padding:6px; border:none; background:#f1c40f; border-radius:6px; cursor:pointer;}
-
-#status { padding:20px; font-weight:bold;}
-
-#modalImagen { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); justify-content:center; align-items:center;}
-#modalImagen img { max-width:90%; max-height:90vh;}
+.btn-ws {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #25D366;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-
-<img src="https://drive.google.com/thumbnail?id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5&sz=w500" class="logo-pyme">
-
-<div id="redesSociales">
-<a href="https://www.instagram.com/likelyon_estampados/" target="_blank">
-<img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg">
-</a>
-<a href="https://web.facebook.com/LikelyonSpa" target="_blank">
-<img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png">
-</a>
-</div>
-
-<h1>Likelyon Estampados</h1>
-<p>Catálogo Oficial de Diseños</p>
-
+    <h1>Likelyon Estampados</h1>
 </header>
 
-<div class="container">
-<input type="text" id="buscador" class="search-bar" placeholder="🔍 Buscar diseño...">
-<div id="status">⏳ Cargando catálogo...</div>
-<div id="galeria" class="grid"></div>
-</div>
+<input type="text" id="buscador" placeholder="Buscar diseño..." onkeyup="mostrarDiseños()">
 
-<div id="modalImagen" onclick="this.style.display='none'">
-<img id="imagenModal">
-</div>
+<div id="galeria"></div>
 
 <script>
-
-// 🔥 CSV usando método export (más estable)
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/export?format=csv&gid=547930647";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=547930647&single=true&output=csv";
 
 let datosCatalogo = [];
 
-// Convertir links Google Drive correctamente
-function convertirLinkDrive(url){
-    if(!url) return "";
-    const id = url.match(/[-\w]{25,}/);
-    return id ? `https://drive.google.com/uc?export=view&id=${id[0]}` : url;
-}
-
-// Cargar CSV
-function cargarDatos(){
-    Papa.parse(CSV_URL,{
-        download:true,
-        header:true,
-        skipEmptyLines:true,
-        complete:function(results){
-
-            console.log("Datos recibidos:", results);
-
-            if(!results.data || results.data.length===0){
-                document.getElementById("status").innerText="⚠️ El CSV está vacío o bloqueado.";
-                return;
-            }
-
-            datosCatalogo = results.data
-            .filter(f=>f["Nombre"] && f["URL Imagen"])
-            .map(f=>({
-                nombre:f["Nombre"].trim(),
-                imagen:convertirLinkDrive(f["URL Imagen"].trim())
-            }));
-
-            if(datosCatalogo.length===0){
-                document.getElementById("status").innerText="⚠️ No se detectaron columnas válidas.";
-                return;
-            }
-
-            document.getElementById("status").style.display="none";
+function cargarDatos() {
+    Papa.parse(CSV_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+            datosCatalogo = results.data;
             mostrarDiseños();
         },
-        error:function(err){
-            console.error("Error PapaParse:", err);
-            document.getElementById("status").innerText="❌ Error cargando CSV.";
+        error: function(err) {
+            document.getElementById("galeria").innerHTML = 
+                "<p style='color:red'>⚠️ Error cargando catálogo</p>";
         }
     });
 }
 
-// Mostrar diseños
-function mostrarDiseños(){
-    const galeria=document.getElementById('galeria');
-    const busqueda=document.getElementById('buscador').value.toLowerCase();
-    const miTelefono="56954188440";
+function mostrarDiseños() {
+    const galeria = document.getElementById('galeria');
+    const busqueda = document.getElementById('buscador').value.toLowerCase();
+    const miTelefono = "56954188440";
 
-    const filtrados=datosCatalogo.filter(d=>
-        d.nombre.toLowerCase().includes(busqueda)
+    const filtrados = datosCatalogo.filter(d =>
+        d["Nombre"] && d["Nombre"].toLowerCase().includes(busqueda)
     );
 
-    galeria.innerHTML="";
+    galeria.innerHTML = "";
 
-    filtrados.forEach(diseño=>{
+    filtrados.forEach(diseño => {
 
-        const nombreLimpio=diseño.nombre.replace(/\.[^/.]+$/,"");
-        const mensajeWs=encodeURIComponent(`¡Hola Likelyon! 👋 Me interesa este diseño: ${nombreLimpio}`);
+        const nombreLimpio = diseño["Nombre"].replace(/\.[^/.]+$/, "");
+        const imagen = diseño["URL Imagen"];
 
-        const card=document.createElement('div');
-        card.className='card';
-        card.innerHTML=`
-            <img src="${diseño.imagen}" onclick="abrirModal('${diseño.imagen}')" loading="lazy" onerror="this.src='https://via.placeholder.com/200x200?text=Sin+Imagen'">
+        const mensajeWs = encodeURIComponent(
+            `¡Hola Likelyon! 👋 Me interesa este diseño para un estampado: ${nombreLimpio}`
+        );
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <img src="${imagen}" alt="${nombreLimpio}" loading="lazy">
             <h3>${nombreLimpio}</h3>
-            <a href="https://wa.me/${miTelefono}?text=${mensajeWs}" class="btn-ws" target="_blank">📲 Consultar</a>
-            <button class="btn-fav-add">⭐ Favorito</button>
+            <a href="https://wa.me/${miTelefono}?text=${mensajeWs}" 
+               class="btn-ws" target="_blank">
+               📲 Consultar por WhatsApp
+            </a>
         `;
-
         galeria.appendChild(card);
     });
 }
 
-// Modal
-function abrirModal(url){
-    document.getElementById("modalImagen").style.display="flex";
-    document.getElementById("imagenModal").src=url;
-}
-
-// Buscador
-document.getElementById("buscador").addEventListener("input",mostrarDiseños);
-
-// Iniciar
-window.onload=cargarDatos;
-
+document.addEventListener("DOMContentLoaded", cargarDatos);
 </script>
 
 </body>
