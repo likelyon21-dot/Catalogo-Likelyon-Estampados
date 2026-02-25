@@ -17,7 +17,6 @@ header { background:#2c3e50; color:white; padding:30px;}
 .card img { width:100%; height:200px; object-fit:contain; background:#fafafa; border-radius:8px; cursor:pointer;}
 .card h3 { font-size:14px; margin:10px 0;}
 .btn-ws { background:#25d366; color:white; padding:8px; display:block; text-decoration:none; border-radius:6px; margin-bottom:6px;}
-.btn-fav-add { padding:6px; border:none; background:#f1c40f; border-radius:6px; cursor:pointer;}
 #status { padding:20px; font-weight:bold;}
 #modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); justify-content:center; align-items:center;}
 #modal img { max-width:90%; max-height:90vh;}
@@ -43,7 +42,8 @@ header { background:#2c3e50; color:white; padding:30px;}
 
 <script>
 
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=0&single=true&output=csv";
+// ✅ CSV CORRECTO (gid actualizado)
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=547930647&single=true&output=csv";
 
 let datosCatalogo = [];
 
@@ -54,7 +54,7 @@ function convertirLinkDrive(url) {
     return id ? `https://drive.google.com/uc?export=view&id=${id[0]}` : url;
 }
 
-// Cargar CSV correctamente
+// Cargar CSV
 function cargarDatos() {
     Papa.parse(CSV_URL, {
         download: true,
@@ -62,7 +62,7 @@ function cargarDatos() {
         skipEmptyLines: true,
         complete: function(results) {
 
-            console.log("Datos recibidos:", results.data);
+            console.log("Respuesta CSV:", results);
 
             if (!results.data || results.data.length === 0) {
                 document.getElementById("status").innerText = "⚠️ El CSV está vacío o no está publicado correctamente.";
@@ -77,7 +77,7 @@ function cargarDatos() {
                 }));
 
             if (datosCatalogo.length === 0) {
-                document.getElementById("status").innerText = "⚠️ No se encontraron columnas válidas.";
+                document.getElementById("status").innerText = "⚠️ No se encontraron columnas 'Nombre' y 'URL Imagen'.";
                 return;
             }
 
@@ -85,13 +85,13 @@ function cargarDatos() {
             mostrarDiseños();
         },
         error: function(error) {
-            console.error(error);
+            console.error("Error PapaParse:", error);
             document.getElementById("status").innerText = "❌ Error cargando CSV.";
         }
     });
 }
 
-// Mostrar diseños (TU FUNCIÓN adaptada)
+// Mostrar diseños
 function mostrarDiseños() {
     const galeria = document.getElementById('galeria');
     const busqueda = document.getElementById('buscador').value.toLowerCase();
@@ -114,7 +114,6 @@ function mostrarDiseños() {
             <img src="${diseño.imagen}" onclick="ampliarImagen('${diseño.imagen}')" loading="lazy">
             <h3>${nombreLimpio}</h3>
             <a href="https://wa.me/${miTelefono}?text=${mensajeWs}" class="btn-ws" target="_blank">📲 Consultar por WhatsApp</a>
-            <button class="btn-fav-add" onclick="agregarFavorito('${diseño.nombre}', '${diseño.imagen}')">⭐ Agregar a Favoritos</button>
         `;
         galeria.appendChild(card);
     });
