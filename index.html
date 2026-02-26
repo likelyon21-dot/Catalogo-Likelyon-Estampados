@@ -149,6 +149,8 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhyg
 
 let datosCatalogo = [];
 let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+let paginaActual = 1;
+const porPagina = 30;
 
 fetch(CSV_URL)
 .then(res => res.text())
@@ -166,7 +168,7 @@ fetch(CSV_URL)
     mostrarDiseños();
 });
 
-function mostrarDiseños(letraSeleccionada = null){
+function mostrarDiseños(){
     const galeria = document.getElementById("galeria");
     const busqueda = document.getElementById("buscador").value.toLowerCase();
     
@@ -174,15 +176,16 @@ function mostrarDiseños(letraSeleccionada = null){
         d.nombre.toLowerCase().includes(busqueda)
     );
 
-    if(letraSeleccionada){
-        filtrados = filtrados.filter(d =>
-            d.nombre.charAt(0).toUpperCase() === letraSeleccionada
-        );
-    }
+    const totalPaginas = Math.ceil(filtrados.length / porPagina);
+    if(paginaActual > totalPaginas) paginaActual = 1;
+
+    const inicio = (paginaActual-1)*porPagina;
+    const fin = inicio + porPagina;
+    const paginaItems = filtrados.slice(inicio, fin);
 
     galeria.innerHTML = "";
 
-    filtrados.forEach(d=>{
+    paginaItems.forEach(d=>{
         const card = document.createElement("div");
         card.className="card";
         card.innerHTML = `
@@ -194,22 +197,29 @@ function mostrarDiseños(letraSeleccionada = null){
         galeria.appendChild(card);
     });
 
-    crearPaginacion();
+    crearPaginacion(totalPaginas);
     mostrarFavoritos();
 }
 
-function crearPaginacion(){
+function crearPaginacion(total){
     const pag = document.getElementById("paginacion");
     pag.innerHTML="";
 
-    const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    letras.forEach(letra=>{
+    for(let i=1;i<=total;i++){
         const btn = document.createElement("button");
-        btn.innerText = letra;
-        btn.onclick = ()=> mostrarDiseños(letra);
+
+        let letraIndex = (i-1) % letras.length;
+        btn.innerText = letras[letraIndex];
+
+        btn.onclick=()=>{
+            paginaActual=i;
+            mostrarDiseños();
+        };
+
         pag.appendChild(btn);
-    });
+    }
 }
 
 function consultar(nombre){
