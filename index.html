@@ -1,185 +1,343 @@
-<script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Likelyon Estampados</title>
 
-let diseños = [];
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #000;
+    color: white;
+    text-align: center;
+}
+
+header{
+    padding: 20px;
+}
+
+.logo{
+    width: 180px;
+    margin-bottom: 15px;
+}
+
+.redes{
+    margin-bottom: 15px;
+}
+
+.redes img{
+    width: 32px;
+    margin: 0 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.redes img:hover{
+    transform: scale(1.3);
+}
+
+#buscador{
+    width: 80%;
+    padding: 10px;
+    margin: 20px 0;
+    border-radius: 8px;
+    border:none;
+}
+
+.galeria{
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.card{
+    background: #111;
+    padding:10px;
+    border-radius:8px;
+}
+
+.card img{
+    width:100%;
+    border-radius:6px;
+    cursor: pointer;
+}
+
+button{
+    margin-top:6px;
+    padding:8px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.btn-ws{
+    background:#25D366;
+    color:white;
+}
+
+.btn-fav{
+    background: gold;
+}
+
+.btn-remove{
+    background: red;
+    color:white;
+}
+
+.btn-fav-all{
+    background:#25D366;
+    color:white;
+    margin:15px auto;
+    display:block;
+    padding:10px 15px;
+}
+
+#contadorFav{
+    font-weight:bold;
+    color:gold;
+    margin-top:10px;
+}
+
+#paginacion button{
+    margin:5px;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.9);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal img{
+    max-width:90%;
+    max-height:90%;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <img class="logo" src="https://lh3.googleusercontent.com/d/1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5">
+    <div class="redes">
+        <a href="https://web.facebook.com/LikelyonSpa" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png">
+        </a>
+        <a href="https://www.instagram.com/likelyon_estampados/" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733558.png">
+        </a>
+        <a href="https://wa.me/56954180844" target="_blank">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png">
+        </a>
+    </div>
+</header>
+
+<input type="text" id="buscador" placeholder="Buscar diseño..." onkeyup="mostrarDiseños()">
+
+<h2>⭐ Favoritos</h2>
+<div id="contadorFav"></div>
+<div id="favoritos" class="galeria"></div>
+
+<!-- BOTÓN DEBAJO DE LOS FAVORITOS -->
+<button class="btn-fav-all" onclick="enviarFavoritosWhatsApp()">Enviar todos por WhatsApp</button>
+
+<h2>Catálogo</h2>
+<div id="galeria" class="galeria"></div>
+
+<div id="paginacion"></div>
+
+<div class="modal" id="modal" onclick="cerrarModal()">
+    <img id="imgModal">
+</div>
+
+<script>
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=547930647&single=true&output=csv";
+
+let datosCatalogo = [];
 let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
 let paginaActual = 1;
-let porPagina = 30;
-let filtroLetra = "";
-let busquedaTexto = "";
+let filtroLetra = null;
+const porPagina = 30;
 
-// =========================
-// CONTADOR DE VISITAS
-// =========================
-function contarVisitas() {
-  let visitas = localStorage.getItem("visitasPagina");
-
-  if (!visitas) {
-    visitas = 1;
-  } else {
-    visitas = parseInt(visitas) + 1;
-  }
-
-  localStorage.setItem("visitasPagina", visitas);
-  document.getElementById("contadorVisitas").innerText = "Visitas: " + visitas;
-}
-
-contarVisitas();
-
-// =========================
-// CARGAR DATOS
-// =========================
-fetch("TU_URL_DE_APPS_SCRIPT")
-  .then(res => res.json())
-  .then(data => {
-    diseños = data;
+fetch(CSV_URL)
+.then(res => res.text())
+.then(data => {
+    const filas = data.split("\n").slice(1);
+    filas.forEach(fila=>{
+        const columnas = fila.split(",");
+        if(columnas[0] && columnas[1]){
+            datosCatalogo.push({
+                nombre: columnas[0].trim(),
+                imagen: columnas[1].trim()
+            });
+        }
+    });
     mostrarDiseños();
+});
+
+function mostrarDiseños(){
+    const galeria = document.getElementById("galeria");
+    const busqueda = document.getElementById("buscador").value.toLowerCase();
+    
+    let filtrados = datosCatalogo;
+
+    if(filtroLetra){
+        if(filtroLetra === "0-9"){
+            filtrados = filtrados.filter(d => /^[0-9]/.test(d.nombre));
+        } else {
+            filtrados = filtrados.filter(d =>
+                d.nombre.charAt(0).toUpperCase() === filtroLetra
+            );
+        }
+    }
+
+    if(busqueda){
+        filtrados = filtrados.filter(d =>
+            d.nombre.toLowerCase().includes(busqueda)
+        );
+    }
+
+    const totalPaginas = Math.ceil(filtrados.length / porPagina);
+    if(paginaActual > totalPaginas) paginaActual = 1;
+
+    const inicio = (paginaActual-1)*porPagina;
+    const fin = inicio + porPagina;
+    const paginaItems = filtrados.slice(inicio, fin);
+
+    galeria.innerHTML = "";
+
+    paginaItems.forEach(d=>{
+        const card = document.createElement("div");
+        card.className="card";
+        card.innerHTML = `
+            <img src="${d.imagen}" onclick="verImagen('${d.imagen}')">
+            <h4>${d.nombre.replace(/\.[^/.]+$/, "")}</h4>
+            <button class="btn-ws" onclick="consultar('${d.nombre}')">WhatsApp</button>
+            <button class="btn-fav" onclick='agregarFavorito(${JSON.stringify(d)})'>⭐</button>
+        `;
+        galeria.appendChild(card);
+    });
+
+    crearPaginacion(totalPaginas);
     mostrarFavoritos();
-  });
+}
 
-// =========================
-// MOSTRAR DISEÑOS
-// =========================
-function mostrarDiseños() {
+function crearPaginacion(total){
+    const pag = document.getElementById("paginacion");
+    pag.innerHTML="";
+    const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-  let contenedor = document.getElementById("catalogo");
-  contenedor.innerHTML = "";
-
-  let filtrados = diseños.filter(d => {
-
-    let cumpleLetra = true;
-    let cumpleBusqueda = true;
-
-    if (filtroLetra) {
-      if (filtroLetra === "0-9") {
-        cumpleLetra = /^[0-9]/.test(d.nombre);
-      } else {
-        cumpleLetra = d.nombre.toUpperCase().startsWith(filtroLetra);
-      }
+    if(total > 1 && paginaActual > 1){
+        const btnPrev = document.createElement("button");
+        btnPrev.innerText = "<";
+        btnPrev.onclick = ()=>{ paginaActual--; mostrarDiseños(); };
+        pag.appendChild(btnPrev);
     }
 
-    if (busquedaTexto) {
-      cumpleBusqueda = d.nombre.toLowerCase().includes(busquedaTexto.toLowerCase());
+    letras.forEach(letra=>{
+        const btn = document.createElement("button");
+        btn.innerText = letra;
+        if(filtroLetra === letra){
+            btn.style.background="gold";
+            btn.style.color="black";
+        }
+        btn.onclick = ()=>{
+            filtroLetra = letra;
+            paginaActual = 1;
+            mostrarDiseños();
+        };
+        pag.appendChild(btn);
+    });
+
+    const btnNum = document.createElement("button");
+    btnNum.innerText="0-9";
+    btnNum.onclick=()=>{
+        filtroLetra="0-9";
+        paginaActual=1;
+        mostrarDiseños();
+    };
+    pag.appendChild(btnNum);
+
+    if(total > 1 && paginaActual < total){
+        const btnNext = document.createElement("button");
+        btnNext.innerText=">";
+        btnNext.onclick=()=>{ paginaActual++; mostrarDiseños(); };
+        pag.appendChild(btnNext);
+    }
+}
+
+function consultar(nombre){
+    const limpio = nombre.replace(/\.[^/.]+$/, "");
+    const mensaje = encodeURIComponent("Hola Likelyon 👋 Me interesa este diseño: "+limpio);
+    window.open("https://wa.me/56954180844?text="+mensaje);
+}
+
+function agregarFavorito(d){
+    if(!favoritos.find(f=>f.nombre===d.nombre)){
+        favoritos.push(d);
+        localStorage.setItem("favoritos",JSON.stringify(favoritos));
+        mostrarFavoritos();
+    }
+}
+
+function quitarFavorito(nombre){
+    favoritos = favoritos.filter(f=>f.nombre!==nombre);
+    localStorage.setItem("favoritos",JSON.stringify(favoritos));
+    mostrarFavoritos();
+}
+
+function mostrarFavoritos(){
+    const cont = document.getElementById("favoritos");
+    const contador = document.getElementById("contadorFav");
+    cont.innerHTML="";
+    
+    contador.innerText = "● Seleccionados: " + favoritos.length;
+
+    favoritos.forEach(f=>{
+        const card=document.createElement("div");
+        card.className="card";
+        card.innerHTML=`
+            <img src="${f.imagen}" onclick="verImagen('${f.imagen}')">
+            <h4>${f.nombre.replace(/\.[^/.]+$/, "")}</h4>
+            <button class="btn-remove" onclick="quitarFavorito('${f.nombre}')">Quitar</button>
+        `;
+        cont.appendChild(card);
+    });
+}
+
+function enviarFavoritosWhatsApp(){
+    if(favoritos.length === 0){
+        alert("No hay diseños seleccionados.");
+        return;
     }
 
-    return cumpleLetra && cumpleBusqueda;
-  });
+    let mensaje = "Hola Likelyon 👋 Me interesan estos diseños:%0A%0A";
 
-  let inicio = (paginaActual - 1) * porPagina;
-  let fin = inicio + porPagina;
+    favoritos.forEach((f,i)=>{
+        mensaje += (i+1)+". "+f.nombre.replace(/\.[^/.]+$/, "")+"%0A";
+    });
 
-  let pagina = filtrados.slice(inicio, fin);
-
-  pagina.forEach(d => {
-
-    let div = document.createElement("div");
-    div.className = "card";
-
-    div.innerHTML = `
-      <img src="${d.url}" />
-      <h4>${d.nombre}</h4>
-      <button onclick="toggleFavorito('${d.nombre}','${d.url}')">
-        ${favoritos.some(f => f.nombre === d.nombre) ? "★ Quitar" : "☆ Favorito"}
-      </button>
-      <a href="https://wa.me/569XXXXXXXX?text=Hola quiero el diseño ${d.nombre}" target="_blank">
-        WhatsApp
-      </a>
-    `;
-
-    contenedor.appendChild(div);
-  });
-
-  generarPaginacion(filtrados.length);
+    window.open("https://wa.me/56954180844?text="+mensaje);
 }
 
-// =========================
-// PAGINACIÓN
-// =========================
-function generarPaginacion(total) {
-
-  let contenedor = document.getElementById("paginacion");
-  contenedor.innerHTML = "";
-
-  let totalPaginas = Math.ceil(total / porPagina);
-
-  if (paginaActual > 1) {
-    let prev = document.createElement("button");
-    prev.innerText = "←";
-    prev.onclick = () => {
-      paginaActual--;
-      mostrarDiseños();
-    };
-    contenedor.appendChild(prev);
-  }
-
-  if (paginaActual < totalPaginas) {
-    let next = document.createElement("button");
-    next.innerText = "→";
-    next.onclick = () => {
-      paginaActual++;
-      mostrarDiseños();
-    };
-    contenedor.appendChild(next);
-  }
+function verImagen(src){
+    document.getElementById("imgModal").src=src;
+    document.getElementById("modal").style.display="flex";
 }
 
-// =========================
-// FAVORITOS
-// =========================
-function toggleFavorito(nombre, url) {
-
-  let existe = favoritos.find(f => f.nombre === nombre);
-
-  if (existe) {
-    favoritos = favoritos.filter(f => f.nombre !== nombre);
-  } else {
-    favoritos.push({ nombre, url });
-  }
-
-  localStorage.setItem("favoritos", JSON.stringify(favoritos));
-
-  mostrarFavoritos();
-  mostrarDiseños();
+function cerrarModal(){
+    document.getElementById("modal").style.display="none";
 }
-
-function mostrarFavoritos() {
-
-  let contenedor = document.getElementById("favoritos");
-  contenedor.innerHTML = "";
-
-  favoritos.forEach(f => {
-
-    let div = document.createElement("div");
-    div.className = "card";
-
-    div.innerHTML = `
-      <img src="${f.url}" />
-      <h4>${f.nombre}</h4>
-      <button onclick="toggleFavorito('${f.nombre}','${f.url}')">★ Quitar</button>
-    `;
-
-    contenedor.appendChild(div);
-  });
-
-  document.getElementById("contadorFavoritos").innerText = favoritos.length;
-}
-
-// =========================
-// WHATSAPP TODOS
-// =========================
-function enviarFavoritosWhatsApp() {
-
-  if (favoritos.length === 0) {
-    alert("No hay favoritos seleccionados");
-    return;
-  }
-
-  let mensaje = "Hola quiero los siguientes diseños:%0A%0A";
-
-  favoritos.forEach(f => {
-    mensaje += "- " + f.nombre + "%0A";
-  });
-
-  window.open("https://wa.me/569XXXXXXXX?text=" + mensaje, "_blank");
-}
-
 </script>
+
+</body>
+</html>
