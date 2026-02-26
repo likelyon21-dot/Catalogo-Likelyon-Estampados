@@ -149,8 +149,7 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhyg
 
 let datosCatalogo = [];
 let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
-let paginaActual = 1;
-const porPagina = 30;
+let filtroLetra = null;
 
 fetch(CSV_URL)
 .then(res => res.text())
@@ -172,20 +171,31 @@ function mostrarDiseños(){
     const galeria = document.getElementById("galeria");
     const busqueda = document.getElementById("buscador").value.toLowerCase();
     
-    let filtrados = datosCatalogo.filter(d =>
-        d.nombre.toLowerCase().includes(busqueda)
-    );
+    let filtrados = datosCatalogo;
 
-    const totalPaginas = Math.ceil(filtrados.length / porPagina);
-    if(paginaActual > totalPaginas) paginaActual = 1;
+    // Filtro por buscador
+    if(busqueda){
+        filtrados = filtrados.filter(d =>
+            d.nombre.toLowerCase().includes(busqueda)
+        );
+    }
 
-    const inicio = (paginaActual-1)*porPagina;
-    const fin = inicio + porPagina;
-    const paginaItems = filtrados.slice(inicio, fin);
+    // Filtro por letra o número
+    if(filtroLetra){
+        if(filtroLetra === "0-9"){
+            filtrados = filtrados.filter(d =>
+                /^[0-9]/.test(d.nombre)
+            );
+        }else{
+            filtrados = filtrados.filter(d =>
+                d.nombre.charAt(0).toUpperCase() === filtroLetra
+            );
+        }
+    }
 
     galeria.innerHTML = "";
 
-    paginaItems.forEach(d=>{
+    filtrados.forEach(d=>{
         const card = document.createElement("div");
         card.className="card";
         card.innerHTML = `
@@ -197,29 +207,43 @@ function mostrarDiseños(){
         galeria.appendChild(card);
     });
 
-    crearPaginacion(totalPaginas);
+    crearPaginacion();
     mostrarFavoritos();
 }
 
-function crearPaginacion(total){
+function crearPaginacion(){
     const pag = document.getElementById("paginacion");
     pag.innerHTML="";
 
-    const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-    for(let i=1;i<=total;i++){
+    letras.forEach(letra=>{
         const btn = document.createElement("button");
-
-        let letraIndex = (i-1) % letras.length;
-        btn.innerText = letras[letraIndex];
-
+        btn.innerText = letra;
         btn.onclick=()=>{
-            paginaActual=i;
+            filtroLetra = letra;
             mostrarDiseños();
         };
-
         pag.appendChild(btn);
-    }
+    });
+
+    // Botón números
+    const btnNum = document.createElement("button");
+    btnNum.innerText="0-9";
+    btnNum.onclick=()=>{
+        filtroLetra="0-9";
+        mostrarDiseños();
+    };
+    pag.appendChild(btnNum);
+
+    // Botón todos
+    const btnAll = document.createElement("button");
+    btnAll.innerText="Todos";
+    btnAll.onclick=()=>{
+        filtroLetra=null;
+        mostrarDiseños();
+    };
+    pag.appendChild(btnAll);
 }
 
 function consultar(nombre){
