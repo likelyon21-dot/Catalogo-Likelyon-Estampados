@@ -6,85 +6,92 @@
 <title>Likelyon Estampados</title>
 
 <style>
-body {
+body{
     font-family: Arial, sans-serif;
     margin: 0;
     background: #000;
     color: white;
     text-align: center;
 }
-header {
+
+header{
     padding: 20px;
 }
-.logo {
+
+.logo{
     width: 180px;
     margin-bottom: 15px;
 }
-.redes {
+
+.redes{
     margin-bottom: 15px;
 }
-.redes img {
+
+.redes img{
     width: 32px;
     margin: 0 12px;
     cursor: pointer;
     transition: 0.2s;
 }
-.redes img:hover {
+
+.redes img:hover{
     transform: scale(1.3);
 }
-#buscador {
+
+#buscador{
     width: 80%;
     padding: 10px;
     margin: 20px 0;
     border-radius: 8px;
-    border: none;
+    border:none;
 }
-.galeria {
+
+.galeria{
     display: grid;
     grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
     gap: 15px;
     padding: 20px;
 }
-.card {
+
+.card{
     background: #111;
     padding:10px;
     border-radius:8px;
 }
-.card img {
+
+.card img{
     width:100%;
     border-radius:6px;
     cursor: pointer;
 }
-button {
+
+button{
     margin-top:6px;
     padding:8px;
     border:none;
     border-radius:6px;
     cursor:pointer;
 }
-.btn-ws {
+
+.btn-ws{
     background:#25D366;
     color:white;
-    width:100%;
-    margin-bottom:4px;
 }
-.btn-fav {
+
+.btn-fav{
     background: gold;
-    width:100%;
 }
-.btn-remove {
+
+.btn-remove{
     background: red;
     color:white;
-    width:100%;
 }
-#paginacion button {
+
+#paginacion button{
     margin:5px;
-    padding:5px 10px;
-    border-radius:5px;
-    border:none;
-    cursor:pointer;
 }
-.modal {
+
+.modal{
     display:none;
     position:fixed;
     top:0;
@@ -95,7 +102,8 @@ button {
     justify-content:center;
     align-items:center;
 }
-.modal img {
+
+.modal img{
     max-width:90%;
     max-height:90%;
 }
@@ -105,10 +113,11 @@ button {
 <body>
 
 <header>
-    <!-- Logo corporativo -->
-    <img class="logo" src="https://drive.google.com/uc?export=view&id=1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5">
 
-    <!-- RRSS solo con iconos -->
+    <!-- LOGO CORPORATIVO CORREGIDO -->
+    <img class="logo" src="https://lh3.googleusercontent.com/d/1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5">
+
+    <!-- RRSS con iconos -->
     <div class="redes">
         <a href="https://web.facebook.com/LikelyonSpa" target="_blank">
             <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png">
@@ -120,6 +129,7 @@ button {
             <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png">
         </a>
     </div>
+
 </header>
 
 <input type="text" id="buscador" placeholder="Buscar diseño..." onkeyup="mostrarDiseños()">
@@ -137,15 +147,13 @@ button {
 </div>
 
 <script>
-// URL CSV con nombres originales y URL de imágenes
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/export?format=csv&gid=547930647";
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTdQJxk_GnAQhygvuOcvoIMbr_1-FAcX3VhWVgKZhCY5cov6rQOj-M6NlW4uBzzE_L4pnE1nxrfWCmM/pub?gid=547930647&single=true&output=csv";
 
 let datosCatalogo = [];
 let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
 let paginaActual = 1;
 const porPagina = 30;
 
-// Cargar CSV y filtrar JPG/JPEG
 fetch(CSV_URL)
 .then(res => res.text())
 .then(data => {
@@ -153,22 +161,19 @@ fetch(CSV_URL)
     filas.forEach(fila=>{
         const columnas = fila.split(",");
         if(columnas[0] && columnas[1]){
-            const nombre = columnas[0].trim();
-            const imagen = columnas[1].trim();
-            // Solo cargar JPG/JPEG
-            if(nombre.match(/\.(jpe?g)$/i)){
-                datosCatalogo.push({nombre, imagen});
-            }
+            datosCatalogo.push({
+                nombre: columnas[0].trim(),
+                imagen: columnas[1].trim()
+            });
         }
     });
     mostrarDiseños();
 });
 
-// Mostrar diseños con paginación
-function mostrarDiseños() {
+function mostrarDiseños(){
     const galeria = document.getElementById("galeria");
     const busqueda = document.getElementById("buscador").value.toLowerCase();
-
+    
     let filtrados = datosCatalogo.filter(d =>
         d.nombre.toLowerCase().includes(busqueda)
     );
@@ -185,11 +190,11 @@ function mostrarDiseños() {
     paginaItems.forEach(d=>{
         const card = document.createElement("div");
         card.className="card";
-        card.innerHTML=`
+        card.innerHTML = `
             <img src="${d.imagen}" onclick="verImagen('${d.imagen}')">
-            <h4>${d.nombre}</h4>
+            <h4>${d.nombre.replace(/\.[^/.]+$/, "")}</h4>
             <button class="btn-ws" onclick="consultar('${d.nombre}')">WhatsApp</button>
-            <button class="btn-fav" onclick='agregarFavorito(${JSON.stringify(d)})'>⭐ Agregar</button>
+            <button class="btn-fav" onclick='agregarFavorito(${JSON.stringify(d)})'>⭐</button>
         `;
         galeria.appendChild(card);
     });
@@ -198,7 +203,6 @@ function mostrarDiseños() {
     mostrarFavoritos();
 }
 
-// Paginación
 function crearPaginacion(total){
     const pag = document.getElementById("paginacion");
     pag.innerHTML="";
@@ -210,13 +214,12 @@ function crearPaginacion(total){
     }
 }
 
-// WhatsApp
 function consultar(nombre){
-    const mensaje = encodeURIComponent("Hola Likelyon 👋 Me interesa este diseño: "+nombre);
+    const limpio = nombre.replace(/\.[^/.]+$/, "");
+    const mensaje = encodeURIComponent("Hola Likelyon 👋 Me interesa este diseño: "+limpio);
     window.open("https://wa.me/56954180844?text="+mensaje);
 }
 
-// Favoritos
 function agregarFavorito(d){
     if(!favoritos.find(f=>f.nombre===d.nombre)){
         favoritos.push(d);
@@ -239,14 +242,13 @@ function mostrarFavoritos(){
         card.className="card";
         card.innerHTML=`
             <img src="${f.imagen}" onclick="verImagen('${f.imagen}')">
-            <h4>${f.nombre}</h4>
+            <h4>${f.nombre.replace(/\.[^/.]+$/, "")}</h4>
             <button class="btn-remove" onclick="quitarFavorito('${f.nombre}')">Quitar</button>
         `;
         cont.appendChild(card);
     });
 }
 
-// Modal
 function verImagen(src){
     document.getElementById("imgModal").src=src;
     document.getElementById("modal").style.display="flex";
