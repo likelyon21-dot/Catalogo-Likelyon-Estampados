@@ -87,6 +87,19 @@ button{
     color:white;
 }
 
+.btn-fav-all{
+    background:#25D366;
+    color:white;
+    margin-bottom:15px;
+    padding:10px 15px;
+}
+
+#contadorFav{
+    margin-top:10px;
+    font-weight:bold;
+    color:gold;
+}
+
 #paginacion button{
     margin:5px;
 }
@@ -113,7 +126,6 @@ button{
 <body>
 
 <header>
-
     <img class="logo" src="https://lh3.googleusercontent.com/d/1uz_32dagKvb-1ayFREKzVmu5Z10AuWU5">
 
     <div class="redes">
@@ -127,12 +139,13 @@ button{
             <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png">
         </a>
     </div>
-
 </header>
 
 <input type="text" id="buscador" placeholder="Buscar diseño..." onkeyup="mostrarDiseños()">
 
 <h2>⭐ Favoritos</h2>
+<div id="contadorFav"></div>
+<button class="btn-fav-all" onclick="enviarFavoritosWhatsApp()">Enviar todos por WhatsApp</button>
 <div id="favoritos" class="galeria"></div>
 
 <h2>Catálogo</h2>
@@ -219,60 +232,43 @@ function mostrarDiseños(){
 function crearPaginacion(total){
     const pag = document.getElementById("paginacion");
     pag.innerHTML="";
-
     const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
     if(total > 1 && paginaActual > 1){
         const btnPrev = document.createElement("button");
         btnPrev.innerText = "<";
-        btnPrev.onclick = ()=>{
-            paginaActual--;
-            mostrarDiseños();
-        };
+        btnPrev.onclick = ()=>{ paginaActual--; mostrarDiseños(); };
         pag.appendChild(btnPrev);
     }
 
     letras.forEach(letra=>{
         const btn = document.createElement("button");
         btn.innerText = letra;
-
         if(filtroLetra === letra){
-            btn.style.background = "gold";
-            btn.style.color = "black";
+            btn.style.background="gold";
+            btn.style.color="black";
         }
-
         btn.onclick = ()=>{
             filtroLetra = letra;
             paginaActual = 1;
             mostrarDiseños();
         };
-
         pag.appendChild(btn);
     });
 
     const btnNum = document.createElement("button");
     btnNum.innerText="0-9";
-
-    if(filtroLetra === "0-9"){
-        btnNum.style.background = "gold";
-        btnNum.style.color = "black";
-    }
-
     btnNum.onclick=()=>{
         filtroLetra="0-9";
         paginaActual=1;
         mostrarDiseños();
     };
-
     pag.appendChild(btnNum);
 
     if(total > 1 && paginaActual < total){
         const btnNext = document.createElement("button");
         btnNext.innerText=">";
-        btnNext.onclick=()=>{
-            paginaActual++;
-            mostrarDiseños();
-        };
+        btnNext.onclick=()=>{ paginaActual++; mostrarDiseños(); };
         pag.appendChild(btnNext);
     }
 }
@@ -299,7 +295,11 @@ function quitarFavorito(nombre){
 
 function mostrarFavoritos(){
     const cont = document.getElementById("favoritos");
+    const contador = document.getElementById("contadorFav");
     cont.innerHTML="";
+    
+    contador.innerText = "Total seleccionados: " + favoritos.length;
+
     favoritos.forEach(f=>{
         const card=document.createElement("div");
         card.className="card";
@@ -310,6 +310,21 @@ function mostrarFavoritos(){
         `;
         cont.appendChild(card);
     });
+}
+
+function enviarFavoritosWhatsApp(){
+    if(favoritos.length === 0){
+        alert("No hay diseños seleccionados.");
+        return;
+    }
+
+    let mensaje = "Hola Likelyon 👋 Me interesan estos diseños:%0A%0A";
+
+    favoritos.forEach((f,i)=>{
+        mensaje += (i+1)+". "+f.nombre.replace(/\.[^/.]+$/, "")+"%0A";
+    });
+
+    window.open("https://wa.me/56954180844?text="+mensaje);
 }
 
 function verImagen(src){
